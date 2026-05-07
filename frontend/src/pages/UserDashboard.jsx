@@ -25,7 +25,7 @@ const UserDashboard = () => {
         api.get('/products', { params: { vendeur: user?._id } }),
         api.get('/locations'),
         api.get('/announcements'),
-        api.get('/boutiques'),
+        api.get('/boutiques/my-boutique').catch(() => ({ data: null })),
         api.get('/notifications'),
         api.get('/credits/my-history'),
         api.get('/messages/my-messages').catch(err => ({ data: { unreadCount: 0 } }))
@@ -33,8 +33,7 @@ const UserDashboard = () => {
       setProducts(prodRes.data.filter(p => p.vendeur?._id === user?._id));
       setLocations(locRes.data.filter(l => l.proprietaire?._id === user?._id));
       setAnnouncements(annRes.data.filter(a => a.auteur?._id === user?._id));
-      const myBoutique = boutRes.data.find(b => b.proprietaire?._id === user?._id || b.proprietaire === user?._id);
-      setBoutique(myBoutique || null);
+      setBoutique(boutRes.data || null);
       setNotifications(notifRes.data);
       setHistory(histRes.data);
       setUnreadMessagesCount(messagesRes.data.unreadCount || 0);
