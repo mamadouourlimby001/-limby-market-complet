@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../utils/api';
 
 const RenewSubscription = () => {
@@ -6,6 +6,20 @@ const RenewSubscription = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [boutique, setBoutique] = useState(null);
+
+  useEffect(() => {
+    const fetchBoutique = async () => {
+      try {
+        const res = await api.get('/boutiques/my-boutique').catch(() => ({ data: null }));
+        if (res.data) {
+          setBoutique(res.data);
+          setForm(prev => ({ ...prev, nomBoutique: res.data.nom, boutiqueId: res.data._id }));
+        }
+      } catch (err) { console.error(err); }
+    };
+    fetchBoutique();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault(); setError(''); setLoading(true);
