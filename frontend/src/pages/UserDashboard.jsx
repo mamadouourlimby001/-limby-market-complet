@@ -78,6 +78,7 @@ const UserDashboard = () => {
             {user?.creditExpiry && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(user.creditExpiry).toLocaleDateString('fr-FR')}</p>}
           </div>
           <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}>💰 Acheter des crédits</Link>
+          <button onClick={handleLogout} className="btn btn-danger btn-block" style={{ marginBottom: 8 }}>Déconnexion</button>
           {boutique && (
             <div className="card" style={{ padding: 14, marginBottom: 12 }}>
               <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>🏪 Ma Boutique: {boutique.nom}</h3>
@@ -86,7 +87,6 @@ const UserDashboard = () => {
               <Link to="/credits/renouveler-abonnement" className="btn btn-secondary btn-sm" style={{ marginTop: 8 }}>Renouveler abonnement</Link>
             </div>
           )}
-          <button onClick={handleLogout} className="btn btn-danger btn-block">Déconnexion</button>
         </div>
       )}
 
