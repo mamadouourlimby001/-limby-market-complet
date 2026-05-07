@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api'
+  baseURL: import.meta.env.VITE_API_URL || 'https://limby01-production.up.railway.app/api'
 });
 
 // Intercepteur de requête : ajoute le token JWT
