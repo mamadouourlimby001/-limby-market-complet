@@ -19,6 +19,17 @@ const UserDashboard = () => {
 
   useEffect(() => { fetchAll(); }, []);
 
+  // Refetch data when user returns to page
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchAll();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
   const fetchAll = async () => {
     try {
       await refreshUser();
@@ -34,7 +45,7 @@ const UserDashboard = () => {
       setProducts(prodRes.data.filter(p => p.vendeur?._id === user?._id));
       setLocations(locRes.data.filter(l => l.proprietaire?._id === user?._id));
       setAnnouncements(annRes.data.filter(a => a.auteur?._id === user?._id));
-      setBoutique(boutRes.data || null);
+      setBoutique(boutRes.data?.boutique || boutRes.data || null);
       setNotifications(notifRes.data);
       setHistory(histRes.data);
       setUnreadMessagesCount(messagesRes.data.unreadCount || 0);
