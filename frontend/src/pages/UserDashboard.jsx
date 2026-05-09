@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import UserMessages from './UserMessages';
@@ -77,11 +78,11 @@ const UserDashboard = () => {
             <p style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B', marginTop: 8 }}>💵 {user?.credits} crédits</p>
             {user?.creditExpiry && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(user.creditExpiry).toLocaleDateString('fr-FR')}</p>}
           </div>
-          <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}>� Acheter des crédits</Link>
+          <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}> Acheter des crédits</Link>
           <button onClick={handleLogout} className="btn btn-danger btn-block" style={{ marginBottom: 8 }}>Déconnexion</button>
           {boutique && (
             <div className="card" style={{ padding: 14, marginBottom: 12 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>� Ma Boutique: {boutique.nom}</h3>
+              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}><Store size={16} style={{ display: 'inline', marginRight: '4px' }} /> Ma Boutique: {boutique.nom}</h3>
               <p style={{ fontSize: 12 }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></p>
               {boutique.dateExpiration && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(boutique.dateExpiration).toLocaleDateString('fr-FR')}</p>}
               <Link to="/credits/renouveler-abonnement" className="btn btn-secondary btn-sm" style={{ marginTop: 8 }}>Renouveler abonnement</Link>
