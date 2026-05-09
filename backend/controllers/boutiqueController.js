@@ -116,13 +116,14 @@ const deleteBoutiqueProduct = async (req, res) => {
   }
 };
 
-// GET /api/boutiques/my-boutique - Boutique de l'utilisateur connecté (peu importe le statut)
+// GET /api/boutiques/my-boutique - Boutique de l'utilisateur connecté + ses produits
 const getMyBoutique = async (req, res) => {
   try {
     const myBoutique = await Boutique.findOne({ proprietaire: req.user._id })
       .populate('proprietaire', 'nom telephone isVerified');
     if (!myBoutique) return res.status(404).json({ message: 'Aucune boutique trouvée.' });
-    res.json(myBoutique);
+    const products = await BoutiqueProduct.find({ boutique: myBoutique._id, statut: 'actif' }).sort({ createdAt: -1 });
+    res.json({ boutique: myBoutique, products });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
