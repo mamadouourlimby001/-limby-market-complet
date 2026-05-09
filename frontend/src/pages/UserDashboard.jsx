@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, ShoppingCart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import UserMessages from './UserMessages';
@@ -89,7 +89,10 @@ const UserDashboard = () => {
             <p style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B', marginTop: 8 }}>💵 {user?.credits} crédits</p>
             {user?.creditExpiry && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(user.creditExpiry).toLocaleDateString('fr-FR')}</p>}
           </div>
-          <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}> Acheter des crédits</Link>
+          <Link to="/mes-commandes" className="btn btn-primary btn-block" style={{ marginBottom: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <ShoppingCart size={16} /> Mes Commandes
+          </Link>
+          <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}>Acheter des crédits</Link>
           <button onClick={handleLogout} className="btn btn-danger btn-block" style={{ marginBottom: 8 }}>Déconnexion</button>
           {boutique && <Link to="/credits/renouveler-abonnement" className="btn btn-secondary btn-block" style={{ marginBottom: 8 }}>Renouveler mon abonnement</Link>}
           {boutique && (

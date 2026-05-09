@@ -29,6 +29,7 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/messages', require('./routes/messages'));
+app.use('/api/orders', require('./routes/orders'));
 
 // Route de base
 app.get('/', (req, res) => {

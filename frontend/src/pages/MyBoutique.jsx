@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Search, SortAsc, MapPin } from 'lucide-react';
+import { Search, SortAsc, MapPin, Package } from 'lucide-react';
 
 const MyBoutique = () => {
   const { user } = useAuth();
@@ -83,8 +83,11 @@ const MyBoutique = () => {
           <MapPin size={16} /> {boutique.quartier}, {boutique.ville}
         </div>
         <span className="badge badge-primary" style={{ marginBottom: 12 }}>{boutique.categorie}</span>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: 16 }}>
-          <span style={{ fontSize: 13, color: '#6b7280' }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: 16, flexWrap: 'wrap' }}>
+          <span style={{ fontSize: 13, color: '#6b7280', width: '100%' }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></span>
+          <Link to="/ma-boutique/commandes" className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Package size={14} /> Commandes
+          </Link>
           <Link to="/credits/renouveler-abonnement" className="btn btn-primary btn-sm">Renouveler</Link>
         </div>
       </div>

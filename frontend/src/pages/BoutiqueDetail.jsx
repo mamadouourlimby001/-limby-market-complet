@@ -52,14 +52,16 @@ const BoutiqueDetail = () => {
       {products.length === 0 ? <div className="empty-state"><p>Aucun produit</p></div> : (
         <div className="grid-2">
           {products.map(p => (
-            <div key={p._id} className="card">
-              <PhotoSlider photos={p.photos} />
-              <div style={{ padding: 8 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
-                <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
-                <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
+            <Link key={p._id} to={`/boutiques/${id}/produits/${p._id}`} style={{ textDecoration: 'none' }}>
+              <div className="card" style={{ cursor: 'pointer', transition: 'transform 0.2s' }}>
+                <PhotoSlider photos={p.photos} />
+                <div style={{ padding: 8 }}>
+                  <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
+                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
+                  <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
+                </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

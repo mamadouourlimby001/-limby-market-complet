@@ -21,6 +21,9 @@ import BoutiqueDetail from './pages/BoutiqueDetail';
 import CreateBoutique from './pages/CreateBoutique';
 import AddBoutiqueProduct from './pages/AddBoutiqueProduct';
 import MyBoutique from './pages/MyBoutique';
+import ProductBoutiqueDetail from './pages/ProductBoutiqueDetail';
+import ProduitsCommandes from './pages/ProduitsCommandes';
+import MesCommandes from './pages/MesCommandes';
 import BuyCredits from './pages/BuyCredits';
 import RenewSubscription from './pages/RenewSubscription';
 import UserDashboard from './pages/UserDashboard';
@@ -55,10 +58,13 @@ function App() {
             <Route path="/annonces/:id" element={<AnnouncementDetail />} />
             <Route path="/annonces/ajouter" element={<ProtectedRoute><AddAnnouncement /></ProtectedRoute>} />
             <Route path="/boutiques" element={<BoutiquesList />} />
+            <Route path="/boutiques/:boutiqueId/produits/:productId" element={<ProductBoutiqueDetail />} />
             <Route path="/boutiques/:id" element={<BoutiqueDetail />} />
             <Route path="/boutiques/creer" element={<ProtectedRoute><CreateBoutique /></ProtectedRoute>} />
             <Route path="/boutiques/:id/ajouter-produit" element={<ProtectedRoute><AddBoutiqueProduct /></ProtectedRoute>} />
             <Route path="/ma-boutique" element={<ProtectedRoute><MyBoutique /></ProtectedRoute>} />
+            <Route path="/ma-boutique/commandes" element={<ProtectedRoute><ProduitsCommandes /></ProtectedRoute>} />
+            <Route path="/mes-commandes" element={<ProtectedRoute><MesCommandes /></ProtectedRoute>} />
             <Route path="/credits/acheter" element={<ProtectedRoute><BuyCredits /></ProtectedRoute>} />
             <Route path="/credits/renouveler-abonnement" element={<ProtectedRoute><RenewSubscription /></ProtectedRoute>} />
             <Route path="/mon-compte" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
