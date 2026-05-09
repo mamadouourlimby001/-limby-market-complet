@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
-import { ShoppingBag, Building2, FileText, Store, User } from 'lucide-react';
+import { ShoppingBag, Building2, FileText, Store, User, Warehouse } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const menuItems = [
   { path: '/occasion', label: 'Occasion', icon: 'shopping', desc: 'Produits d\'occasion' },
   { path: '/locations', label: 'Locations', icon: 'building', desc: 'Immobilier' },
   { path: '/annonces', label: 'Annonces', icon: 'announce', desc: 'Offres d\'emploi' },
-  { path: '/boutiques', label: 'Boutiques', icon: 'store', desc: 'Boutiques en ligne' },
+  { path: '/boutiques', label: 'Boutiques', icon: 'warehouse', desc: 'Boutiques en ligne' },
   { path: '/mon-compte', label: 'Mon Compte', icon: 'user', desc: 'Tableau de bord' },
   { path: '/ma-boutique', label: 'Ma Boutique', icon: 'store', desc: 'Ma boutique' },
 ];
@@ -47,6 +47,7 @@ const Home = () => {
               {item.icon === 'shopping' && <ShoppingBag size={32} color="#1B2A6B" />}
               {item.icon === 'building' && <Building2 size={32} color="#1B2A6B" />}
               {item.icon === 'announce' && <FileText size={32} color="#1B2A6B" />}
+              {item.icon === 'warehouse' && <Warehouse size={32} color="#1B2A6B" />}
               {item.icon === 'store' && <Store size={32} color="#1B2A6B" />}
             </span>
             <span style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B', display: 'block' }}>{item.label}</span>
