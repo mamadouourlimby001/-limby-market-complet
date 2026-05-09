@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import LocationCard from '../components/LocationCard';
@@ -34,7 +35,7 @@ const LocationsList = () => {
     <div className="page">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 className="page-title" style={{ marginBottom: 0 }}>Locations</h1>
-        <button onClick={() => setShowFilters(!showFilters)} className="btn btn-secondary btn-sm">🔍 Filtres</button>
+        <button onClick={() => setShowFilters(!showFilters)} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Search size={16} /> Filtres</button>
       </div>
       {showFilters && (
         <div className="card" style={{ padding: 12, marginBottom: 12 }}>

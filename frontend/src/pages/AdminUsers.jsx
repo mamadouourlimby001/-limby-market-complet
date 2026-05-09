@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Check, X, Coins, Trash2, Phone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
@@ -79,19 +80,19 @@ const AdminUsers = () => {
         <div key={u._id} className="card" style={{ padding: 12, marginBottom: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 8 }}>
             <div>
-              <p style={{ fontSize: 14, fontWeight: 600 }}>{u.nom} {u.isVerified && <span style={{ color: '#4A90D9' }}>✓</span>}</p>
-              <p style={{ fontSize: 12, color: '#6b7280' }}>📞 {u.telephone}</p>
+              <p style={{ fontSize: 14, fontWeight: 600 }}>{u.nom} {u.isVerified && <span style={{ color: '#4A90D9' }}><Check size={16} style={{ display: 'inline' }} /></span>}</p>
+              <p style={{ fontSize: 12, color: '#6b7280', display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={12} /> {u.telephone}</p>
               <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
                 <span className="badge badge-primary">{roleLabels[u.role]}</span>
-                <span className="badge badge-success">💰 {u.credits}</span>
+                <span className="badge badge-success" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Coins size={13} /> {u.credits}</span>
               </div>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-            <button onClick={() => toggleVerified(u._id, u.isVerified)} className="btn btn-secondary btn-sm">
-              {u.isVerified ? '❌ Retirer badge' : '✓ Vérifier'}
+            <button onClick={() => toggleVerified(u._id, u.isVerified)} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {u.isVerified ? <><X size={14} /> Retirer badge</> : <><Check size={14} /> Vérifier</>}
             </button>
-            <button onClick={() => deleteUser(u._id)} className="btn btn-danger btn-sm">🗑</button>
+            <button onClick={() => deleteUser(u._id)} className="btn btn-danger btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Trash2 size={14} /></button>
             {isSupremeAdmin && u.role !== 'admin_supreme' && (
               <button onClick={() => toggleAdmin(u._id, u.role)} className={`btn btn-sm ${u.role === 'admin_simple' ? 'btn-danger' : 'btn-primary'}`}>
                 {u.role === 'admin_simple' ? 'Retirer admin' : 'Nommer admin'}

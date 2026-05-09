@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { MapPin } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import UnlockButton from '../components/UnlockButton';
@@ -31,7 +32,7 @@ const LocationDetail = () => {
         <p className="price" style={{ fontSize: 20, marginBottom: 10 }}>{location.prix?.toLocaleString('fr-GN')} GNF</p>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
           <span className="badge badge-primary">{catLabels[location.categorie]}</span>
-          <span className="badge badge-primary">📍 {location.ville}, {location.quartier}</span>
+          <span className="badge badge-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} /> {location.ville}, {location.quartier}</span>
         </div>
         <UnlockButton type="location" id={location._id} contact={location.contact} />
         <div style={{ marginTop: 8 }}><ReportButton typeContenu="location" contenuId={location._id} /></div>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Unlock, Phone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
@@ -30,8 +31,8 @@ const UnlockButton = ({ type, id, contact }) => {
 
   if (unlockedContact) {
     return (
-      <div style={{ background: 'rgba(16,185,129,0.1)', padding: '6px 10px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#10b981', marginBottom: 4 }}>
-        📞 {unlockedContact}
+      <div style={{ background: 'rgba(16,185,129,0.1)', padding: '6px 10px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#10b981', marginBottom: 4, display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <Phone size={14} /> {unlockedContact}
       </div>
     );
   }
@@ -39,8 +40,8 @@ const UnlockButton = ({ type, id, contact }) => {
   return (
     <>
       <button onClick={() => { if (!user) { navigate('/login'); return; } setShowConfirm(true); }}
-        className="btn btn-primary btn-sm btn-block" style={{ marginBottom: 4, fontSize: 12 }}>
-        🔓 Débloquer contact (1 crédit)
+        className="btn btn-primary btn-sm btn-block" style={{ marginBottom: 4, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+        <Unlock size={14} /> Débloquer contact (1 crédit)
       </button>
       {showConfirm && (
         <div className="modal-overlay" onClick={() => setShowConfirm(false)}>

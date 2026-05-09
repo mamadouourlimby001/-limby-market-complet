@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { MapPin, Building2, Clock } from 'lucide-react';
 import PhotoSlider from './PhotoSlider';
 import UnlockButton from './UnlockButton';
 import ReportButton from './ReportButton';
@@ -13,15 +14,15 @@ const AnnouncementCard = ({ announcement }) => {
         <Link to={`/annonces/${announcement._id}`}>
           <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{announcement.titre}</h3>
         </Link>
-        <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: 2 }}>📍 {announcement.villeDeTravail}</div>
-        <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: 4 }}>
-          🏢 {announcement.entreprise}
+        <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: 2, display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={12} /> {announcement.villeDeTravail}</div>
+        <div style={{ fontSize: '11px', color: '#6b7280', marginBottom: 4, display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Building2 size={12} /> {announcement.entreprise}
         </div>
         <p className="price" style={{ fontSize: '14px', marginBottom: 2 }}>
           {announcement.salaireMensuel?.toLocaleString('fr-GN')} GNF/mois
         </p>
-        <div style={{ fontSize: '10px', color: '#f59e0b', marginBottom: 6 }}>
-          ⏳ Limite: {new Date(announcement.dateLimite).toLocaleDateString('fr-FR')}
+        <div style={{ fontSize: '10px', color: '#f59e0b', marginBottom: 6, display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Clock size={12} /> Limite: {new Date(announcement.dateLimite).toLocaleDateString('fr-FR')}
         </div>
         <UnlockButton type="announcement" id={announcement._id} contact={announcement.contact} />
         <ReportButton typeContenu="announcement" contenuId={announcement._id} />

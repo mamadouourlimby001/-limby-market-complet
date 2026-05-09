@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { Store } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import BoutiqueCard from '../components/BoutiqueCard';
@@ -22,7 +23,7 @@ const BoutiquesList = () => {
     <div className="page">
       <h1 className="page-title">Boutiques</h1>
       {user && user.role !== 'vendeur_boutique' && (
-        <Link to="/boutiques/creer" className="btn btn-primary btn-block" style={{ marginBottom: 14 }}>🏪 Créer ma boutique</Link>
+        <Link to="/boutiques/creer" className="btn btn-primary btn-block" style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Store size={16} /> Créer ma boutique</Link>
       )}
       {loading ? <div className="loader"><div className="spinner"></div></div> : boutiques.length === 0 ? <div className="empty-state"><p>Aucune boutique active</p></div> : (
         <div className="grid-1">{boutiques.map(b => <BoutiqueCard key={b._id} boutique={b} />)}</div>

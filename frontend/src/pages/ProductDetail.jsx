@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { MapPin, CheckCircle } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import UnlockButton from '../components/UnlockButton';
@@ -34,9 +35,9 @@ const ProductDetail = () => {
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
           <span className="badge badge-primary">{product.categorie}</span>
           {product.etat && <span className="badge badge-success">{etatLabels[product.etat]}</span>}
-          <span className="badge badge-primary">📍 {product.ville}, {product.quartier}</span>
+          <span className="badge badge-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} /> {product.ville}, {product.quartier}</span>
         </div>
-        {product.vendeur?.isVerified && <span className="badge badge-success" style={{ marginBottom: 10 }}>✔️ Vendeur vérifié</span>}
+        {product.vendeur?.isVerified && <span className="badge badge-success" style={{ marginBottom: 10, display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle size={14} /> Vendeur vérifié</span>}
         <div style={{ marginBottom: 14 }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Description</h3>
           <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>{product.description}</p>

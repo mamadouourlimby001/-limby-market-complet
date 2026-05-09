@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { MapPin, Building2, Clock } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import UnlockButton from '../components/UnlockButton';
@@ -29,10 +30,10 @@ const AnnouncementDetail = () => {
         <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{ann.titre}</h1>
         <p className="price" style={{ fontSize: 20, marginBottom: 6 }}>{ann.salaireMensuel?.toLocaleString('fr-GN')} GNF/mois</p>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-          <span className="badge badge-primary">📍 {ann.villeDeTravail}, {ann.quartier}</span>
-          <span className="badge badge-primary">🏢 {ann.entreprise}</span>
+          <span className="badge badge-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} /> {ann.villeDeTravail}, {ann.quartier}</span>
+          <span className="badge badge-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><Building2 size={14} /> {ann.entreprise}</span>
         </div>
-        <div className="badge badge-warning" style={{ marginBottom: 12 }}>⏳ Limite: {new Date(ann.dateLimite).toLocaleDateString('fr-FR')}</div>
+        <div className="badge badge-warning" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: '4px' }}><Clock size={14} /> Limite: {new Date(ann.dateLimite).toLocaleDateString('fr-FR')}</div>
         <div style={{ marginBottom: 14 }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Description</h3>
           <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>{ann.description}</p>

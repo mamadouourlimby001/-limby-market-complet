@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
@@ -33,7 +34,7 @@ const AdminDashboard = () => {
     { path: '/admin/signalements', label: 'Signalements', icon: '⚠️' },
     { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: '�‍💼' },
     { path: '/admin/send-to-users', label: 'Écrire aux utilisateurs', icon: '✎' },
-    { path: '/admin/messages', label: 'Messages', icon: `💬${unreadMessagesCount > 0 ? ' ' + unreadMessagesCount : ''}` }
+    { path: '/admin/messages', label: 'Messages', icon: 'messages' }
   ];
 
   return (
@@ -73,7 +74,14 @@ const AdminDashboard = () => {
                 {unreadMessagesCount}
               </div>
             )}
-            <span style={{ fontSize: 28, display: 'block', marginBottom: 6 }}>{item.icon}</span>
+            <span style={{ fontSize: 28, display: 'block', marginBottom: 6 }}>
+              {item.path === '/admin/messages' && <MessageSquare size={28} />}
+              {item.path === '/admin/credits' && <CreditCard size={28} />}
+              {item.path === '/admin/abonnements' && <RefreshCw size={28} />}
+              {item.path === '/admin/signalements' && <AlertTriangle size={28} />}
+              {item.path === '/admin/utilisateurs' && <Users size={28} />}
+              {item.path === '/admin/send-to-users' && <PenTool size={28} />}
+            </span>
             <span style={{ fontSize: 13, fontWeight: 600, color: '#1B2A6B' }}>{item.label}</span>
           </Link>
         ))}

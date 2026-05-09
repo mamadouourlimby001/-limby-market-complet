@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
+import { Home as HomeIcon, ShoppingBag, Building2, FileText, Store } from 'lucide-react';
 
 const tabs = [
-  { path: '/', label: 'Accueil', icon: '🏠' },
-  { path: '/occasion', label: 'Occasion', icon: '�' },
-  { path: '/locations', label: 'Locations', icon: '🏠' },
-  { path: '/annonces', label: 'Annonces', icon: '📰' },
-  { path: '/boutiques', label: 'Boutiques', icon: '🏬' },
+  { path: '/', label: 'Accueil', icon: 'home' },
+  { path: '/occasion', label: 'Occasion', icon: 'shopping' },
+  { path: '/locations', label: 'Locations', icon: 'building' },
+  { path: '/annonces', label: 'Annonces', icon: 'announce' },
+  { path: '/boutiques', label: 'Boutiques', icon: 'store' },
 ];
 
 const BottomNav = () => {
@@ -29,7 +30,13 @@ const BottomNav = () => {
             color: isActive ? '#1B2A6B' : '#9ca3af',
             transition: 'color 0.2s'
           }}>
-            <span style={{ fontSize: '20px' }}>{tab.icon}</span>
+            <span style={{ fontSize: '20px' }}>
+              {tab.icon === 'home' && <HomeIcon size={20} />}
+              {tab.icon === 'shopping' && <ShoppingBag size={20} />}
+              {tab.icon === 'building' && <Building2 size={20} />}
+              {tab.icon === 'announce' && <FileText size={20} />}
+              {tab.icon === 'store' && <Store size={20} />}
+            </span>
             <span style={{
               fontSize: '10px', fontWeight: isActive ? 700 : 500,
               color: isActive ? '#1B2A6B' : '#9ca3af'

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Search } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import ProductCard from '../components/ProductCard';
@@ -37,7 +38,7 @@ const ProductsList = () => {
     <div className="page">
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
         <h1 className="page-title" style={{ marginBottom: 0 }}>Occasion</h1>
-        <button onClick={() => setShowFilters(!showFilters)} className="btn btn-secondary btn-sm">🔍 Filtres</button>
+        <button onClick={() => setShowFilters(!showFilters)} className="btn btn-secondary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Search size={16} /> Filtres</button>
       </div>
 
       {showFilters && (
