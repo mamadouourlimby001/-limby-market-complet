@@ -81,12 +81,11 @@ const UserDashboard = () => {
           <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}> Acheter des crédits</Link>
           <button onClick={handleLogout} className="btn btn-danger btn-block" style={{ marginBottom: 8 }}>Déconnexion</button>
           {boutique && (
-            <div className="card" style={{ padding: 14, marginBottom: 12 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: '6px' }}><ShoppingBag size={16} /> Ma Boutique: {boutique.nom}</h3>
-              <p style={{ fontSize: 12 }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></p>
+            <Link to="/ma-boutique" className="card" style={{ padding: 14, marginBottom: 12, textDecoration: 'none', display: 'block' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: '6px', color: '#1B2A6B' }}><span style={{ display: 'flex' }}><ShoppingBag size={16} /></span> Ma Boutique: {boutique.nom}</h3>
+              <p style={{ fontSize: 12, color: '#1B2A6B' }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></p>
               {boutique.dateExpiration && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(boutique.dateExpiration).toLocaleDateString('fr-FR')}</p>}
-              <Link to="/credits/renouveler-abonnement" className="btn btn-secondary btn-sm" style={{ marginTop: 8 }}>Renouveler abonnement</Link>
-            </div>
+            </Link>
           )}
         </div>
       )}
