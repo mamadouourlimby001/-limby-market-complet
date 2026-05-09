@@ -27,6 +27,9 @@ const CreateBoutique = () => {
     <div className="page" style={{ maxWidth: 500, margin: '0 auto' }}>
       <h1 className="page-title">Créer ma boutique</h1>
       <div className="alert alert-info">📌 Votre boutique sera créée mais inactive. Pour l'activer, vous devez payer un abonnement de 10000 GNF et obtenir l'approbation d'un administrateur.</div>
+      <div className="alert alert-info">
+        📱 Déposez <strong>10 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> pour activer votre boutique.
+      </div>
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
         <div className="form-group"><label>Nom de la boutique</label><input className="form-control" value={form.nom} onChange={e => setForm({...form, nom: e.target.value})} required /></div>

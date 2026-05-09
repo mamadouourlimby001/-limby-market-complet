@@ -42,7 +42,7 @@ const RenewSubscription = () => {
     <div className="page" style={{ maxWidth: 500, margin: '0 auto' }}>
       <h1 className="page-title">Renouveler abonnement</h1>
       <div className="alert alert-info">
-        📱 Déposez <strong>10 000 GNF</strong> sur le numéro Orange Money <strong>+224629043181</strong> puis soumettez ce formulaire.
+        📱 Déposez <strong>10 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> puis soumettez ce formulaire.
       </div>
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>

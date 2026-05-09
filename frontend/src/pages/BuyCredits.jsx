@@ -48,7 +48,7 @@ const BuyCredits = () => {
         ))}
       </div>
       <div className="alert alert-info">
-        📱 Effectuez un dépôt Orange Money sur le numéro <strong>+224629043181</strong> puis remplissez le formulaire ci-dessous.
+        📱 Effectuez un dépôt Orange Money sur le numéro <strong>+224625223418</strong> puis remplissez le formulaire ci-dessous.
       </div>
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
