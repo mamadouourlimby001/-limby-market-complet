@@ -83,6 +83,12 @@ const MyBoutique = () => {
           <MapPin size={16} /> {boutique.quartier}, {boutique.ville}
         </div>
         <span className="badge badge-primary" style={{ marginBottom: 8 }}>{boutique.categorie}</span>
+        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #e5e7eb', display: 'flex', gap: 8, alignItems: 'center' }}>
+          <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>
+            {boutique.isActive ? 'Active' : 'Inactive'}
+          </span>
+          <Link to="/credits/renouveler-abonnement" className="btn btn-secondary" style={{ flex: 1, fontSize: 13 }}>Renouveler mon abonnement</Link>
+        </div>
       </div>
 
       {/* Boutons Recherche et Tri */}
