@@ -2,18 +2,27 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { Search, SortAsc } from 'lucide-react';
 
 const MyBoutique = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
+  const [boutique, setBoutique] = useState(null);
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState('recent');
 
   useEffect(() => {
     const fetch = async () => {
       try {
         const res = await api.get('/boutiques/my-boutique');
-        setData(res.data);
+        if (res.data) {
+          setBoutique(res.data.boutique || res.data);
+          setProducts(res.data.products || []);
+          setFilteredProducts(res.data.products || []);
+        }
       }
       catch (err) {
         console.error(err);
@@ -26,39 +35,106 @@ const MyBoutique = () => {
     fetch();
   }, [navigate]);
 
-  if (loading) return <div className="loader"><div className="spinner"></div></div>;
-  if (!data) return <div className="page"><div className="empty-state"><p>Vous n'avez pas de boutique</p></div></div>;
+  useEffect(() => {
+    let filtered = products.filter(p => 
+      p.titre.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-  const { boutique, products } = data;
+    if (sortBy === 'price-asc') {
+      filtered.sort((a, b) => (a.prix || 0) - (b.prix || 0));
+    } else if (sortBy === 'price-desc') {
+      filtered.sort((a, b) => (b.prix || 0) - (a.prix || 0));
+    } else if (sortBy === 'recent') {
+      filtered.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));
+    }
+
+    setFilteredProducts(filtered);
+  }, [searchTerm, sortBy, products]);
+
+  if (loading) return <div className="loader"><div className="spinner"></div></div>;
+  if (!boutique) return <div className="page"><div className="empty-state"><p>Vous n'avez pas de boutique</p></div></div>;
 
   return (
     <div className="page">
+      {/* Info boutique */}
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <div style={{ width: 70, height: 70, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 8px', background: '#f0f0f0' }}>
+        <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 8px', background: '#f0f0f0' }}>
           {boutique.logo && <img src={boutique.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
-        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>
-          {boutique.nom} {boutique.isVerified && <span style={{ color: '#4A90D9' }}>✔️</span>}
+        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4, color: '#1B2A6B' }}>
+          {boutique.nom}
         </h1>
-        <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>{boutique.description}</p>
-        <p style={{ fontSize: 13, color: '#1B2A6B', fontWeight: 600 }}>☎️ {boutique.telephone}</p>
-        <span className="badge badge-primary">{boutique.categorie}</span>
-        <p style={{ fontSize: 12, marginTop: 8 }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></p>
-        {boutique.dateExpiration && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(boutique.dateExpiration).toLocaleDateString('fr-FR')}</p>}
+        <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>{boutique.description}</p>
+        <span className="badge badge-primary" style={{ marginBottom: 8 }}>{boutique.categorie}</span>
       </div>
 
-      <Link to={`/boutiques/${boutique._id}/ajouter-produit`} className="btn btn-primary btn-block" style={{ marginBottom: 14 }}>+ Ajouter un produit</Link>
-      <Link to="/credits/renouveler-abonnement" className="btn btn-secondary btn-block" style={{ marginBottom: 14 }}>Renouveler abonnement</Link>
+      {/* Boutons Recherche et Tri */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
+          <input
+            type="text"
+            placeholder="Chercher un produit..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px 8px 8px 36px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '6px',
+              fontSize: '13px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          style={{
+            padding: '8px 10px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '6px',
+            fontSize: '13px',
+            cursor: 'pointer',
+            background: '#fff',
+            minWidth: '120px'
+          }}
+        >
+          <option value="recent">Plus récent</option>
+          <option value="price-asc">Prix ↑</option>
+          <option value="price-desc">Prix ↓</option>
+        </select>
+      </div>
 
-      <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 10 }}>Produits ({products.length})</h2>
-      {products.length === 0 ? <div className="empty-state"><p>Aucun produit</p></div> : (
+      {/* Bouton Ajouter produit */}
+      <Link to={`/boutiques/${boutique._id}/ajouter-produit`} className="btn btn-primary btn-block" style={{ marginBottom: 14 }}>
+        + Ajouter un produit
+      </Link>
+
+      {/* Galerie produits */}
+      <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: '#1B2A6B' }}>
+        Produits ({filteredProducts.length})
+      </h2>
+
+      {filteredProducts.length === 0 ? (
+        <div className="empty-state" style={{ padding: 20, textAlign: 'center' }}>
+          <p style={{ fontSize: 14, color: '#6b7280' }}>Aucun produit trouvé</p>
+        </div>
+      ) : (
         <div className="grid-2">
-          {products.map(p => (
-            <div key={p._id} className="card" style={{ padding: 10, textAlign: 'center' }}>
-              {p.photos && p.photos[0] && <img src={p.photos[0]} alt="" style={{ width: '100%', height: 100, objectFit: 'cover', marginBottom: 8, borderRadius: 4 }} />}
-              <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</p>
-              <p className="price" style={{ fontSize: 14, marginBottom: 8 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
-              <Link to={`/boutiques/${boutique._id}`} className="btn btn-secondary btn-sm btn-block">Voir</Link>
+          {filteredProducts.map(p => (
+            <div key={p._id} className="card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.3s ease' }}>
+              <div style={{ width: '100%', height: 150, background: '#f0f0f0', overflow: 'hidden' }}>
+                {p.photos && p.photos[0] && (
+                  <img src={p.photos[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                )}
+              </div>
+              <div style={{ padding: 10 }}>
+                <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, color: '#1B2A6B' }}>{p.titre}</h3>
+                <p className="price" style={{ fontSize: 14, fontWeight: 700, color: '#4A90D9' }}>
+                  {p.prix?.toLocaleString('fr-GN')} GNF
+                </p>
+              </div>
             </div>
           ))}
         </div>
