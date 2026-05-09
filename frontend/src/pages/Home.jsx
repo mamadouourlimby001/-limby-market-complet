@@ -8,6 +8,7 @@ const menuItems = [
   { path: '/annonces', label: 'Annonces', icon: 'announce', desc: 'Offres d\'emploi' },
   { path: '/boutiques', label: 'Boutiques', icon: 'store', desc: 'Boutiques en ligne' },
   { path: '/mon-compte', label: 'Mon Compte', icon: 'user', desc: 'Tableau de bord' },
+  { path: '/ma-boutique', label: 'Ma Boutique', icon: 'store', desc: 'Ma boutique' },
 ];
 
 const Home = () => {
@@ -55,17 +56,25 @@ const Home = () => {
       </div>
 
       <div style={{ maxWidth: 400, margin: '12px auto 0' }}>
-        <Link to={menuItems[4].path} style={{
-          background: 'rgba(255,255,255,0.95)', borderRadius: 14, padding: '18px 14px',
-          textAlign: 'center', display: 'block', textDecoration: 'none',
-          boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+        <div style={{
+          display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12
         }}>
-          <span style={{ fontSize: 32, display: 'block', marginBottom: 6 }}>
-            <User size={32} color="#1B2A6B" />
-          </span>
-          <span style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B', display: 'block' }}>{menuItems[4].label}</span>
-          <span style={{ fontSize: 11, color: '#6b7280' }}>{menuItems[4].desc}</span>
-        </Link>
+          {menuItems.slice(4, 6).map(item => (
+            <Link key={item.path} to={item.path} style={{
+              background: 'rgba(255,255,255,0.95)', borderRadius: 14, padding: '18px 14px',
+              textAlign: 'center', textDecoration: 'none',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.1)',
+              transition: 'transform 0.2s, box-shadow 0.2s'
+            }}>
+              <span style={{ fontSize: 32, display: 'block', marginBottom: 6 }}>
+                {item.icon === 'user' && <User size={32} color="#1B2A6B" />}
+                {item.icon === 'store' && <Store size={32} color="#1B2A6B" />}
+              </span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B', display: 'block' }}>{item.label}</span>
+              <span style={{ fontSize: 11, color: '#6b7280' }}>{item.desc}</span>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
