@@ -1,17 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
+import { Package, MapPin, Calendar, Phone, AlertCircle } from 'lucide-react';
 import api from '../utils/api';
-import { ShoppingCart, Trash2, Eye } from 'lucide-react';
 
 const MesCommandes = () => {
-  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedOrder, setExpandedOrder] = useState(null);
-  const [deleting, setDeleting] = useState(null);
+  const [filter, setFilter] = useState('all');
 
   useEffect(() => {
     fetchOrders();
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchOrders();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const fetchOrders = async () => {
@@ -19,210 +24,176 @@ const MesCommandes = () => {
       const res = await api.get('/orders/my-orders');
       setOrders(res.data);
     } catch (err) {
-      console.error('Erreur:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCancelOrder = async (orderId) => {
-    if (!confirm('Êtes-vous sûr de vouloir annuler cette commande?')) return;
+  const handleCancel = async (orderId) => {
+    if (!window.confirm('Annuler cette commande ?')) return;
 
     try {
-      setDeleting(orderId);
       await api.delete(`/orders/${orderId}`);
-      alert('✅ Commande annulée');
       fetchOrders();
+      alert('Commande annulée');
     } catch (err) {
-      alert('❌ ' + (err.response?.data?.message || 'Erreur lors de l\'annulation'));
-    } finally {
-      setDeleting(null);
+      alert(err.response?.data?.message || 'Erreur');
     }
   };
 
-  const statusColors = {
-    'en_attente': '#f59e0b',
-    'confirmé': '#3b82f6',
-    'expédié': '#8b5cf6',
-    'livré': '#10b981',
-    'annulé': '#ef4444'
+  const filteredOrders = filter === 'all' 
+    ? orders 
+    : orders.filter(o => o.status === filter);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'en_attente': return '#f59e0b';
+      case 'confirmée': return '#3b82f6';
+      case 'livrée': return '#059669';
+      case 'annulée': return '#dc3545';
+      default: return '#6b7280';
+    }
   };
 
-  const statusLabels = {
-    'en_attente': 'En attente',
-    'confirmé': 'Confirmée',
-    'expédié': 'Expédiée',
-    'livré': 'Livrée',
-    'annulé': 'Annulée'
+  const getStatusLabel = (status) => {
+    const labels = {
+      'en_attente': 'En attente',
+      'confirmée': 'Confirmée',
+      'livrée': 'Livrée',
+      'annulée': 'Annulée'
+    };
+    return labels[status] || status;
   };
 
-  if (loading) return <div className="loader"><div className="spinner"></div></div>;
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="loader"><div className="spinner"></div></div>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
-      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <ShoppingCart size={24} /> Mes Commandes
-      </h1>
+      <h1 className="page-title">Mes Commandes</h1>
 
-      {orders.length === 0 ? (
-        <div className="empty-state">
-          <ShoppingCart size={48} style={{ color: '#d1d5db', marginBottom: 12 }} />
-          <p>Vous n'avez pas encore de commandes</p>
-          <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>Explorez les boutiques et commandez des produits!</p>
+      {/* Filtres */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 8 }}>
+        {['all', 'en_attente', 'confirmée', 'livrée', 'annulée'].map(status => (
+          <button
+            key={status}
+            onClick={() => setFilter(status)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 6,
+              border: 'none',
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              background: filter === status ? '#1B2A6B' : '#e5e7eb',
+              color: filter === status ? '#fff' : '#1f2937',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {status === 'all' ? 'Toutes' : getStatusLabel(status)}
+          </button>
+        ))}
+      </div>
+
+      {/* Compteur */}
+      <div style={{ marginBottom: 16, fontSize: 13, color: '#6b7280' }}>
+        {filteredOrders.length} commande{filteredOrders.length !== 1 ? 's' : ''}
+      </div>
+
+      {/* Liste des commandes */}
+      {filteredOrders.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+          <Package size={32} style={{ margin: '0 auto 12px' }} />
+          <p>Aucune commande</p>
+          <Link to="/boutiques" style={{ color: '#1B2A6B', fontWeight: 600, marginTop: 12, display: 'inline-block' }}>
+            Explorer les boutiques
+          </Link>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {orders.map(order => (
-            <div
-              key={order._id}
-              style={{
-                padding: 12,
-                border: '1px solid #e5e7eb',
-                borderRadius: 8,
-                backgroundColor: expandedOrder === order._id ? '#f9fafb' : '#fff'
-              }}
-            >
-              {/* Header */}
-              <div
-                onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  marginBottom: expandedOrder === order._id ? 12 : 0
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
-                    {order.produit?.titre}
+          {filteredOrders.map(order => (
+            <div key={order._id} className="card" style={{ padding: 12 }}>
+              {/* En-tête */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 12, paddingBottom: 12, borderBottom: '1px solid #e5e7eb' }}>
+                <div>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
+                    {order.product?.titre || 'Produit'}
                   </h3>
-                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>
-                    {order.boutique?.nom}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span className="badge badge-primary">{order.quantite} × {order.prixUnitaire?.toLocaleString('fr-GN')} GNF</span>
-                    <span
-                      className="badge"
-                      style={{
-                        backgroundColor: statusColors[order.statut],
-                        color: '#fff',
-                        fontSize: 12
-                      }}
-                    >
-                      {statusLabels[order.statut]}
-                    </span>
-                    <span style={{ fontSize: 12, color: '#9ca3af' }}>
-                      {new Date(order.createdAt).toLocaleDateString('fr-FR')}
-                    </span>
+                  <div style={{ fontSize: 12, color: '#6b7280', display: 'flex', gap: 8 }}>
+                    <span><strong>Boutique:</strong> {order.boutique?.nom}</span>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: 16, fontWeight: 700, color: '#d97706' }}>
-                    {order.prixTotal?.toLocaleString('fr-GN')} GNF
-                  </p>
-                  <Eye size={18} style={{ color: '#6b7280', marginTop: 4 }} />
+                <span
+                  style={{
+                    padding: '4px 8px',
+                    borderRadius: 4,
+                    background: getStatusColor(order.status),
+                    color: '#fff',
+                    fontSize: 11,
+                    fontWeight: 600
+                  }}
+                >
+                  {getStatusLabel(order.status)}
+                </span>
+              </div>
+
+              {/* Détails */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12, fontSize: 12 }}>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Quantité</div>
+                  <div style={{ fontWeight: 600 }}>{order.quantite}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Prix total</div>
+                  <div style={{ fontWeight: 600, color: '#059669' }}>{order.prixTotal} GNF</div>
+                </div>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Date</div>
+                  <div style={{ fontSize: 11 }}>
+                    <Calendar size={12} style={{ display: 'inline', marginRight: 4 }} />
+                    {new Date(order.createdAt).toLocaleDateString('fr-FR')}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Catégorie</div>
+                  <div style={{ fontSize: 11 }}>{order.product?.categorie}</div>
                 </div>
               </div>
 
-              {/* Expanded Details */}
-              {expandedOrder === order._id && (
-                <div style={{
-                  paddingTop: 12,
-                  borderTop: '1px solid #e5e7eb'
-                }}>
-                  {/* Produit Image */}
-                  {order.produit?.photos?.[0] && (
-                    <div style={{
-                      width: '100%',
-                      height: 150,
-                      backgroundColor: '#f0f0f0',
-                      borderRadius: 6,
-                      overflow: 'hidden',
-                      marginBottom: 12
-                    }}>
-                      <img
-                        src={order.produit.photos[0]}
-                        alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Order Details */}
-                  <div style={{ marginBottom: 12 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
-                      <div>
-                        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 2 }}>Quantité</p>
-                        <p style={{ fontSize: 14, fontWeight: 600 }}>{order.quantite}</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 2 }}>Prix unitaire</p>
-                        <p style={{ fontSize: 14, fontWeight: 600 }}>{order.prixUnitaire?.toLocaleString('fr-GN')} GNF</p>
-                      </div>
-                    </div>
-
-                    <div style={{
-                      padding: 8,
-                      backgroundColor: '#fef3c7',
-                      borderRadius: 6,
-                      borderLeft: '3px solid #f59e0b'
-                    }}>
-                      <p style={{ fontSize: 12, color: '#92400e' }}>
-                        <strong>Total:</strong> {order.prixTotal?.toLocaleString('fr-GN')} GNF
-                      </p>
-                    </div>
+              {/* Notes du vendeur */}
+              {order.noteVendeur && (
+                <div style={{ background: '#f3f4f6', padding: 8, borderRadius: 4, marginBottom: 12, fontSize: 12, borderLeft: '3px solid #f59e0b' }}>
+                  <div style={{ fontWeight: 600, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <AlertCircle size={14} /> Note du vendeur
                   </div>
-
-                  {/* Boutique Info */}
-                  <div style={{
-                    padding: 10,
-                    backgroundColor: '#eff6ff',
-                    borderRadius: 6,
-                    marginBottom: 12,
-                    borderLeft: '3px solid #3b82f6'
-                  }}>
-                    <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Boutique</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {order.boutique?.logo && (
-                        <div style={{
-                          width: 40,
-                          height: 40,
-                          borderRadius: '50%',
-                          overflow: 'hidden',
-                          backgroundColor: '#f0f0f0'
-                        }}>
-                          <img
-                            src={order.boutique.logo}
-                            alt=""
-                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          />
-                        </div>
-                      )}
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 600 }}>{order.boutique?.nom}</p>
-                        <p style={{ fontSize: 12, color: '#6b7280' }}>Propriétaire vérifié</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Cancel Button */}
-                  {!['livré', 'annulé'].includes(order.statut) && (
-                    <button
-                      onClick={() => handleCancelOrder(order._id)}
-                      disabled={deleting === order._id}
-                      className="btn btn-danger btn-block"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '6px'
-                      }}
-                    >
-                      <Trash2 size={16} /> {deleting === order._id ? 'Annulation...' : 'Annuler la commande'}
-                    </button>
-                  )}
+                  <div style={{ color: '#4b5563' }}>{order.noteVendeur}</div>
                 </div>
+              )}
+
+              {/* Actions */}
+              {order.status === 'en_attente' && (
+                <button
+                  onClick={() => handleCancel(order._id)}
+                  style={{
+                    width: '100%',
+                    padding: 10,
+                    background: '#dc3545',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 4,
+                    fontWeight: 600,
+                    fontSize: 12,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Annuler la commande
+                </button>
               )}
             </div>
           ))}

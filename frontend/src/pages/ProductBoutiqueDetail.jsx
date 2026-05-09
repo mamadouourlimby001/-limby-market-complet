@@ -1,242 +1,334 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { ArrowLeft, Phone, MapPin, Store, Send } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
-import ReportButton from '../components/ReportButton';
-import { MapPin, ArrowLeft, ShoppingCart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const ProductBoutiqueDetail = () => {
   const { boutiqueId, productId } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
+  const { user } = useAuth();
+  
+  const [product, setProduct] = useState(null);
+  const [boutique, setBoutique] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [quantity, setQuantity] = useState(1);
-  const [ordering, setOrdering] = useState(false);
+  const [error, setError] = useState('');
+  const [quantite, setQuantite] = useState(1);
+  const [showMessageForm, setShowMessageForm] = useState(false);
+  const [messageContent, setMessageContent] = useState('');
+  const [orderLoading, setOrderLoading] = useState(false);
 
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await api.get(`/boutiques/${boutiqueId}`);
-        const product = res.data.products?.find(p => p._id === productId);
-        if (!product) throw new Error('Produit non trouvé');
-        setData({
-          product,
-          boutique: res.data.boutique
-        });
-      } catch (err) {
-        console.error(err);
-        setData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetch();
+    fetchProduct();
   }, [boutiqueId, productId]);
+
+  const fetchProduct = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get(`/boutiques/${boutiqueId}`);
+      const { boutique: boutiqueData, products } = res.data;
+      
+      setBoutique(boutiqueData);
+      const prod = products.find(p => p._id === productId);
+      if (!prod) {
+        setError('Produit non trouvé');
+      } else {
+        setProduct(prod);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Erreur lors du chargement du produit');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOrder = async () => {
     if (!user) {
+      alert('Veuillez vous connecter');
+      navigate('/login');
+      return;
+    }
+
+    // Empêcher le propriétaire de commande sa propre boutique
+    if (user._id === boutique.proprietaire._id || user._id === boutique.proprietaire) {
+      alert('Vous ne pouvez pas commander vos propres produits');
+      return;
+    }
+
+    setOrderLoading(true);
+    try {
+      await api.post('/orders', {
+        productId,
+        quantite
+      });
+      alert('Commande créée avec succès !');
+      navigate('/mes-commandes');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de la création de la commande');
+    } finally {
+      setOrderLoading(false);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!messageContent.trim()) {
+      alert('Veuillez écrire un message');
+      return;
+    }
+
+    if (!user) {
+      alert('Veuillez vous connecter');
       navigate('/login');
       return;
     }
 
     try {
-      setOrdering(true);
-      const response = await api.post('/orders', {
+      await api.post('/boutique-messages/send-to-boutique', {
         boutiqueId,
-        productId,
-        quantite: quantity
+        contenu: messageContent
       });
-
-      if (response.data) {
-        alert('✅ Commande créée avec succès!');
-        navigate('/mes-commandes');
-      }
-    } catch (error) {
-      console.error('Erreur:', error);
-      alert('❌ ' + (error.response?.data?.message || 'Erreur lors de la création de la commande'));
-    } finally {
-      setOrdering(false);
+      alert('Message envoyé à la boutique avec succès');
+      setMessageContent('');
+      setShowMessageForm(false);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de l\'envoi du message');
     }
   };
 
-  if (loading) return <div className="loader"><div className="spinner"></div></div>;
-  if (!data) return (
-    <div className="page">
-      <div style={{ marginBottom: 16 }}>
-        <Link to={`/boutiques/${boutiqueId}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4A90D9', fontSize: 14, fontWeight: 600 }}>
-          <ArrowLeft size={18} /> Retour
-        </Link>
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="loader"><div className="spinner"></div></div>
       </div>
-      <div className="empty-state"><p>Produit introuvable</p></div>
-    </div>
-  );
+    );
+  }
 
-  const { product, boutique } = data;
+  if (error || !product || !boutique) {
+    return (
+      <div className="page">
+        <button onClick={() => navigate(-1)} className="btn btn-secondary" style={{ marginBottom: 16 }}>
+          <ArrowLeft size={18} /> Retour
+        </button>
+        <div style={{ textAlign: 'center', color: '#dc3545' }}>{error || 'Produit non trouvé'}</div>
+      </div>
+    );
+  }
+
+  const isOwner = user && (user._id === boutique.proprietaire._id || user._id === boutique.proprietaire);
 
   return (
-    <div className="page" style={{ padding: 0 }}>
-      {/* Back button */}
-      <div style={{ padding: '12px 14px 0' }}>
-        <Link to={`/boutiques/${boutiqueId}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#4A90D9', fontSize: 14, fontWeight: 600 }}>
-          <ArrowLeft size={18} /> Retour à la boutique
-        </Link>
+    <div className="page">
+      {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        <button onClick={() => navigate(-1)} className="btn btn-secondary" style={{ marginBottom: 12 }}>
+          <ArrowLeft size={18} /> Retour
+        </button>
       </div>
 
       {/* Photos */}
-      <div style={{ height: 280 }}>
-        <PhotoSlider photos={product.photos} />
+      <div style={{ marginBottom: 20 }}>
+        <PhotoSlider photos={product.photos || []} />
       </div>
 
-      {/* Content */}
-      <div style={{ padding: 14 }}>
-        {/* Title and Price */}
-        <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 8 }}>{product.titre}</h1>
-        <p className="price" style={{ fontSize: 22, fontWeight: 600, marginBottom: 12, color: '#d97706' }}>
-          {product.prix?.toLocaleString('fr-GN')} GNF
+      {/* Titre et Prix */}
+      <div style={{ marginBottom: 16 }}>
+        <h2 style={{ fontSize: 20, fontWeight: 700, color: '#1B2A6B', marginBottom: 4 }}>
+          {product.titre}
+        </h2>
+        <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 8 }}>
+          {product.categorie}
         </p>
+        <p style={{ fontSize: 28, fontWeight: 700, color: '#059669', marginBottom: 12 }}>
+          {product.prix} GNF
+        </p>
+        <p style={{ fontSize: 12, color: '#9ca3af' }}>
+          Créé le {new Date(product.createdAt).toLocaleDateString('fr-FR')}
+        </p>
+      </div>
 
-        {/* Badges */}
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
-          <span className="badge badge-primary">{product.categorie}</span>
-          {product.createdAt && (
-            <span className="badge badge-primary" style={{ fontSize: 12 }}>
-              {new Date(product.createdAt).toLocaleDateString('fr-FR')}
-            </span>
+      {/* Description */}
+      <div style={{ marginBottom: 20 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Description</h3>
+        <p style={{ fontSize: 14, color: '#4b5563', lineHeight: 1.6 }}>
+          {product.description}
+        </p>
+      </div>
+
+      {/* Info Boutique */}
+      <div className="card" style={{ padding: 12, marginBottom: 20, borderLeft: '4px solid #1B2A6B' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+          {boutique.logo && (
+            <img 
+              src={boutique.logo} 
+              alt={boutique.nom} 
+              style={{ width: 60, height: 60, borderRadius: 8, objectFit: 'cover' }}
+            />
+          )}
+          <div style={{ flex: 1 }}>
+            <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
+              <Store size={16} style={{ marginRight: 6, display: 'inline' }} />
+              {boutique.nom}
+            </h4>
+            {boutique.isVerified && (
+              <p style={{ fontSize: 11, color: '#059669', fontWeight: 600 }}>✓ Vérifié</p>
+            )}
+          </div>
+        </div>
+
+        {/* Détails boutique */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, fontSize: 12 }}>
+          {boutique.telephone && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Phone size={14} style={{ color: '#6b7280' }} />
+              <span>{boutique.telephone}</span>
+            </div>
+          )}
+          {boutique.quartier && boutique.ville && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <MapPin size={14} style={{ color: '#6b7280' }} />
+              <span>{boutique.quartier}, {boutique.ville}</span>
+            </div>
+          )}
+          {boutique.categorie && (
+            <div style={{ fontSize: 11, color: '#6b7280' }}>
+              <strong>Catégorie:</strong> {boutique.categorie}
+            </div>
           )}
         </div>
+      </div>
 
-        {/* Description */}
-        <div style={{ marginBottom: 16 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Description</h3>
-          <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>{product.description}</p>
-        </div>
-
-        {/* Boutique Info */}
-        <div style={{
-          padding: 12,
-          backgroundColor: '#f9fafb',
-          borderRadius: 8,
-          marginBottom: 14,
-          border: '1px solid #e5e7eb'
-        }}>
-          <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>Boutique</h3>
-          
-          <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
-            {boutique.logo && (
-              <div style={{
-                width: 50,
-                height: 50,
-                borderRadius: '50%',
-                overflow: 'hidden',
-                background: '#f0f0f0',
-                flexShrink: 0
-              }}>
-                <img src={boutique.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              </div>
-            )}
-            <div style={{ flex: 1 }}>
-              <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
-                {boutique.nom}
-                {boutique.isVerified && <span style={{ color: '#4A90D9', marginLeft: 4 }}>✔️</span>}
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: 12, color: '#6b7280', marginBottom: 4 }}>
-                <MapPin size={14} /> {boutique.quartier}, {boutique.ville}
-              </div>
-              <p style={{ fontSize: 12, color: '#1B2A6B', fontWeight: 500 }}>☎️ {boutique.telephone}</p>
+      {/* Actions */}
+      {!isOwner ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {/* Quantité */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <label style={{ fontSize: 14, fontWeight: 600, minWidth: 80 }}>Quantité:</label>
+            <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: 4, width: 100 }}>
+              <button
+                onClick={() => setQuantite(Math.max(1, quantite - 1))}
+                style={{ flex: 1, padding: 6, border: 'none', background: 'none', cursor: 'pointer' }}
+              >
+                −
+              </button>
+              <span style={{ flex: 1, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                {quantite}
+              </span>
+              <button
+                onClick={() => setQuantite(quantite + 1)}
+                style={{ flex: 1, padding: 6, border: 'none', background: 'none', cursor: 'pointer' }}
+              >
+                +
+              </button>
             </div>
           </div>
 
-          <Link
-            to={`/boutiques/${boutiqueId}`}
+          {/* Bouton Commander */}
+          <button
+            onClick={handleOrder}
+            disabled={orderLoading}
             style={{
-              display: 'inline-block',
-              padding: '6px 12px',
-              backgroundColor: '#f0f0f0',
-              color: '#1f2937',
+              padding: 12,
+              background: '#059669',
+              color: '#fff',
+              border: 'none',
               borderRadius: 6,
-              fontSize: 12,
               fontWeight: 600,
-              textDecoration: 'none'
+              fontSize: 14,
+              cursor: orderLoading ? 'not-allowed' : 'pointer',
+              opacity: orderLoading ? 0.6 : 1
             }}
           >
-            Voir tous les produits
+            {orderLoading ? 'Traitement...' : 'Commander maintenant'}
+          </button>
+
+          {/* Bouton Message */}
+          <button
+            onClick={() => setShowMessageForm(!showMessageForm)}
+            style={{
+              padding: 12,
+              background: '#3b82f6',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 6,
+              fontWeight: 600,
+              fontSize: 14,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8
+            }}
+          >
+            <Send size={16} /> Écrire à la boutique
+          </button>
+
+          {/* Formulaire Message */}
+          {showMessageForm && (
+            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
+              <textarea
+                placeholder="Votre message..."
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: 10,
+                  border: '1px solid #e5e7eb',
+                  borderRadius: 6,
+                  fontSize: 14,
+                  fontFamily: 'inherit',
+                  marginBottom: 8,
+                  minHeight: 80,
+                  resize: 'vertical'
+                }}
+              />
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={handleSendMessage}
+                  style={{
+                    flex: 1,
+                    padding: 10,
+                    background: '#3b82f6',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 6,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Envoyer
+                </button>
+                <button
+                  onClick={() => {
+                    setShowMessageForm(false);
+                    setMessageContent('');
+                  }}
+                  style={{
+                    flex: 1,
+                    padding: 10,
+                    background: '#e5e7eb',
+                    color: '#1f2937',
+                    border: 'none',
+                    borderRadius: 6,
+                    fontWeight: 600,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Annuler
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div style={{ textAlign: 'center', padding: 20, background: '#f3f4f6', borderRadius: 6 }}>
+          <p style={{ fontSize: 14, color: '#6b7280' }}>C'est votre produit</p>
+          <Link to={`/boutiques/${boutiqueId}/ajouter-produit`} className="btn btn-primary" style={{ marginTop: 12 }}>
+            Modifier
           </Link>
         </div>
-
-        {/* Quantity Selector */}
-        <div style={{ marginBottom: 14 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>Quantité</label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: 'fit-content' }}>
-            <button
-              onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 6,
-                border: '1px solid #d1d5db',
-                backgroundColor: '#f9fafb',
-                cursor: 'pointer',
-                fontSize: 18,
-                fontWeight: 600
-              }}
-            >
-              −
-            </button>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-              style={{
-                width: 60,
-                height: 36,
-                borderRadius: 6,
-                border: '1px solid #d1d5db',
-                textAlign: 'center',
-                fontSize: 14,
-                fontWeight: 600
-              }}
-            />
-            <button
-              onClick={() => setQuantity(quantity + 1)}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 6,
-                border: '1px solid #d1d5db',
-                backgroundColor: '#f9fafb',
-                cursor: 'pointer',
-                fontSize: 18,
-                fontWeight: 600
-              }}
-            >
-              +
-            </button>
-          </div>
-        </div>
-
-        {/* Order Button */}
-        <button
-          onClick={handleOrder}
-          disabled={ordering}
-          className="btn btn-primary btn-block"
-          style={{
-            marginBottom: 10,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '6px',
-            opacity: ordering ? 0.6 : 1,
-            cursor: ordering ? 'not-allowed' : 'pointer'
-          }}
-        >
-          <ShoppingCart size={18} /> {ordering ? 'Traitement...' : 'Commander'}
-        </button>
-
-        {/* Report Button */}
-        <div><ReportButton typeContenu="product" contenuId={product._id} /></div>
-      </div>
+      )}
     </div>
   );
 };

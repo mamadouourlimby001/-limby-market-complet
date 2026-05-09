@@ -18,16 +18,18 @@ import AnnouncementDetail from './pages/AnnouncementDetail';
 import AddAnnouncement from './pages/AddAnnouncement';
 import BoutiquesList from './pages/BoutiquesList';
 import BoutiqueDetail from './pages/BoutiqueDetail';
+import ProductBoutiqueDetail from './pages/ProductBoutiqueDetail';
 import CreateBoutique from './pages/CreateBoutique';
 import AddBoutiqueProduct from './pages/AddBoutiqueProduct';
 import MyBoutique from './pages/MyBoutique';
-import ProductBoutiqueDetail from './pages/ProductBoutiqueDetail';
-import ProduitsCommandes from './pages/ProduitsCommandes';
 import MesCommandes from './pages/MesCommandes';
+import ProduitsCommandes from './pages/ProduitsCommandes';
 import BuyCredits from './pages/BuyCredits';
 import RenewSubscription from './pages/RenewSubscription';
 import UserDashboard from './pages/UserDashboard';
 import SendMessageToAdmins from './pages/SendMessageToAdmins';
+import UserBoutiqueMessages from './pages/UserBoutiqueMessages';
+import BoutiqueMessages from './pages/BoutiqueMessages';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminCreditRequests from './pages/AdminCreditRequests';
 import AdminSubscriptions from './pages/AdminSubscriptions';
@@ -63,13 +65,15 @@ function App() {
             <Route path="/boutiques/creer" element={<ProtectedRoute><CreateBoutique /></ProtectedRoute>} />
             <Route path="/boutiques/:id/ajouter-produit" element={<ProtectedRoute><AddBoutiqueProduct /></ProtectedRoute>} />
             <Route path="/ma-boutique" element={<ProtectedRoute><MyBoutique /></ProtectedRoute>} />
-            <Route path="/ma-boutique/commandes" element={<ProtectedRoute><ProduitsCommandes /></ProtectedRoute>} />
             <Route path="/mes-commandes" element={<ProtectedRoute><MesCommandes /></ProtectedRoute>} />
+            <Route path="/boutique-commandes" element={<ProtectedRoute><ProduitsCommandes /></ProtectedRoute>} />
             <Route path="/credits/acheter" element={<ProtectedRoute><BuyCredits /></ProtectedRoute>} />
             <Route path="/credits/renouveler-abonnement" element={<ProtectedRoute><RenewSubscription /></ProtectedRoute>} />
             <Route path="/mon-compte" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
             <Route path="/account" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
             <Route path="/send-message-to-admins" element={<ProtectedRoute><SendMessageToAdmins /></ProtectedRoute>} />
+            <Route path="/messages-boutiques" element={<ProtectedRoute><UserBoutiqueMessages /></ProtectedRoute>} />
+            <Route path="/boutique-messages-inbox" element={<ProtectedRoute><BoutiqueMessages /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
             <Route path="/admin/credits" element={<AdminRoute><AdminCreditRequests /></AdminRoute>} />
             <Route path="/admin/abonnements" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />

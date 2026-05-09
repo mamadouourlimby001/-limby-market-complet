@@ -1,165 +1,183 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
+import { Search, SortAsc, RotateCcw, Package } from 'lucide-react';
 import api from '../utils/api';
-import { Search, SortAsc, MapPin, Package } from 'lucide-react';
+import PhotoSlider from '../components/PhotoSlider';
+import { useAuth } from '../context/AuthContext';
 
 const MyBoutique = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [boutique, setBoutique] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('recent');
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const res = await api.get('/boutiques/my-boutique');
-      if (res.data) {
-        setBoutique(res.data.boutique || res.data);
-        const prods = res.data.products || [];
-        setProducts(prods);
-        setFilteredProducts(prods);
-      }
-    }
-    catch (err) {
-      console.error(err);
-      navigate('/mon-compte');
-    }
-    finally {
-      setLoading(false);
-    }
-  };
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState('recent');
 
   useEffect(() => {
-    fetchData();
-  }, [navigate]);
-
-  // Refetch data when page becomes visible (user returns to MyBoutique)
-  useEffect(() => {
+    fetchBoutique();
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        fetchData();
+      if (!document.hidden) {
+        fetchBoutique();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
     return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
-  useEffect(() => {
-    let filtered = products.filter(p => 
-      p.titre.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    if (sortBy === 'price-asc') {
-      filtered.sort((a, b) => (a.prix || 0) - (b.prix || 0));
-    } else if (sortBy === 'price-desc') {
-      filtered.sort((a, b) => (b.prix || 0) - (a.prix || 0));
-    } else if (sortBy === 'recent') {
-      filtered.sort((a, b) => new Date(b.createdAt || b.dateCreation) - new Date(a.createdAt || a.dateCreation));
+  const fetchBoutique = async () => {
+    try {
+      const res = await api.get('/boutiques/my-boutique');
+      setData(res.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    setFilteredProducts(filtered);
-  }, [searchTerm, sortBy, products]);
+  if (loading) return (
+    <div className="page">
+      <div className="loader"><div className="spinner"></div></div>
+    </div>
+  );
 
-  if (loading) return <div className="loader"><div className="spinner"></div></div>;
-  if (!boutique) return <div className="page"><div className="empty-state"><p>Vous n'avez pas de boutique</p></div></div>;
+  if (!data) return (
+    <div className="page">
+      <div style={{ textAlign: 'center', padding: '40px 20px' }}>
+        <p style={{ marginBottom: 12 }}>Vous n'avez pas encore de boutique</p>
+        <Link to="/boutiques/creer" className="btn btn-primary">Créer une boutique</Link>
+      </div>
+    </div>
+  );
+
+  const { boutique, products } = data;
+  let filteredProducts = products;
+
+  // Filtrer par recherche
+  if (search) {
+    filteredProducts = filteredProducts.filter(p =>
+      p.titre.toLowerCase().includes(search.toLowerCase()) ||
+      p.categorie.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+
+  // Trier
+  if (sort === 'recent') {
+    filteredProducts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  } else if (sort === 'price-asc') {
+    filteredProducts.sort((a, b) => a.prix - b.prix);
+  } else if (sort === 'price-desc') {
+    filteredProducts.sort((a, b) => b.prix - a.prix);
+  }
+
+  const statusColor = boutique.isActive ? '#059669' : '#dc3545';
+  const statusLabel = boutique.isActive ? 'Active' : 'Inactive';
 
   return (
     <div className="page">
-      {/* Info boutique */}
+      {/* En-tête */}
       <div style={{ textAlign: 'center', marginBottom: 16 }}>
-        <div style={{ width: 80, height: 80, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 8px', background: '#f0f0f0' }}>
+        <div style={{ width: 70, height: 70, borderRadius: '50%', overflow: 'hidden', margin: '0 auto 8px', background: '#f0f0f0' }}>
           {boutique.logo && <img src={boutique.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
-        <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4, color: '#1B2A6B' }}>
-          {boutique.nom}
-        </h1>
-        <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>{boutique.description}</p>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: 8, fontSize: 13, color: '#6b7280' }}>
-          <MapPin size={16} /> {boutique.quartier}, {boutique.ville}
-        </div>
-        <span className="badge badge-primary" style={{ marginBottom: 12 }}>{boutique.categorie}</span>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: 16, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 13, color: '#6b7280', width: '100%' }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></span>
-          <Link to="/ma-boutique/commandes" className="btn btn-primary btn-sm" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Package size={14} /> Commandes
-          </Link>
-          <Link to="/credits/renouveler-abonnement" className="btn btn-primary btn-sm">Renouveler</Link>
+        <h1 style={{ fontSize: 18, fontWeight: 700, marginBottom: 4 }}>{boutique.nom}</h1>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>{boutique.description}</p>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
+          📍 {boutique.quartier}, {boutique.ville}
+        </p>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
+          <span
+            style={{
+              padding: '4px 10px',
+              borderRadius: 4,
+              background: statusColor,
+              color: '#fff',
+              fontSize: 11,
+              fontWeight: 600
+            }}
+          >
+            {statusLabel}
+          </span>
+          <span className="badge badge-primary">{boutique.categorie}</span>
         </div>
       </div>
 
-      {/* Boutons Recherche et Tri */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-        <div style={{ flex: 1, position: 'relative' }}>
-          <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
+      {/* Boutons d'action */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+        <Link to="/credits/renouveler-abonnement" className="btn btn-primary btn-block">
+          Renouveler mon abonnement
+        </Link>
+        <Link to="/boutique-commandes" className="btn btn-secondary btn-block">
+          <Package size={16} style={{ marginRight: 6, display: 'inline' }} /> Commandes
+        </Link>
+        <Link to="/boutique-messages-inbox" className="btn btn-secondary btn-block">
+          💬 Messages ({0})
+        </Link>
+      </div>
+
+      {/* Barre de recherche et filtres */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: '#f3f4f6', borderRadius: 6, paddingLeft: 10 }}>
+          <Search size={16} style={{ color: '#9ca3af' }} />
           <input
             type="text"
-            placeholder="Chercher un produit..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Chercher produit..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             style={{
-              width: '100%',
-              padding: '8px 8px 8px 36px',
-              border: '1px solid #e5e7eb',
-              borderRadius: '6px',
-              fontSize: '13px',
-              boxSizing: 'border-box'
+              flex: 1,
+              border: 'none',
+              background: 'transparent',
+              padding: '10px 8px',
+              fontSize: 13,
+              outline: 'none'
             }}
           />
         </div>
         <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
           style={{
-            padding: '8px 10px',
+            padding: '10px 8px',
+            borderRadius: 6,
             border: '1px solid #e5e7eb',
-            borderRadius: '6px',
-            fontSize: '13px',
-            cursor: 'pointer',
             background: '#fff',
-            minWidth: '120px'
+            fontSize: 13,
+            cursor: 'pointer'
           }}
         >
-          <option value="recent">Plus récent</option>
-          <option value="price-asc">Prix ↑</option>
-          <option value="price-desc">Prix ↓</option>
+          <option value="recent">📅 Récent</option>
+          <option value="price-asc">💰 Prix ↑</option>
+          <option value="price-desc">💰 Prix ↓</option>
         </select>
       </div>
 
       {/* Bouton Ajouter produit */}
-      <Link to={`/boutiques/${boutique._id}/ajouter-produit`} className="btn btn-primary btn-block" style={{ marginBottom: 14 }}>
+      <Link to={`/boutiques/${boutique._id}/ajouter-produit`} className="btn btn-success btn-block" style={{ marginBottom: 16 }}>
         + Ajouter un produit
       </Link>
 
-      {/* Galerie produits */}
-      <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: '#1B2A6B' }}>
-        Produits ({filteredProducts.length})
+      {/* Liste des produits */}
+      <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 10 }}>
+        Mes produits ({filteredProducts.length})
       </h2>
 
       {filteredProducts.length === 0 ? (
-        <div className="empty-state" style={{ padding: 20, textAlign: 'center' }}>
-          <p style={{ fontSize: 14, color: '#6b7280' }}>Aucun produit trouvé</p>
+        <div style={{ textAlign: 'center', padding: '30px 20px', color: '#9ca3af' }}>
+          <p>{search ? 'Aucun produit ne correspond à votre recherche' : 'Aucun produit'}</p>
         </div>
       ) : (
         <div className="grid-2">
           {filteredProducts.map(p => (
-            <div key={p._id} className="card" style={{ padding: 0, overflow: 'hidden', cursor: 'pointer', transition: 'all 0.3s ease' }}>
-              <div style={{ width: '100%', height: 150, background: '#f0f0f0', overflow: 'hidden' }}>
-                {p.photos && p.photos[0] && (
-                  <img src={p.photos[0]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                )}
+            <Link key={p._id} to={`/boutiques/${boutique._id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+              <div className="card">
+                <PhotoSlider photos={p.photos} />
+                <div style={{ padding: 8 }}>
+                  <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
+                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
+                  <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
+                </div>
               </div>
-              <div style={{ padding: 10 }}>
-                <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4, color: '#1B2A6B' }}>{p.titre}</h3>
-                <p className="price" style={{ fontSize: 14, fontWeight: 700, color: '#4A90D9' }}>
-                  {p.prix?.toLocaleString('fr-GN')} GNF
-                </p>
-              </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

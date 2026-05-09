@@ -2,177 +2,188 @@ const Order = require('../models/Order');
 const BoutiqueProduct = require('../models/BoutiqueProduct');
 const Boutique = require('../models/Boutique');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
+
+/**
+ * Contrôleur des commandes
+ * Gère la création, lecture et gestion des commandes
+ */
 
 // POST /api/orders - Créer une commande
 const createOrder = async (req, res) => {
   try {
-    const { boutiqueId, productId, quantite } = req.body;
-
-    if (!quantite || quantite < 1) {
-      return res.status(400).json({ message: 'La quantité doit être au minimum 1.' });
-    }
+    const { productId, quantite, noteAcheteur } = req.body;
+    const buyerId = req.user._id;
 
     // Vérifier que le produit existe
     const product = await BoutiqueProduct.findById(productId);
     if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable.' });
+      return res.status(404).json({ message: 'Produit non trouvé' });
     }
 
-    // Vérifier que la boutique existe
-    const boutique = await Boutique.findById(boutiqueId);
+    // Récupérer la boutique
+    const boutique = await Boutique.findById(product.boutique);
     if (!boutique) {
-      return res.status(404).json({ message: 'Boutique introuvable.' });
+      return res.status(404).json({ message: 'Boutique non trouvée' });
     }
-
-    // Vérifier que le produit appartient à la boutique
-    if (product.boutique.toString() !== boutiqueId) {
-      return res.status(400).json({ message: 'Ce produit n\'appartient pas à cette boutique.' });
-    }
-
-    // Vérifier que l'acheteur n'est pas le vendeur
-    if (req.user._id.toString() === boutique.proprietaire.toString()) {
-      return res.status(400).json({ message: 'Vous ne pouvez pas commander auprès de votre propre boutique.' });
-    }
-
-    // Calculer le prix total
-    const prixTotal = product.prix * quantite;
 
     // Créer la commande
+    const prixTotal = product.prix * (quantite || 1);
     const order = await Order.create({
-      acheteur: req.user._id,
-      boutique: boutiqueId,
-      produit: productId,
-      quantite,
-      prixUnitaire: product.prix,
-      prixTotal
+      product: productId,
+      boutique: product.boutique,
+      buyer: buyerId,
+      quantite: quantite || 1,
+      prixTotal,
+      noteAcheteur: noteAcheteur || ''
     });
 
-    res.status(201).json(order);
+    // Notifier le vendeur
+    await Notification.create({
+      destinataire: boutique.proprietaire,
+      message: `Nouvelle commande: ${product.titre}`,
+      type: 'general'
+    });
+
+    await order.populate([
+      { path: 'product' },
+      { path: 'boutique' },
+      { path: 'buyer', select: 'nom telephone' }
+    ]);
+
+    res.status(201).json({
+      message: 'Commande créée avec succès',
+      order
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
 
 // GET /api/orders/my-orders - Récupérer les commandes de l'acheteur
-const getBuyerOrders = async (req, res) => {
+const getMyOrders = async (req, res) => {
   try {
-    const orders = await Order.find({ acheteur: req.user._id })
-      .populate('boutique', 'nom logo proprietaire')
-      .populate('produit', 'titre photos prix')
+    const buyerId = req.user._id;
+
+    const orders = await Order.find({ buyer: buyerId })
+      .populate('product')
+      .populate('boutique', 'nom logo')
       .sort({ createdAt: -1 });
+
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
 
-// GET /api/orders/my-boutique-orders - Récupérer les commandes pour la boutique du vendeur
-const getSellerOrders = async (req, res) => {
+// GET /api/orders/boutique-orders - Récupérer les commandes du vendeur
+const getBoutiqueOrders = async (req, res) => {
   try {
-    // Récupérer la boutique du vendeur
-    const boutique = await Boutique.findOne({ proprietaire: req.user._id });
+    const userId = req.user._id;
+
+    // Récupérer la boutique de l'utilisateur
+    const boutique = await Boutique.findOne({ proprietaire: userId });
     if (!boutique) {
-      return res.status(404).json({ message: 'Vous n\'avez pas de boutique.' });
+      return res.status(404).json({ message: 'Aucune boutique trouvée' });
     }
 
-    // Récupérer les commandes pour cette boutique
     const orders = await Order.find({ boutique: boutique._id })
-      .populate('acheteur', 'nom telephone email')
-      .populate('produit', 'titre photos prix')
+      .populate('product')
+      .populate('buyer', 'nom telephone')
       .sort({ createdAt: -1 });
 
     res.json(orders);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
 
-// PATCH /api/orders/:id/status - Mettre à jour le statut de la commande
+// PUT /api/orders/:id/status - Mettre à jour le statut d'une commande
 const updateOrderStatus = async (req, res) => {
   try {
-    const { statut } = req.body;
+    const { id } = req.params;
+    const { status, noteVendeur } = req.body;
+    const userId = req.user._id;
 
-    if (!['en_attente', 'confirmé', 'expédié', 'livré', 'annulé'].includes(statut)) {
-      return res.status(400).json({ message: 'Statut invalide.' });
+    // Vérifier que le statut est valide
+    if (!['en_attente', 'confirmée', 'livrée', 'annulée'].includes(status)) {
+      return res.status(400).json({ message: 'Statut invalide' });
     }
 
-    // Récupérer la commande
-    const order = await Order.findById(req.params.id);
+    const order = await Order.findById(id);
     if (!order) {
-      return res.status(404).json({ message: 'Commande introuvable.' });
+      return res.status(404).json({ message: 'Commande non trouvée' });
     }
 
-    // Vérifier que l'utilisateur est le vendeur
+    // Vérifier que l'utilisateur est propriétaire de la boutique
     const boutique = await Boutique.findById(order.boutique);
-    if (boutique.proprietaire.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Accès refusé. Vous n\'êtes pas le propriétaire de cette boutique.' });
+    if (boutique.proprietaire.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Accès refusé' });
     }
 
-    // Mettre à jour le statut
-    order.statut = statut;
-    order.updatedAt = new Date();
+    // Mettre à jour
+    order.status = status;
+    if (noteVendeur) {
+      order.noteVendeur = noteVendeur;
+    }
     await order.save();
 
-    // Créer une notification pour l'acheteur
-    const Notification = require('../models/Notification');
-    const messages = {
-      confirmé: `Votre commande a été confirmée par la boutique ${boutique.nom}`,
-      expédié: `Votre commande a été expédiée par la boutique ${boutique.nom}`,
-      livré: `Votre commande a été livrée par la boutique ${boutique.nom}`,
-      annulé: `Votre commande a été annulée par la boutique ${boutique.nom}`
-    };
-
+    // Notifier l'acheteur
     await Notification.create({
-      utilisateur: order.acheteur,
-      type: 'commande',
-      message: messages[statut],
-      reference: order._id
+      destinataire: order.buyer,
+      message: `Statut de votre commande: ${status}`,
+      type: 'general'
     });
 
-    res.json(order);
+    await order.populate([
+      { path: 'product' },
+      { path: 'boutique' },
+      { path: 'buyer', select: 'nom telephone' }
+    ]);
+
+    res.json({
+      message: 'Statut de commande mis à jour',
+      order
+    });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
 
 // DELETE /api/orders/:id - Annuler une commande
 const cancelOrder = async (req, res) => {
   try {
-    // Récupérer la commande
-    const order = await Order.findById(req.params.id);
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const order = await Order.findById(id);
     if (!order) {
-      return res.status(404).json({ message: 'Commande introuvable.' });
+      return res.status(404).json({ message: 'Commande non trouvée' });
     }
 
-    // Vérifier que l'utilisateur est l'acheteur
-    if (order.acheteur.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Accès refusé. Cette commande n\'est pas la vôtre.' });
+    // Vérifier que c'est le propriétaire
+    if (order.buyer.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Accès refusé' });
     }
 
-    // Vérifier que la commande n'est pas déjà livrée ou annulée
-    if (['livré', 'annulé'].includes(order.statut)) {
-      return res.status(400).json({ message: `Impossible d'annuler une commande ${order.statut}.` });
-    }
-
-    // Annuler la commande
-    order.statut = 'annulé';
-    order.updatedAt = new Date();
+    order.status = 'annulée';
     await order.save();
 
-    // Créer une notification pour le vendeur
-    const Notification = require('../models/Notification');
-    const boutique = await Boutique.findById(order.boutique);
-    await Notification.create({
-      utilisateur: boutique.proprietaire,
-      type: 'commande',
-      message: `Une commande a été annulée par l'acheteur`,
-      reference: order._id
-    });
-
-    res.json(order);
+    res.json({ message: 'Commande annulée' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
   }
 };
 
-module.exports = { createOrder, getBuyerOrders, getSellerOrders, updateOrderStatus, cancelOrder };
+module.exports = {
+  createOrder,
+  getMyOrders,
+  getBoutiqueOrders,
+  updateOrderStatus,
+  cancelOrder
+};

@@ -1,267 +1,263 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { Package, Phone, Calendar, AlertCircle } from 'lucide-react';
 import api from '../utils/api';
-import { Package, CheckCircle, Truck, MapPin } from 'lucide-react';
 
 const ProduitsCommandes = () => {
-  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [expandedOrder, setExpandedOrder] = useState(null);
-  const [updatingStatus, setUpdatingStatus] = useState(null);
-  const [selectedStatus, setSelectedStatus] = useState({});
+  const [filter, setFilter] = useState('all');
+  const [expandedId, setExpandedId] = useState(null);
+  const [statusUpdating, setStatusUpdating] = useState({});
+  const [noteText, setNoteText] = useState({});
 
   useEffect(() => {
     fetchOrders();
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchOrders();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const fetchOrders = async () => {
     try {
-      const res = await api.get('/orders/my-boutique-orders');
+      const res = await api.get('/orders/boutique-orders');
       setOrders(res.data);
     } catch (err) {
-      console.error('Erreur:', err);
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleStatusChange = async (orderId, newStatus) => {
+  const handleStatusUpdate = async (orderId, newStatus) => {
+    setStatusUpdating(prev => ({ ...prev, [orderId]: true }));
     try {
-      setUpdatingStatus(orderId);
-      await api.patch(`/orders/${orderId}/status`, { statut: newStatus });
-      alert('✅ Statut mis à jour');
+      const noteVendeur = noteText[orderId] || '';
+      await api.put(`/orders/${orderId}/status`, {
+        status: newStatus,
+        noteVendeur
+      });
+      setNoteText(prev => ({ ...prev, [orderId]: '' }));
       fetchOrders();
-      setSelectedStatus({});
+      alert('Statut mis à jour');
     } catch (err) {
-      alert('❌ ' + (err.response?.data?.message || 'Erreur lors de la mise à jour'));
+      alert(err.response?.data?.message || 'Erreur');
     } finally {
-      setUpdatingStatus(null);
+      setStatusUpdating(prev => ({ ...prev, [orderId]: false }));
     }
   };
 
-  const statusColors = {
-    'en_attente': '#f59e0b',
-    'confirmé': '#3b82f6',
-    'expédié': '#8b5cf6',
-    'livré': '#10b981',
-    'annulé': '#ef4444'
+  const filteredOrders = filter === 'all' 
+    ? orders 
+    : orders.filter(o => o.status === filter);
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'en_attente': return '#f59e0b';
+      case 'confirmée': return '#3b82f6';
+      case 'livrée': return '#059669';
+      case 'annulée': return '#dc3545';
+      default: return '#6b7280';
+    }
   };
 
-  const statusLabels = {
-    'en_attente': 'En attente',
-    'confirmé': 'Confirmée',
-    'expédié': 'Expédiée',
-    'livré': 'Livrée',
-    'annulé': 'Annulée'
+  const getStatusLabel = (status) => {
+    const labels = {
+      'en_attente': 'En attente',
+      'confirmée': 'Confirmée',
+      'livrée': 'Livrée',
+      'annulée': 'Annulée'
+    };
+    return labels[status] || status;
   };
 
-  const nextStatuses = {
-    'en_attente': ['confirmé', 'annulé'],
-    'confirmé': ['expédié', 'annulé'],
-    'expédié': ['livré'],
-    'livré': [],
-    'annulé': []
-  };
-
-  if (loading) return <div className="loader"><div className="spinner"></div></div>;
-
-  // Compter les commandes par statut
-  const stats = {
-    total: orders.length,
-    en_attente: orders.filter(o => o.statut === 'en_attente').length,
-    confirmé: orders.filter(o => o.statut === 'confirmé').length,
-    expédié: orders.filter(o => o.statut === 'expédié').length,
-    livré: orders.filter(o => o.statut === 'livré').length
-  };
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="loader"><div className="spinner"></div></div>
+      </div>
+    );
+  }
 
   return (
     <div className="page">
-      <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Package size={24} /> Commandes reçues
-      </h1>
+      <h1 className="page-title">Commandes Reçues</h1>
 
-      {/* Stats */}
-      <div className="grid-2" style={{ marginBottom: 16 }}>
-        <div style={{ padding: 12, backgroundColor: '#f3f4f6', borderRadius: 8, textAlign: 'center' }}>
-          <p style={{ fontSize: 24, fontWeight: 700, color: '#1f2937' }}>{stats.total}</p>
-          <p style={{ fontSize: 12, color: '#6b7280' }}>Total</p>
-        </div>
-        <div style={{ padding: 12, backgroundColor: '#fef3c7', borderRadius: 8, textAlign: 'center' }}>
-          <p style={{ fontSize: 24, fontWeight: 700, color: '#d97706' }}>{stats.en_attente}</p>
-          <p style={{ fontSize: 12, color: '#92400e' }}>En attente</p>
-        </div>
+      {/* Filtres */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, overflowX: 'auto', paddingBottom: 8 }}>
+        {['all', 'en_attente', 'confirmée', 'livrée', 'annulée'].map(status => (
+          <button
+            key={status}
+            onClick={() => setFilter(status)}
+            style={{
+              padding: '8px 12px',
+              borderRadius: 6,
+              border: 'none',
+              fontWeight: 600,
+              fontSize: 13,
+              cursor: 'pointer',
+              background: filter === status ? '#1B2A6B' : '#e5e7eb',
+              color: filter === status ? '#fff' : '#1f2937',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {status === 'all' ? 'Toutes' : getStatusLabel(status)}
+          </button>
+        ))}
       </div>
 
-      {orders.length === 0 ? (
-        <div className="empty-state">
-          <Package size={48} style={{ color: '#d1d5db', marginBottom: 12 }} />
-          <p>Aucune commande reçue</p>
-          <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 6 }}>Les commandes apparaîtront ici</p>
+      {/* Compteur */}
+      <div style={{ marginBottom: 16, fontSize: 13, color: '#6b7280' }}>
+        {filteredOrders.length} commande{filteredOrders.length !== 1 ? 's' : ''}
+      </div>
+
+      {/* Liste des commandes */}
+      {filteredOrders.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px 20px', color: '#9ca3af' }}>
+          <Package size={32} style={{ margin: '0 auto 12px' }} />
+          <p>Aucune commande</p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {orders.map(order => (
-            <div
-              key={order._id}
-              style={{
-                padding: 12,
-                border: '1px solid #e5e7eb',
-                borderRadius: 8,
-                backgroundColor: expandedOrder === order._id ? '#f9fafb' : '#fff',
-                borderLeft: `3px solid ${statusColors[order.statut]}`
-              }}
-            >
-              {/* Header */}
+          {filteredOrders.map(order => (
+            <div key={order._id} className="card" style={{ padding: 12 }}>
+              {/* En-tête cliquable */}
               <div
-                onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
+                onClick={() => setExpandedId(expandedId === order._id ? null : order._id)}
                 style={{
                   display: 'flex',
-                  alignItems: 'flex-start',
                   justifyContent: 'space-between',
+                  alignItems: 'center',
                   cursor: 'pointer',
-                  marginBottom: expandedOrder === order._id ? 12 : 0
+                  paddingBottom: 12,
+                  borderBottom: '1px solid #e5e7eb',
+                  marginBottom: 12
                 }}
               >
-                <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
-                    {order.produit?.titre}
+                <div>
+                  <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
+                    {order.product?.titre || 'Produit'}
                   </h3>
-                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 6 }}>
-                    <strong>Acheteur:</strong> {order.acheteur?.nom}
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                    <span className="badge badge-primary">{order.quantite} × {order.prixUnitaire?.toLocaleString('fr-GN')} GNF</span>
-                    <span
-                      className="badge"
-                      style={{
-                        backgroundColor: statusColors[order.statut],
-                        color: '#fff',
-                        fontSize: 12
-                      }}
-                    >
-                      {statusLabels[order.statut]}
-                    </span>
-                    <span style={{ fontSize: 12, color: '#9ca3af' }}>
-                      {new Date(order.createdAt).toLocaleDateString('fr-FR')}
-                    </span>
+                  <div style={{ fontSize: 12, color: '#6b7280' }}>
+                    <strong>Acheteur:</strong> {order.buyer?.nom}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: 16, fontWeight: 700, color: '#d97706' }}>
-                    {order.prixTotal?.toLocaleString('fr-GN')} GNF
-                  </p>
+                  <span
+                    style={{
+                      padding: '4px 8px',
+                      borderRadius: 4,
+                      background: getStatusColor(order.status),
+                      color: '#fff',
+                      fontSize: 11,
+                      fontWeight: 600,
+                      display: 'inline-block',
+                      marginBottom: 8
+                    }}
+                  >
+                    {getStatusLabel(order.status)}
+                  </span>
+                  <div style={{ fontSize: 10, color: '#9ca3af' }}>
+                    {expandedId === order._id ? '▼' : '▶'}
+                  </div>
                 </div>
               </div>
 
-              {/* Expanded Details */}
-              {expandedOrder === order._id && (
-                <div style={{
-                  paddingTop: 12,
-                  borderTop: '1px solid #e5e7eb'
-                }}>
-                  {/* Produit Image */}
-                  {order.produit?.photos?.[0] && (
-                    <div style={{
-                      width: '100%',
-                      height: 120,
-                      backgroundColor: '#f0f0f0',
-                      borderRadius: 6,
-                      overflow: 'hidden',
-                      marginBottom: 12
-                    }}>
-                      <img
-                        src={order.produit.photos[0]}
-                        alt=""
-                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      />
-                    </div>
-                  )}
-
-                  {/* Buyer Info */}
-                  <div style={{
-                    padding: 10,
-                    backgroundColor: '#eff6ff',
-                    borderRadius: 6,
-                    marginBottom: 12,
-                    borderLeft: '3px solid #3b82f6'
-                  }}>
-                    <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 6 }}>Informations de l'acheteur</p>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <div>
-                        <p style={{ fontSize: 11, color: '#6b7280' }}>Nom</p>
-                        <p style={{ fontSize: 13, fontWeight: 600 }}>{order.acheteur?.nom}</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: 11, color: '#6b7280' }}>Téléphone</p>
-                        <p style={{ fontSize: 13, fontWeight: 600 }}>{order.acheteur?.telephone || 'Non renseigné'}</p>
-                      </div>
-                      <div style={{ gridColumn: '1 / -1' }}>
-                        <p style={{ fontSize: 11, color: '#6b7280' }}>Email</p>
-                        <p style={{ fontSize: 13, fontWeight: 600 }}>{order.acheteur?.email || 'Non renseigné'}</p>
-                      </div>
-                    </div>
+              {/* Détails */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12, fontSize: 12 }}>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Quantité</div>
+                  <div style={{ fontWeight: 600 }}>{order.quantite}</div>
+                </div>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Prix total</div>
+                  <div style={{ fontWeight: 600, color: '#059669' }}>{order.prixTotal} GNF</div>
+                </div>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Date</div>
+                  <div style={{ fontSize: 11 }}>
+                    <Calendar size={12} style={{ display: 'inline', marginRight: 4 }} />
+                    {new Date(order.createdAt).toLocaleDateString('fr-FR')}
                   </div>
+                </div>
+                <div>
+                  <div style={{ color: '#6b7280', marginBottom: 4 }}>Catégorie</div>
+                  <div style={{ fontSize: 11 }}>{order.product?.categorie}</div>
+                </div>
+              </div>
 
-                  {/* Order Details */}
+              {/* Notes de l'acheteur */}
+              {order.noteAcheteur && (
+                <div style={{ background: '#f3f4f6', padding: 8, borderRadius: 4, marginBottom: 12, fontSize: 12, borderLeft: '3px solid #3b82f6' }}>
+                  <div style={{ fontWeight: 600, marginBottom: 4 }}>Note de l'acheteur</div>
+                  <div style={{ color: '#4b5563' }}>{order.noteAcheteur}</div>
+                </div>
+              )}
+
+              {/* Contact acheteur */}
+              {order.buyer?.telephone && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, fontSize: 12, padding: 8, background: '#f0f9ff', borderRadius: 4 }}>
+                  <Phone size={14} style={{ color: '#3b82f6' }} />
+                  <span>{order.buyer.telephone}</span>
+                </div>
+              )}
+
+              {/* Formulaire de réponse - Affichage conditionnel */}
+              {expandedId === order._id && (
+                <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 12 }}>
+                  {/* Sélecteur de statut */}
                   <div style={{ marginBottom: 12 }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 8 }}>
-                      <div>
-                        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 2 }}>Quantité</p>
-                        <p style={{ fontSize: 14, fontWeight: 600 }}>{order.quantite}</p>
-                      </div>
-                      <div>
-                        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 2 }}>Prix unitaire</p>
-                        <p style={{ fontSize: 14, fontWeight: 600 }}>{order.prixUnitaire?.toLocaleString('fr-GN')} GNF</p>
-                      </div>
-                    </div>
-
-                    <div style={{
-                      padding: 8,
-                      backgroundColor: '#fef3c7',
-                      borderRadius: 6,
-                      borderLeft: '3px solid #f59e0b'
-                    }}>
-                      <p style={{ fontSize: 12, color: '#92400e' }}>
-                        <strong>Montant total:</strong> {order.prixTotal?.toLocaleString('fr-GN')} GNF
-                      </p>
+                    <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>
+                      Mettre à jour le statut:
+                    </label>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {['en_attente', 'confirmée', 'livrée', 'annulée'].map(status => (
+                        <button
+                          key={status}
+                          onClick={() => handleStatusUpdate(order._id, status)}
+                          disabled={statusUpdating[order._id] || order.status === status}
+                          style={{
+                            padding: '8px 10px',
+                            borderRadius: 4,
+                            border: '1px solid #e5e7eb',
+                            background: order.status === status ? '#1B2A6B' : '#fff',
+                            color: order.status === status ? '#fff' : '#1f2937',
+                            fontWeight: 600,
+                            fontSize: 12,
+                            cursor: order.status === status ? 'not-allowed' : 'pointer',
+                            opacity: order.status === status ? 0.6 : 1
+                          }}
+                        >
+                          {statusUpdating[order._id] && order.status !== status ? 'Mise à jour...' : getStatusLabel(status)}
+                        </button>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Status Update */}
-                  {nextStatuses[order.statut]?.length > 0 && (
-                    <div style={{ marginBottom: 12 }}>
-                      <label style={{ fontSize: 13, fontWeight: 600, display: 'block', marginBottom: 6 }}>
-                        Mettre à jour le statut
-                      </label>
-                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                        {nextStatuses[order.statut].map(status => (
-                          <button
-                            key={status}
-                            onClick={() => handleStatusChange(order._id, status)}
-                            disabled={updatingStatus === order._id}
-                            className="btn"
-                            style={{
-                              backgroundColor: statusColors[status],
-                              color: '#fff',
-                              fontSize: 12,
-                              padding: '6px 10px',
-                              opacity: updatingStatus === order._id ? 0.6 : 1
-                            }}
-                          >
-                            {status === 'confirmé' && <CheckCircle size={14} style={{ marginRight: 4 }} />}
-                            {status === 'expédié' && <Truck size={14} style={{ marginRight: 4 }} />}
-                            {statusLabels[status]}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Date */}
-                  <p style={{ fontSize: 12, color: '#9ca3af', textAlign: 'right' }}>
-                    Commande du {new Date(order.createdAt).toLocaleDateString('fr-FR')} à {new Date(order.createdAt).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
+                  {/* Zone note */}
+                  <div>
+                    <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>
+                      Votre note au client:
+                    </label>
+                    <textarea
+                      value={noteText[order._id] || ''}
+                      onChange={(e) => setNoteText(prev => ({ ...prev, [order._id]: e.target.value }))}
+                      placeholder="Optionnel: délai de livraison, conditions de livraison, etc..."
+                      style={{
+                        width: '100%',
+                        padding: 8,
+                        border: '1px solid #e5e7eb',
+                        borderRadius: 4,
+                        fontSize: 12,
+                        fontFamily: 'inherit',
+                        minHeight: 60,
+                        resize: 'vertical'
+                      }}
+                    />
+                  </div>
                 </div>
               )}
             </div>
