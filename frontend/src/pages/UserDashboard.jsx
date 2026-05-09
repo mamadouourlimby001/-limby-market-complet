@@ -81,10 +81,10 @@ const UserDashboard = () => {
           <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}> Acheter des crédits</Link>
           <button onClick={handleLogout} className="btn btn-danger btn-block" style={{ marginBottom: 8 }}>Déconnexion</button>
           {boutique && (
-            <Link to="/ma-boutique" className="card" style={{ padding: 14, marginBottom: 12, textDecoration: 'none', display: 'block' }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: '6px', color: '#1B2A6B' }}><span style={{ display: 'flex' }}><ShoppingBag size={16} /></span> Ma Boutique: {boutique.nom}</h3>
-              <p style={{ fontSize: 12, color: '#1B2A6B' }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></p>
-              {boutique.dateExpiration && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(boutique.dateExpiration).toLocaleDateString('fr-FR')}</p>}
+            <Link to="/ma-boutique" style={{ padding: 14, marginBottom: 12, textDecoration: 'none', display: 'block', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px', cursor: 'pointer' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6, display: 'flex', alignItems: 'center', gap: '6px', color: '#1B2A6B', margin: 0 }}><span style={{ display: 'flex' }}><ShoppingBag size={16} /></span> Ma Boutique: {boutique.nom}</h3>
+              <p style={{ fontSize: 12, color: '#1B2A6B', margin: '6px 0 4px 0' }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></p>
+              {boutique.dateExpiration && <p style={{ fontSize: 11, color: '#6b7280', margin: 0 }}>Expire le {new Date(boutique.dateExpiration).toLocaleDateString('fr-FR')}</p>}
             </Link>
           )}
         </div>
