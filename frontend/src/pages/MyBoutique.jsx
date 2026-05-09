@@ -83,14 +83,10 @@ const MyBoutique = () => {
           <MapPin size={16} /> {boutique.quartier}, {boutique.ville}
         </div>
         <span className="badge badge-primary" style={{ marginBottom: 12 }}>{boutique.categorie}</span>
-      </div>
-
-      {/* Boutique status and renewal button */}
-      <div style={{ display: 'flex', gap: 8, marginBottom: 14, alignItems: 'center' }}>
-        <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`} style={{ padding: '6px 12px' }}>
-          {boutique.isActive ? 'Active' : 'Inactive'}
-        </span>
-        <Link to="/credits/renouveler-abonnement" className="btn btn-secondary" style={{ flex: 1, fontSize: 13 }}>Renouveler mon abonnement</Link>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: 16 }}>
+          <span style={{ fontSize: 13, color: '#6b7280' }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></span>
+          <Link to="/credits/renouveler-abonnement" className="btn btn-primary btn-sm">Renouveler</Link>
+        </div>
       </div>
 
       {/* Boutons Recherche et Tri */}

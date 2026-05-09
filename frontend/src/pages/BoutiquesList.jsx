@@ -123,14 +123,12 @@ const BoutiquesList = () => {
           {userBoutique && (
             <>
               <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: '#1B2A6B' }}>Votre boutique</h2>
-              <div style={{ marginBottom: 24 }}>
+              <div style={{ marginBottom: 8 }}>
                 <BoutiqueCard boutique={userBoutique} />
-                <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-                  <span className={`badge ${userBoutique.isActive ? 'badge-success' : 'badge-danger'}`} style={{ padding: '6px 12px' }}>
-                    {userBoutique.isActive ? 'Active' : 'Inactive'}
-                  </span>
-                  <Link to="/credits/renouveler-abonnement" className="btn btn-secondary" style={{ flex: 1, textAlign: 'center', fontSize: 13, padding: '8px 12px' }}>Renouveler mon abonnement</Link>
-                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 8 }}>
+                <span style={{ fontSize: 13, color: '#6b7280' }}>Statut: <span className={`badge ${userBoutique.isActive ? 'badge-success' : 'badge-danger'}`}>{userBoutique.isActive ? 'Active' : 'Inactive'}</span></span>
+                <Link to="/credits/renouveler-abonnement" className="btn btn-primary btn-sm">Renouveler</Link>
               </div>
             </>
           )}
