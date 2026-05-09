@@ -14,26 +14,40 @@ const MyBoutique = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const res = await api.get('/boutiques/my-boutique');
+      if (res.data) {
+        setBoutique(res.data.boutique || res.data);
+        const prods = res.data.products || [];
+        setProducts(prods);
+        setFilteredProducts(prods);
+      }
+    }
+    catch (err) {
+      console.error(err);
+      navigate('/mon-compte');
+    }
+    finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetch = async () => {
-      try {
-        const res = await api.get('/boutiques/my-boutique');
-        if (res.data) {
-          setBoutique(res.data.boutique || res.data);
-          setProducts(res.data.products || []);
-          setFilteredProducts(res.data.products || []);
-        }
-      }
-      catch (err) {
-        console.error(err);
-        navigate('/mon-compte');
-      }
-      finally {
-        setLoading(false);
+    fetchData();
+  }, [navigate]);
+
+  // Refetch data when page becomes visible (user returns to MyBoutique)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchData();
       }
     };
-    fetch();
-  }, [navigate]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
 
   useEffect(() => {
     let filtered = products.filter(p => 
@@ -45,7 +59,7 @@ const MyBoutique = () => {
     } else if (sortBy === 'price-desc') {
       filtered.sort((a, b) => (b.prix || 0) - (a.prix || 0));
     } else if (sortBy === 'recent') {
-      filtered.sort((a, b) => new Date(b.dateCreation) - new Date(a.dateCreation));
+      filtered.sort((a, b) => new Date(b.createdAt || b.dateCreation) - new Date(a.createdAt || a.dateCreation));
     }
 
     setFilteredProducts(filtered);
