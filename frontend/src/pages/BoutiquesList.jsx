@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Store, Search } from 'lucide-react';
+import { Store, Search, SortAsc } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import BoutiqueCard from '../components/BoutiqueCard';
@@ -11,7 +11,13 @@ const BoutiquesList = () => {
   const [filteredBoutiques, setFilteredBoutiques] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [filterCategorie, setFilterCategorie] = useState('');
+  const [filterVille, setFilterVille] = useState('');
   const { user } = useAuth();
+
+  // Get unique categories and cities
+  const categories = [...new Set(boutiques.map(b => b.categorie))].filter(Boolean);
+  const villes = [...new Set(boutiques.map(b => b.ville))].filter(Boolean);
 
   useEffect(() => {
     const fetch = async () => {
@@ -38,12 +44,15 @@ const BoutiquesList = () => {
   }, [user]);
 
   useEffect(() => {
-    let filtered = boutiques.filter(b => 
-      b.nom.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      (!userBoutique || b._id !== userBoutique._id)
-    );
+    let filtered = boutiques.filter(b => {
+      const matchSearch = b.nom.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchCategorie = !filterCategorie || b.categorie === filterCategorie;
+      const matchVille = !filterVille || b.ville === filterVille;
+      const notUserBoutique = !userBoutique || b._id !== userBoutique._id;
+      return matchSearch && matchCategorie && matchVille && notUserBoutique;
+    });
     setFilteredBoutiques(filtered);
-  }, [searchTerm, boutiques, userBoutique]);
+  }, [searchTerm, filterCategorie, filterVille, boutiques, userBoutique]);
 
   return (
     <div className="page">
@@ -53,23 +62,57 @@ const BoutiquesList = () => {
         <Link to="/boutiques/creer" className="btn btn-primary btn-block" style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Store size={16} /> Créer ma boutique</Link>
       )}
 
-      {/* Search bar */}
-      <div style={{ position: 'relative', marginBottom: 16 }}>
-        <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
-        <input
-          type="text"
-          placeholder="Chercher une boutique..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+      {/* Search and filter bar */}
+      <div style={{ display: 'flex', gap: 8, marginBottom: 16, alignItems: 'center' }}>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
+          <input
+            type="text"
+            placeholder="Chercher par nom..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '10px 10px 10px 36px',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              fontSize: '14px',
+              boxSizing: 'border-box'
+            }}
+          />
+        </div>
+        <select
+          value={filterCategorie}
+          onChange={(e) => setFilterCategorie(e.target.value)}
           style={{
-            width: '100%',
-            padding: '10px 10px 10px 36px',
+            padding: '10px 8px',
             border: '1px solid #e5e7eb',
             borderRadius: '8px',
-            fontSize: '14px',
-            boxSizing: 'border-box'
+            fontSize: '13px',
+            cursor: 'pointer',
+            background: '#fff',
+            minWidth: '140px'
           }}
-        />
+        >
+          <option value="">Catégorie</option>
+          {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+        </select>
+        <select
+          value={filterVille}
+          onChange={(e) => setFilterVille(e.target.value)}
+          style={{
+            padding: '10px 8px',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            fontSize: '13px',
+            cursor: 'pointer',
+            background: '#fff',
+            minWidth: '120px'
+          }}
+        >
+          <option value="">Ville</option>
+          {villes.map(ville => <option key={ville} value={ville}>{ville}</option>)}
+        </select>
       </div>
 
       {loading ? (
