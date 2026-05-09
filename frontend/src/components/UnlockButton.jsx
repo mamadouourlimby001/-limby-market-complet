@@ -39,7 +39,6 @@ const UnlockButton = ({ type, id, contact }) => {
   return (
     <>
       <button onClick={() => { if (!user) { navigate('/login'); return; } setShowConfirm(true); }}
-        <button onClick={() => { if (!user) { navigate('/login'); return; } setShowConfirm(true); }}
         className="btn btn-primary btn-sm btn-block" style={{ marginBottom: 4, fontSize: 12 }}>
         🔓 Débloquer contact (1 crédit)
       </button>
