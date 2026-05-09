@@ -126,10 +126,10 @@ const BoutiquesList = () => {
               <div style={{ marginBottom: 24 }}>
                 <BoutiqueCard boutique={userBoutique} />
                 <div style={{ display: 'flex', gap: 8, marginTop: 12, alignItems: 'center' }}>
-                  <span className={`badge ${userBoutique.isActive ? 'badge-success' : 'badge-danger'}`}>
+                  <span className={`badge ${userBoutique.isActive ? 'badge-success' : 'badge-danger'}`} style={{ padding: '6px 12px' }}>
                     {userBoutique.isActive ? 'Active' : 'Inactive'}
                   </span>
-                  <Link to="/credits/renouveler-abonnement" className="btn btn-secondary" style={{ flex: 1, textAlign: 'center', fontSize: 13 }}>Renouveler mon abonnement</Link>
+                  <Link to="/credits/renouveler-abonnement" className="btn btn-secondary" style={{ flex: 1, textAlign: 'center', fontSize: 13, padding: '8px 12px' }}>Renouveler mon abonnement</Link>
                 </div>
               </div>
             </>
