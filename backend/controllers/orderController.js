@@ -180,10 +180,40 @@ const cancelOrder = async (req, res) => {
   }
 };
 
+// DELETE /api/orders/:id/delete-permanently - Supprimer définitivement une commande
+const deleteOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user._id;
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ message: 'Commande non trouvée' });
+    }
+
+    // Vérifier que c'est l'acheteur ou le vendeur
+    const isBuyer = order.buyer.toString() === userId.toString();
+    const boutique = await Boutique.findById(order.boutique);
+    const isVendor = boutique && boutique.proprietaire.toString() === userId.toString();
+
+    if (!isBuyer && !isVendor) {
+      return res.status(403).json({ message: 'Accès refusé' });
+    }
+
+    await Order.findByIdAndDelete(id);
+
+    res.json({ message: 'Commande supprimée' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+  }
+};
+
 module.exports = {
   createOrder,
   getMyOrders,
   getBoutiqueOrders,
   updateOrderStatus,
-  cancelOrder
+  cancelOrder,
+  deleteOrder
 };

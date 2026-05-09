@@ -6,7 +6,8 @@ const {
   getMyOrders,
   getBoutiqueOrders,
   updateOrderStatus,
-  cancelOrder
+  cancelOrder,
+  deleteOrder
 } = require('../controllers/orderController');
 
 /**
@@ -23,5 +24,6 @@ router.get('/my-orders', auth, getMyOrders);
 router.get('/boutique-orders', auth, getBoutiqueOrders);
 router.put('/:id/status', auth, updateOrderStatus);
 router.delete('/:id', auth, cancelOrder);
+router.delete('/:id/delete-permanently', auth, deleteOrder);
 
 module.exports = router;

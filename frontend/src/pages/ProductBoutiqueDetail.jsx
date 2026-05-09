@@ -18,6 +18,8 @@ const ProductBoutiqueDetail = () => {
   const [showMessageForm, setShowMessageForm] = useState(false);
   const [messageContent, setMessageContent] = useState('');
   const [orderLoading, setOrderLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '' });
 
   useEffect(() => {
     fetchProduct();
@@ -84,16 +86,20 @@ const ProductBoutiqueDetail = () => {
       return;
     }
 
+    setMessageLoading(true);
     try {
       await api.post('/boutique-messages/send-to-boutique', {
         boutiqueId,
         contenu: messageContent
       });
-      alert('Message envoyé à la boutique avec succès');
       setMessageContent('');
       setShowMessageForm(false);
+      setToast({ show: true, message: 'Message envoyé avec succès ✓' });
+      setTimeout(() => setToast({ show: false, message: '' }), 3000);
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de l\'envoi du message');
+    } finally {
+      setMessageLoading(false);
     }
   };
 
@@ -243,9 +249,27 @@ const ProductBoutiqueDetail = () => {
             {orderLoading ? 'Traitement...' : 'Commander maintenant'}
           </button>
 
+          {/* Toast Message */}
+          {toast.show && (
+            <div style={{
+              background: '#059669',
+              color: '#fff',
+              padding: '12px 16px',
+              borderRadius: 6,
+              marginBottom: 12,
+              fontSize: 14,
+              fontWeight: 600,
+              textAlign: 'center',
+              animation: 'slideDown 0.3s ease'
+            }}>
+              {toast.message}
+            </div>
+          )}
+
           {/* Bouton Message */}
           <button
             onClick={() => setShowMessageForm(!showMessageForm)}
+            disabled={messageLoading}
             style={{
               padding: 12,
               background: '#3b82f6',

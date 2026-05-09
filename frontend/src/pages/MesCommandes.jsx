@@ -42,6 +42,18 @@ const MesCommandes = () => {
     }
   };
 
+  const handleDelete = async (orderId) => {
+    if (!window.confirm('Supprimer définitivement cette commande ?')) return;
+
+    try {
+      await api.delete(`/orders/${orderId}/delete-permanently`);
+      fetchOrders();
+      alert('Commande supprimée');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
+
   const filteredOrders = filter === 'all' 
     ? orders 
     : orders.filter(o => o.status === filter);
@@ -177,11 +189,29 @@ const MesCommandes = () => {
               )}
 
               {/* Actions */}
-              {order.status === 'en_attente' && (
+              <div style={{ display: 'flex', gap: 8 }}>
+                {order.status === 'en_attente' && (
+                  <button
+                    onClick={() => handleCancel(order._id)}
+                    style={{
+                      flex: 1,
+                      padding: 10,
+                      background: '#f59e0b',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 4,
+                      fontWeight: 600,
+                      fontSize: 12,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Annuler
+                  </button>
+                )}
                 <button
-                  onClick={() => handleCancel(order._id)}
+                  onClick={() => handleDelete(order._id)}
                   style={{
-                    width: '100%',
+                    flex: 1,
                     padding: 10,
                     background: '#dc3545',
                     color: '#fff',
@@ -192,9 +222,9 @@ const MesCommandes = () => {
                     cursor: 'pointer'
                   }}
                 >
-                  Annuler la commande
+                  Supprimer
                 </button>
-              )}
+              </div>
             </div>
           ))}
         </div>

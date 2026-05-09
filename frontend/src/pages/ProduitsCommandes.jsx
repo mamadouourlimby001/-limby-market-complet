@@ -50,6 +50,18 @@ const ProduitsCommandes = () => {
     }
   };
 
+  const handleDelete = async (orderId) => {
+    if (!window.confirm('Supprimer définitivement cette commande ?')) return;
+
+    try {
+      await api.delete(`/orders/${orderId}/delete-permanently`);
+      fetchOrders();
+      alert('Commande supprimée');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur');
+    }
+  };
+
   const filteredOrders = filter === 'all' 
     ? orders 
     : orders.filter(o => o.status === filter);
@@ -238,7 +250,7 @@ const ProduitsCommandes = () => {
                   </div>
 
                   {/* Zone note */}
-                  <div>
+                  <div style={{ marginBottom: 12 }}>
                     <label style={{ fontSize: 12, fontWeight: 600, display: 'block', marginBottom: 6 }}>
                       Votre note au client:
                     </label>
@@ -258,6 +270,25 @@ const ProduitsCommandes = () => {
                       }}
                     />
                   </div>
+
+                  {/* Bouton Supprimer */}
+                  <button
+                    onClick={() => handleDelete(order._id)}
+                    style={{
+                      width: '100%',
+                      padding: 8,
+                      background: '#dc3545',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: 4,
+                      fontWeight: 600,
+                      fontSize: 12,
+                      cursor: 'pointer',
+                      marginTop: 8
+                    }}
+                  >
+                    Supprimer cette commande
+                  </button>
                 </div>
               )}
             </div>
