@@ -13,8 +13,9 @@ const RenewSubscription = () => {
       try {
         const res = await api.get('/boutiques/my-boutique').catch(() => ({ data: null }));
         if (res.data) {
-          setBoutique(res.data);
-          setForm(prev => ({ ...prev, nomBoutique: res.data.nom, boutiqueId: res.data._id }));
+          const boutique = res.data.boutique || res.data;
+          setBoutique(boutique);
+          setForm(prev => ({ ...prev, nomBoutique: boutique.nom, boutiqueId: boutique._id }));
         }
       } catch (err) { console.error(err); }
     };
