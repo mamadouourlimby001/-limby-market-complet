@@ -32,7 +32,7 @@ const RenewSubscription = () => {
 
   if (success) return (
     <div className="page" style={{ textAlign: 'center', paddingTop: 60 }}>
-      <span style={{ fontSize: 48 }}>✅</span>
+      <span style={{ fontSize: 48 }}>✔️</span>
       <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 12, color: '#1B2A6B' }}>Demande envoyée !</h2>
       <p style={{ fontSize: 13, color: '#6b7280', marginTop: 8 }}>Votre demande de renouvellement sera traitée sous peu.</p>
     </div>
@@ -42,7 +42,7 @@ const RenewSubscription = () => {
     <div className="page" style={{ maxWidth: 500, margin: '0 auto' }}>
       <h1 className="page-title">Renouveler abonnement</h1>
       <div className="alert alert-info">
-        📱 Déposez <strong>10 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> puis soumettez ce formulaire.
+        � Déposez <strong>10 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> puis soumettez ce formulaire.
       </div>
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>

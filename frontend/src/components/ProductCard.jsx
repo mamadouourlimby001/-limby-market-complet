@@ -15,7 +15,7 @@ const ProductCard = ({ product }) => {
           <h3 style={{ fontSize: '13px', fontWeight: 600, marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{product.titre}</h3>
         </Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 4 }}>
-          <span style={{ fontSize: '11px', color: '#6b7280' }}>📍{product.ville}</span>
+          <span style={{ fontSize: '11px', color: '#6b7280' }}>📍 {product.ville}</span>
           {product.etat && <span className="badge badge-primary" style={{ fontSize: 10 }}>{etatLabels[product.etat]}</span>}
         </div>
         <p className="price" style={{ fontSize: '14px', marginBottom: 6 }}>

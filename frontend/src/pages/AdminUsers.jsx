@@ -91,7 +91,7 @@ const AdminUsers = () => {
             <button onClick={() => toggleVerified(u._id, u.isVerified)} className="btn btn-secondary btn-sm">
               {u.isVerified ? '❌ Retirer badge' : '✓ Vérifier'}
             </button>
-            <button onClick={() => deleteUser(u._id)} className="btn btn-danger btn-sm">🗑️</button>
+            <button onClick={() => deleteUser(u._id)} className="btn btn-danger btn-sm">🗑</button>
             {isSupremeAdmin && u.role !== 'admin_supreme' && (
               <button onClick={() => toggleAdmin(u._id, u.role)} className={`btn btn-sm ${u.role === 'admin_simple' ? 'btn-danger' : 'btn-primary'}`}>
                 {u.role === 'admin_simple' ? 'Retirer admin' : 'Nommer admin'}

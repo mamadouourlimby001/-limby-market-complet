@@ -37,7 +37,7 @@ const AdminReports = () => {
             <p style={{ fontSize: 13, marginBottom: 4 }}>{r.raison || 'Aucune raison spécifiée'}</p>
             <p style={{ fontSize: 11, color: '#6b7280' }}>Par: {r.signalePar?.nom}</p>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <button onClick={() => handle(r._id, 'supprimer')} className="btn btn-danger btn-sm" style={{ flex: 1 }}>🗑️ Supprimer contenu</button>
+              <button onClick={() => handle(r._id, 'supprimer')} className="btn btn-danger btn-sm" style={{ flex: 1 }}>🗑 Supprimer contenu</button>
               <button onClick={() => handle(r._id, 'ignorer')} className="btn btn-secondary btn-sm" style={{ flex: 1 }}>Ignorer</button>
             </div>
           </div>

@@ -33,10 +33,10 @@ const BoutiqueDetail = () => {
           {boutique.logo && <img src={boutique.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
         <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>
-          {boutique.nom} {boutique.isVerified && <span style={{ color: '#4A90D9' }}>✓</span>}
+          {boutique.nom} {boutique.isVerified && <span style={{ color: '#4A90D9' }}>✔️</span>}
         </h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>{boutique.description}</p>
-        <p style={{ fontSize: 13, color: '#1B2A6B', fontWeight: 600 }}>📞 {boutique.telephone}</p>
+        <p style={{ fontSize: 13, color: '#1B2A6B', fontWeight: 600 }}>☎️ {boutique.telephone}</p>
         <span className="badge badge-primary">{boutique.categorie}</span>
       </div>
 

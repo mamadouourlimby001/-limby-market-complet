@@ -26,7 +26,7 @@ const Navbar = () => {
               background: 'rgba(27,42,107,0.08)', padding: '4px 10px',
               borderRadius: '16px', fontSize: '12px', fontWeight: 600, color: '#1B2A6B'
             }}>
-              💰 {user.credits}
+              � {user.credits}
             </Link>
             {(user.role === 'admin_simple' || user.role === 'admin_supreme') && (
               <Link to="/admin" style={{

@@ -26,7 +26,7 @@ const BuyCredits = () => {
 
   if (success) return (
     <div className="page" style={{ textAlign: 'center', paddingTop: 60 }}>
-      <span style={{ fontSize: 48 }}>✅</span>
+      <span style={{ fontSize: 48 }}>✔️</span>
       <h2 style={{ fontSize: 18, fontWeight: 700, marginTop: 12, color: '#1B2A6B' }}>Demande envoyée !</h2>
       <p style={{ fontSize: 13, color: '#6b7280', marginTop: 8 }}>Votre demande sera traitée sous peu par un administrateur.</p>
     </div>
@@ -48,7 +48,7 @@ const BuyCredits = () => {
         ))}
       </div>
       <div className="alert alert-info">
-        📱 Effectuez un dépôt Orange Money sur le numéro <strong>+224625223418</strong> puis remplissez le formulaire ci-dessous.
+        � Effectuez un dépôt Orange Money sur le numéro <strong>+224625223418</strong> puis remplissez le formulaire ci-dessous.
       </div>
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>

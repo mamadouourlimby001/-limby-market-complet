@@ -36,7 +36,7 @@ const ProductDetail = () => {
           {product.etat && <span className="badge badge-success">{etatLabels[product.etat]}</span>}
           <span className="badge badge-primary">📍 {product.ville}, {product.quartier}</span>
         </div>
-        {product.vendeur?.isVerified && <span className="badge badge-success" style={{ marginBottom: 10 }}>✓ Vendeur vérifié</span>}
+        {product.vendeur?.isVerified && <span className="badge badge-success" style={{ marginBottom: 10 }}>✔️ Vendeur vérifié</span>}
         <div style={{ marginBottom: 14 }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Description</h3>
           <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>{product.description}</p>

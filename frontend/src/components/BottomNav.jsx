@@ -2,10 +2,10 @@ import { Link, useLocation } from 'react-router-dom';
 
 const tabs = [
   { path: '/', label: 'Accueil', icon: '🏠' },
-  { path: '/occasion', label: 'Occasion', icon: '🛍️' },
-  { path: '/locations', label: 'Locations', icon: '🏘️' },
-  { path: '/annonces', label: 'Annonces', icon: '📋' },
-  { path: '/boutiques', label: 'Boutiques', icon: '🏪' },
+  { path: '/occasion', label: 'Occasion', icon: '�' },
+  { path: '/locations', label: 'Locations', icon: '🏠' },
+  { path: '/annonces', label: 'Annonces', icon: '📰' },
+  { path: '/boutiques', label: 'Boutiques', icon: '🏬' },
 ];
 
 const BottomNav = () => {

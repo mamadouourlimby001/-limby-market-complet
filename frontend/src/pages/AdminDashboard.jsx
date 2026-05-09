@@ -28,10 +28,10 @@ const AdminDashboard = () => {
   if (loading) return <div className="loader"><div className="spinner"></div></div>;
 
   const menuItems = [
-    { path: '/admin/credits', label: 'Demandes crédits', icon: '💰' },
-    { path: '/admin/abonnements', label: 'Abonnements', icon: '🔄' },
+    { path: '/admin/credits', label: 'Demandes crédits', icon: '�' },
+    { path: '/admin/abonnements', label: 'Abonnements', icon: '♻️' },
     { path: '/admin/signalements', label: 'Signalements', icon: '⚠️' },
-    { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: '👥' },
+    { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: '�‍💼' },
     { path: '/admin/send-to-users', label: 'Écrire aux utilisateurs', icon: '✎' },
     { path: '/admin/messages', label: 'Messages', icon: `💬${unreadMessagesCount > 0 ? ' ' + unreadMessagesCount : ''}` }
   ];

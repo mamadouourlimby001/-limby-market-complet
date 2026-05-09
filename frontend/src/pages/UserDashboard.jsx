@@ -72,16 +72,16 @@ const UserDashboard = () => {
         <div>
           <div className="card" style={{ padding: 14, marginBottom: 12 }}>
             <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>{user?.nom}</h3>
-            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>📞 {user?.telephone}</p>
-            <p style={{ fontSize: 13, marginBottom: 4 }}><span className="badge badge-primary">{roleLabels[user?.role]}</span> {user?.isVerified && <span className="badge badge-success">✓ Vérifié</span>}</p>
-            <p style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B', marginTop: 8 }}>💰 {user?.credits} crédits</p>
+            <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>☎️ {user?.telephone}</p>
+            <p style={{ fontSize: 13, marginBottom: 4 }}><span className="badge badge-primary">{roleLabels[user?.role]}</span> {user?.isVerified && <span className="badge badge-success">✔️ Vérifié</span>}</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B', marginTop: 8 }}>💵 {user?.credits} crédits</p>
             {user?.creditExpiry && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(user.creditExpiry).toLocaleDateString('fr-FR')}</p>}
           </div>
-          <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}>💰 Acheter des crédits</Link>
+          <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}>� Acheter des crédits</Link>
           <button onClick={handleLogout} className="btn btn-danger btn-block" style={{ marginBottom: 8 }}>Déconnexion</button>
           {boutique && (
             <div className="card" style={{ padding: 14, marginBottom: 12 }}>
-              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>🏪 Ma Boutique: {boutique.nom}</h3>
+              <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>� Ma Boutique: {boutique.nom}</h3>
               <p style={{ fontSize: 12 }}>Statut: <span className={`badge ${boutique.isActive ? 'badge-success' : 'badge-danger'}`}>{boutique.isActive ? 'Active' : 'Inactive'}</span></p>
               {boutique.dateExpiration && <p style={{ fontSize: 11, color: '#6b7280' }}>Expire le {new Date(boutique.dateExpiration).toLocaleDateString('fr-FR')}</p>}
               <Link to="/credits/renouveler-abonnement" className="btn btn-secondary btn-sm" style={{ marginTop: 8 }}>Renouveler abonnement</Link>
@@ -96,21 +96,21 @@ const UserDashboard = () => {
           {products.map(p => (
             <div key={p._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div><p style={{ fontSize: 13, fontWeight: 600 }}>{p.titre}</p><p style={{ fontSize: 11, color: '#6b7280' }}>{p.prix?.toLocaleString('fr-GN')} GNF</p></div>
-              <button onClick={() => handleDelete('products', p._id)} className="btn btn-danger btn-sm">🗑️</button>
+              <button onClick={() => handleDelete('products', p._id)} className="btn btn-danger btn-sm">🗑</button>
             </div>
           ))}
           <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, marginTop: 16 }}>Mes locations ({locations.length})</h3>
           {locations.map(l => (
             <div key={l._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div><p style={{ fontSize: 13, fontWeight: 600 }}>{l.titre}</p><p style={{ fontSize: 11, color: '#6b7280' }}>{l.prix?.toLocaleString('fr-GN')} GNF</p></div>
-              <button onClick={() => handleDelete('locations', l._id)} className="btn btn-danger btn-sm">🗑️</button>
+              <button onClick={() => handleDelete('locations', l._id)} className="btn btn-danger btn-sm">🗑</button>
             </div>
           ))}
           <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, marginTop: 16 }}>Mes annonces ({announcements.length})</h3>
           {announcements.map(a => (
             <div key={a._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div><p style={{ fontSize: 13, fontWeight: 600 }}>{a.titre}</p><p style={{ fontSize: 11, color: '#6b7280' }}>{a.salaireMensuel?.toLocaleString('fr-GN')} GNF</p></div>
-              <button onClick={() => handleDelete('announcements', a._id)} className="btn btn-danger btn-sm">🗑️</button>
+              <button onClick={() => handleDelete('announcements', a._id)} className="btn btn-danger btn-sm">🗑</button>
             </div>
           ))}
         </div>

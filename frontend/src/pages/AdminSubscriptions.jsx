@@ -29,13 +29,13 @@ const AdminSubscriptions = () => {
         requests.map(r => (
           <div key={r._id} className="card" style={{ padding: 12, marginBottom: 10 }}>
             <p style={{ fontSize: 14, fontWeight: 600 }}>{r.nomBoutique}</p>
-            <p style={{ fontSize: 12, color: '#6b7280' }}>📞 Dépôt: {r.telephoneDepot}</p>
+            <p style={{ fontSize: 12, color: '#6b7280' }}>☎️ Dépôt: {r.telephoneDepot}</p>
             <p style={{ fontSize: 14, fontWeight: 700, color: '#1B2A6B' }}>{r.montant?.toLocaleString('fr-GN')} GNF</p>
             <p style={{ fontSize: 12, color: '#6b7280' }}>Par: {r.demandeur?.nom}</p>
             <p style={{ fontSize: 10, color: '#9ca3af' }}>{new Date(r.createdAt).toLocaleString('fr-FR')}</p>
             <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <button onClick={() => handle(r._id, 'approve')} className="btn btn-success btn-sm" style={{ flex: 1 }}>✅ Approuver</button>
-              <button onClick={() => handle(r._id, 'reject')} className="btn btn-danger btn-sm" style={{ flex: 1 }}>❌ Rejeter</button>
+              <button onClick={() => handle(r._id, 'approve')} className="btn btn-success btn-sm" style={{ flex: 1 }}>✔️ Approuver</button>
+              <button onClick={() => handle(r._id, 'reject')} className="btn btn-danger btn-sm" style={{ flex: 1 }}>✖️ Rejeter</button>
             </div>
           </div>
         ))

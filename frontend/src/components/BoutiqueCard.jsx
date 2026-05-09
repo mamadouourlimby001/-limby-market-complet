@@ -9,7 +9,7 @@ const BoutiqueCard = ({ boutique }) => {
           {boutique.logo ? (
             <img src={boutique.logo} alt={boutique.nom} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🏪</div>
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>�</div>
           )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
@@ -17,7 +17,7 @@ const BoutiqueCard = ({ boutique }) => {
             <h3 style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{boutique.nom}</h3>
             {boutique.isVerified && <span title="Vérifiée" style={{ color: '#4A90D9', fontSize: 14 }}>✓</span>}
           </div>
-          <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2 }}>📞 {boutique.telephone}</p>
+          <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2 }}>☎️ {boutique.telephone}</p>
           <span className="badge badge-primary" style={{ fontSize: 10 }}>{boutique.categorie}</span>
         </div>
       </Link>

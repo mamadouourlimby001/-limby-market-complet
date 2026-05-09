@@ -32,7 +32,7 @@ const AnnouncementDetail = () => {
           <span className="badge badge-primary">📍 {ann.villeDeTravail}, {ann.quartier}</span>
           <span className="badge badge-primary">🏢 {ann.entreprise}</span>
         </div>
-        <div className="badge badge-warning" style={{ marginBottom: 12 }}>⏰ Limite: {new Date(ann.dateLimite).toLocaleDateString('fr-FR')}</div>
+        <div className="badge badge-warning" style={{ marginBottom: 12 }}>⏳ Limite: {new Date(ann.dateLimite).toLocaleDateString('fr-FR')}</div>
         <div style={{ marginBottom: 14 }}>
           <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>Description</h3>
           <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>{ann.description}</p>

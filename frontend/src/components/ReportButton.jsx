@@ -33,7 +33,7 @@ const ReportButton = ({ typeContenu, contenuId }) => {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             {sent ? (
               <div style={{ textAlign: 'center', padding: 20 }}>
-                <p style={{ fontSize: 14, color: '#10b981' }}>✅ Signalement envoyé. Merci !</p>
+                <p style={{ fontSize: 14, color: '#10b981' }}>✔️ Signalement envoyé. Merci !</p>
               </div>
             ) : (
               <>
