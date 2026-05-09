@@ -7,7 +7,7 @@ import BoutiqueCard from '../components/BoutiqueCard';
 
 const BoutiquesList = () => {
   const [boutiques, setBoutiques] = useState([]);
-  const [myBoutique, setMyBoutique] = useState(null);
+  const [userBoutique, setUserBoutique] = useState(null);
   const [filteredBoutiques, setFilteredBoutiques] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,17 +18,16 @@ const BoutiquesList = () => {
       try {
         const res = await api.get('/boutiques');
         setBoutiques(res.data);
-        setFilteredBoutiques(res.data);
         
         // Fetch user's boutique if logged in
         if (user) {
           try {
-            const myRes = await api.get('/boutiques/my-boutique');
-            if (myRes.data) {
-              setMyBoutique(myRes.data.boutique || myRes.data);
+            const userRes = await api.get('/boutiques/my-boutique');
+            if (userRes.data) {
+              setUserBoutique(userRes.data.boutique || userRes.data);
             }
           } catch (err) {
-            console.error('No boutique for user');
+            // User doesn't have a boutique
           }
         }
       }
@@ -40,19 +39,20 @@ const BoutiquesList = () => {
 
   useEffect(() => {
     let filtered = boutiques.filter(b => 
-      b.nom.toLowerCase().includes(searchTerm.toLowerCase())
+      b.nom.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (!userBoutique || b._id !== userBoutique._id)
     );
     setFilteredBoutiques(filtered);
-  }, [searchTerm, boutiques]);
-
-  const otherBoutiques = myBoutique 
-    ? filteredBoutiques.filter(b => b._id !== myBoutique._id)
-    : filteredBoutiques;
+  }, [searchTerm, boutiques, userBoutique]);
 
   return (
     <div className="page">
       <h1 className="page-title">Boutiques</h1>
       
+      {user && user.role !== 'vendeur_boutique' && (
+        <Link to="/boutiques/creer" className="btn btn-primary btn-block" style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Store size={16} /> Créer ma boutique</Link>
+      )}
+
       {/* Search bar */}
       <div style={{ position: 'relative', marginBottom: 16 }}>
         <Search size={16} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', color: '#6b7280' }} />
@@ -72,34 +72,28 @@ const BoutiquesList = () => {
         />
       </div>
 
-      {user && user.role !== 'vendeur_boutique' && (
-        <Link to="/boutiques/creer" className="btn btn-primary btn-block" style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}><Store size={16} /> Créer ma boutique</Link>
-      )}
-
       {loading ? (
         <div className="loader"><div className="spinner"></div></div>
-      ) : filteredBoutiques.length === 0 ? (
-        <div className="empty-state"><p>Aucune boutique trouvée</p></div>
       ) : (
         <>
-          {/* My Boutique Section */}
-          {myBoutique && (
-            <div style={{ marginBottom: 24 }}>
+          {/* User's boutique */}
+          {userBoutique && (
+            <>
               <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: '#1B2A6B' }}>Votre boutique</h2>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 12 }}>
-                <BoutiqueCard boutique={myBoutique} />
+              <div style={{ marginBottom: 24 }}>
+                <BoutiqueCard boutique={userBoutique} />
               </div>
-            </div>
+            </>
           )}
 
-          {/* Other Boutiques Section */}
-          {otherBoutiques.length > 0 && (
-            <div>
-              <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: '#1B2A6B' }}>Les autres boutiques</h2>
-              <div className="grid-2">
-                {otherBoutiques.map(b => <BoutiqueCard key={b._id} boutique={b} />)}
-              </div>
-            </div>
+          {/* Other boutiques */}
+          <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12, color: '#1B2A6B' }}>
+            {userBoutique ? 'Les autres boutiques' : 'Boutiques'}
+          </h2>
+          {filteredBoutiques.length === 0 ? (
+            <div className="empty-state"><p>Aucune boutique trouvée</p></div>
+          ) : (
+            <div className="grid-2">{filteredBoutiques.map(b => <BoutiqueCard key={b._id} boutique={b} />)}</div>
           )}
         </>
       )}
