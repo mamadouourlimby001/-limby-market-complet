@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Check, Phone } from 'lucide-react';
+import { Check, Phone, MapPin } from 'lucide-react';
 import ReportButton from './ReportButton';
 
 const BoutiqueCard = ({ boutique }) => {
@@ -19,6 +19,7 @@ const BoutiqueCard = ({ boutique }) => {
             {boutique.isVerified && <span title="Vérifiée" style={{ color: '#4A90D9' }}><Check size={14} style={{ display: 'inline' }} /></span>}
           </div>
           <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2, display: 'flex', alignItems: 'center', gap: '3px' }}><Phone size={12} /> {boutique.telephone}</p>
+          <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2, display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={12} /> {boutique.quartier}, {boutique.ville}</p>
           <span className="badge badge-primary" style={{ fontSize: 10 }}>{boutique.categorie}</span>
         </div>
       </Link>

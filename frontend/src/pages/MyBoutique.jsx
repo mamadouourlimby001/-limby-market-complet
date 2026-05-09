@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { Search, SortAsc } from 'lucide-react';
+import { Search, SortAsc, MapPin } from 'lucide-react';
 
 const MyBoutique = () => {
   const { user } = useAuth();
@@ -79,6 +79,9 @@ const MyBoutique = () => {
           {boutique.nom}
         </h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 8 }}>{boutique.description}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: 8, fontSize: 13, color: '#6b7280' }}>
+          <MapPin size={16} /> {boutique.quartier}, {boutique.ville}
+        </div>
         <span className="badge badge-primary" style={{ marginBottom: 8 }}>{boutique.categorie}</span>
       </div>
 

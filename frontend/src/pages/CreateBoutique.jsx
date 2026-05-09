@@ -5,7 +5,7 @@ import api from '../utils/api';
 
 const CreateBoutique = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ nom: '', description: '', categorie: '', telephone: '' });
+  const [form, setForm] = useState({ nom: '', description: '', categorie: '', telephone: '', ville: '', quartier: '' });
   const [logo, setLogo] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -41,6 +41,8 @@ const CreateBoutique = () => {
             <option value="Électronique">Électronique</option><option value="Mode">Mode</option><option value="Alimentation">Alimentation</option>
             <option value="Beauté">Beauté</option><option value="Maison">Maison</option><option value="Services">Services</option><option value="Autres">Autres</option>
           </select></div>
+        <div className="form-group"><label>Ville</label><input className="form-control" value={form.ville} onChange={e => setForm({...form, ville: e.target.value})} placeholder="Ex: Conakry" required /></div>
+        <div className="form-group"><label>Quartier</label><input className="form-control" value={form.quartier} onChange={e => setForm({...form, quartier: e.target.value})} placeholder="Ex: Kaloum" required /></div>
         <div className="form-group"><label>Téléphone</label><input type="tel" className="form-control" placeholder="+224..." value={form.telephone} onChange={e => setForm({...form, telephone: e.target.value})} required /></div>
         <div className="form-group"><label>Logo</label>
           <div className="photo-upload">

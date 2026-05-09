@@ -32,6 +32,14 @@ const boutiqueSchema = new mongoose.Schema({
     type: String,
     required: [true, 'La catégorie est requise']
   },
+  ville: {
+    type: String,
+    required: [true, 'La ville est requise']
+  },
+  quartier: {
+    type: String,
+    required: [true, 'Le quartier est requis']
+  },
   isActive: {
     type: Boolean,
     default: true

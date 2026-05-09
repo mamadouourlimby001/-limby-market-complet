@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import ReportButton from '../components/ReportButton';
+import { MapPin } from 'lucide-react';
 
 const BoutiqueDetail = () => {
   const { id } = useParams();
@@ -36,6 +37,9 @@ const BoutiqueDetail = () => {
           {boutique.nom} {boutique.isVerified && <span style={{ color: '#4A90D9' }}>✔️</span>}
         </h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>{boutique.description}</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: 8, fontSize: 13, color: '#6b7280' }}>
+          <MapPin size={16} /> {boutique.quartier}, {boutique.ville}
+        </div>
         <p style={{ fontSize: 13, color: '#1B2A6B', fontWeight: 600 }}>☎️ {boutique.telephone}</p>
         <span className="badge badge-primary">{boutique.categorie}</span>
       </div>

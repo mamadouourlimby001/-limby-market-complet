@@ -30,7 +30,7 @@ const getBoutique = async (req, res) => {
 // POST /api/boutiques - Créer une boutique
 const createBoutique = async (req, res) => {
   try {
-    const { nom, description, logo, telephone, categorie } = req.body;
+    const { nom, description, logo, telephone, categorie, ville, quartier } = req.body;
     
     // Valider que la description ne contient pas de chiffres
     if (description && /\d/.test(description)) {
@@ -39,7 +39,7 @@ const createBoutique = async (req, res) => {
     
     // Boutique créée inactive - nécessite paiement et approbation admin
     const boutique = await Boutique.create({
-      nom, description, logo, proprietaire: req.user._id, telephone, categorie,
+      nom, description, logo, proprietaire: req.user._id, telephone, categorie, ville, quartier,
       isActive: false, dateExpiration: null
     });
     // Changer le rôle de l'utilisateur en vendeur_boutique
