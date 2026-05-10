@@ -69,7 +69,10 @@ const getUserBoutiqueMessages = async (req, res) => {
 
     // Récupérer les messages initiaux et leurs répliques
     const messages = await BoutiqueMessage.find({
-      recipient: userId,
+      $or: [
+        { recipient: userId },
+        { sender: userId }
+      ],
       deletedBy: { $ne: userId },
       messageType: 'initial'
     })
