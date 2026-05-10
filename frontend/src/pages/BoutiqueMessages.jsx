@@ -64,12 +64,14 @@ const BoutiqueMessages = () => {
   const handleDelete = async (messageId) => {
     if (!window.confirm('Supprimer ce message ?')) return;
     try {
-      await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
+      const response = await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
+      console.log('Message deleted:', response.data);
       setExpandedId(null);
       fetchMessages();
-      alert('Message supprimé');
+      alert('Message supprimé avec succès');
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur lors de la suppression');
+      console.error('Delete error:', err.response?.data || err.message);
+      alert(err.response?.data?.message || `Erreur: ${err.message}`);
     }
   };
 
@@ -226,6 +228,22 @@ const BoutiqueMessages = () => {
                         Marquer lu
                       </button>
                     )}
+                    <button
+                      onClick={() => handleDelete(msg._id)}
+                      style={{
+                        flex: 1,
+                        padding: 8,
+                        background: '#dc3545',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 4,
+                        fontWeight: 600,
+                        fontSize: 12,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Supprimer
+                    </button>
                     <button
                       onClick={() => handleDelete(msg._id)}
                       style={{

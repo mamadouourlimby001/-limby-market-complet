@@ -54,12 +54,14 @@ const ProduitsCommandes = () => {
     if (!window.confirm('Supprimer définitivement cette commande ?')) return;
 
     try {
-      await api.delete(`/orders/${orderId}/delete-permanently`);
+      const response = await api.delete(`/orders/${orderId}/delete-permanently`);
+      console.log('Order deleted:', response.data);
       setExpandedId(null);
       fetchOrders();
-      alert('Commande supprimée');
+      alert('Commande supprimée avec succès');
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur lors de la suppression');
+      console.error('Delete error:', err.response?.data || err.message);
+      alert(err.response?.data?.message || `Erreur: ${err.message}`);
     }
   };
 
