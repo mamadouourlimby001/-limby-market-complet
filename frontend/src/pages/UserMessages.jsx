@@ -53,8 +53,11 @@ const UserMessages = ({ embedded = false }) => {
     if (!window.confirm('Supprimer ce message ?')) return;
     try {
       await api.delete(`/messages/${messageId}`);
+      setExpandedId(null);
       fetchMessages();
+      alert('Message supprimé');
     } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
       console.error(err);
     }
   };
@@ -72,8 +75,11 @@ const UserMessages = ({ embedded = false }) => {
     if (!window.confirm('Supprimer ce message ?')) return;
     try {
       await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
+      setExpandedId(null);
       fetchMessages();
+      alert('Message supprimé');
     } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
       console.error(err);
     }
   };
