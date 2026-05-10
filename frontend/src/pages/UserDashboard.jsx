@@ -16,6 +16,7 @@ const UserDashboard = () => {
   const [history, setHistory] = useState(null);
   const [tab, setTab] = useState('profil');
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [unreadBoutiqueMessagesCount, setUnreadBoutiqueMessagesCount] = useState(0);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -33,14 +34,15 @@ const UserDashboard = () => {
   const fetchAll = async () => {
     try {
       await refreshUser();
-      const [prodRes, locRes, annRes, boutRes, notifRes, histRes, messagesRes] = await Promise.all([
+      const [prodRes, locRes, annRes, boutRes, notifRes, histRes, messagesRes, boutiqueMessagesRes] = await Promise.all([
         api.get('/products', { params: { vendeur: user?._id } }),
         api.get('/locations'),
         api.get('/announcements'),
         api.get('/boutiques/my-boutique').catch(() => ({ data: null })),
         api.get('/notifications'),
         api.get('/credits/my-history'),
-        api.get('/messages/my-messages').catch(err => ({ data: { unreadCount: 0 } }))
+        api.get('/messages/my-messages').catch(err => ({ data: { unreadCount: 0 } })),
+        api.get('/boutique-messages/user-boutique-messages').catch(err => ({ data: { unreadCount: 0 } }))
       ]);
       setProducts(prodRes.data.filter(p => p.vendeur?._id === user?._id));
       setLocations(locRes.data.filter(l => l.proprietaire?._id === user?._id));
@@ -49,6 +51,7 @@ const UserDashboard = () => {
       setNotifications(notifRes.data);
       setHistory(histRes.data);
       setUnreadMessagesCount(messagesRes.data.unreadCount || 0);
+      setUnreadBoutiqueMessagesCount(boutiqueMessagesRes.data.unreadCount || 0);
     } catch (err) { console.error(err); }
   };
 
@@ -71,7 +74,7 @@ const UserDashboard = () => {
           <button key={t} className={`tab ${tab === t ? 'active' : ''}`} onClick={() => setTab(t)}>
             {t === 'messages' ? (
               <span>
-                Messages {unreadMessagesCount > 0 && <span style={{ marginLeft: 6, backgroundColor: '#dc3545', color: 'white', borderRadius: '50%', padding: '2px 6px', fontSize: 11, fontWeight: 'bold' }}>{unreadMessagesCount}</span>}
+                Messages {(unreadMessagesCount + unreadBoutiqueMessagesCount) > 0 && <span style={{ marginLeft: 6, backgroundColor: '#dc3545', color: 'white', borderRadius: '50%', padding: '2px 6px', fontSize: 11, fontWeight: 'bold' }}>{unreadMessagesCount + unreadBoutiqueMessagesCount}</span>}
               </span>
             ) : (
               t.charAt(0).toUpperCase() + t.slice(1)

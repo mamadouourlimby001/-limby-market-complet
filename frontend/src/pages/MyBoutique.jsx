@@ -11,6 +11,7 @@ const MyBoutique = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('recent');
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   useEffect(() => {
     fetchBoutique();
@@ -25,8 +26,12 @@ const MyBoutique = () => {
 
   const fetchBoutique = async () => {
     try {
-      const res = await api.get('/boutiques/my-boutique');
-      setData(res.data);
+      const [boutRes, messagesRes] = await Promise.all([
+        api.get('/boutiques/my-boutique'),
+        api.get('/boutique-messages/boutique-inbox').catch(err => ({ data: { unreadCount: 0 } }))
+      ]);
+      setData(boutRes.data);
+      setUnreadMessagesCount(messagesRes.data.unreadCount || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -110,7 +115,7 @@ const MyBoutique = () => {
           <Package size={16} style={{ marginRight: 6, display: 'inline' }} /> Commandes
         </Link>
         <Link to="/boutique-messages-inbox" className="btn btn-secondary btn-block">
-          💬 Messages ({0})
+          💬 Messages ({unreadMessagesCount})
         </Link>
       </div>
 

@@ -4,7 +4,9 @@ import api from '../utils/api';
 
 const UserMessages = ({ embedded = false }) => {
   const [messages, setMessages] = useState([]);
+  const [boutiquMessages, setBoutiqueMessages] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadBoutiqueCount, setUnreadBoutiqueCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [replyContent, setReplyContent] = useState({});
@@ -12,13 +14,25 @@ const UserMessages = ({ embedded = false }) => {
 
   useEffect(() => {
     fetchMessages();
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchMessages();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const fetchMessages = async () => {
     try {
-      const res = await api.get('/messages/my-messages');
-      setMessages(res.data.data);
-      setUnreadCount(res.data.unreadCount);
+      const [adminRes, boutiqueRes] = await Promise.all([
+        api.get('/messages/my-messages').catch(err => ({ data: { data: [], unreadCount: 0 } })),
+        api.get('/boutique-messages/user-boutique-messages').catch(err => ({ data: { data: [], unreadCount: 0 } }))
+      ]);
+      setMessages(adminRes.data.data || []);
+      setUnreadCount(adminRes.data.unreadCount || 0);
+      setBoutiqueMessages(boutiqueRes.data.data || []);
+      setUnreadBoutiqueCount(boutiqueRes.data.unreadCount || 0);
     } catch (err) {
       console.error(err);
     } finally {
@@ -42,6 +56,47 @@ const UserMessages = ({ embedded = false }) => {
       fetchMessages();
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleBoutiqueMarkAsRead = async (messageId) => {
+    try {
+      await api.put(`/boutique-messages/${messageId}/boutique-read`);
+      fetchMessages();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleBoutiqueDelete = async (messageId) => {
+    if (!window.confirm('Supprimer ce message ?')) return;
+    try {
+      await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
+      fetchMessages();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleBoutiqueReply = async (messageId) => {
+    if (!replyContent[messageId]?.trim()) {
+      alert('Veuillez écrire une réponse');
+      return;
+    }
+
+    setReplyLoading(prev => ({ ...prev, [messageId]: true }));
+    try {
+      await api.post(`/boutique-messages/${messageId}/boutique-reply`, {
+        contenu: replyContent[messageId]
+      });
+      setReplyContent(prev => ({ ...prev, [messageId]: '' }));
+      setExpandedId(null);
+      fetchMessages();
+      alert('Réponse envoyée avec succès');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de l\'envoi');
+    } finally {
+      setReplyLoading(prev => ({ ...prev, [messageId]: false }));
     }
   };
 
@@ -69,6 +124,7 @@ const UserMessages = ({ embedded = false }) => {
 
   if (loading) return <div className="loader"><div className="spinner"></div></div>;
 
+  // Grouper les messages admin
   const groupedMessages = {};
   messages.forEach(msg => {
     const groupId = msg.parentMessage || msg._id;
@@ -78,14 +134,36 @@ const UserMessages = ({ embedded = false }) => {
     groupedMessages[groupId].push(msg);
   });
 
-  const conversations = Object.values(groupedMessages).map(group => ({
+  const adminConversations = Object.values(groupedMessages).map(group => ({
     mainMessage: group.find(m => !m.parentMessage) || group[0],
-    replies: group.filter(m => m.parentMessage)
+    replies: group.filter(m => m.parentMessage),
+    type: 'admin'
   }));
+
+  // Grouper les messages boutique
+  const groupedBoutiqueMessages = {};
+  boutiquMessages.forEach(msg => {
+    const groupId = msg.parentMessage || msg._id;
+    if (!groupedBoutiqueMessages[groupId]) {
+      groupedBoutiqueMessages[groupId] = [];
+    }
+    groupedBoutiqueMessages[groupId].push(msg);
+  });
+
+  const boutiqueConversations = Object.values(groupedBoutiqueMessages).map(group => ({
+    mainMessage: group.find(m => !m.parentMessage) || group[0],
+    replies: group.filter(m => m.parentMessage),
+    type: 'boutique'
+  }));
+
+  // Combiner et trier par date
+  const allConversations = [...adminConversations, ...boutiqueConversations].sort((a, b) => 
+    new Date(b.mainMessage.createdAt) - new Date(a.mainMessage.createdAt)
+  );
 
   const content = (
     <>
-      {conversations.length === 0 ? (
+      {allConversations.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '20px', color: '#666' }}>
           <p>Aucun message</p>
           {embedded && (
@@ -95,30 +173,33 @@ const UserMessages = ({ embedded = false }) => {
           )}
         </div>
       ) : (
-        conversations.map((conv) => {
+        allConversations.map((conv) => {
           const msg = conv.mainMessage;
-          const isUnread = msg.readBy?.find(r => r.user === msg.recipients[0] || !r.readAt);
+          const isAdmin = conv.type === 'admin';
+          const isUnread = isAdmin ? msg.readBy?.find(r => r.user === msg.recipients[0] || !r.readAt) : !msg.readBy;
           
           return (
             <div key={msg._id} className="card" style={{ padding: 12, marginBottom: 10 }}>
               <div
                 onClick={() => {
-                  if (!isUnread?.readAt) handleMarkAsRead(msg._id);
+                  if (isAdmin && !isUnread?.readAt) handleMarkAsRead(msg._id);
+                  if (!isAdmin && !isUnread) handleBoutiqueMarkAsRead(msg._id);
                   setExpandedId(expandedId === msg._id ? null : msg._id);
                 }}
                 style={{
                   cursor: 'pointer',
                   display: 'flex',
                   justifyContent: 'space-between',
-                  alignItems: 'flex-start'
+                  alignItems: 'flex-start',
+                  borderLeft: `4px solid ${isAdmin ? '#1B2A6B' : '#667eea'}`
                 }}
               >
-                <div style={{ flex: 1 }}>
+                <div style={{ flex: 1, paddingLeft: 8 }}>
                   <p style={{ fontSize: 12, fontWeight: 600, margin: '0 0 4px 0' }}>
                     {msg.sender?.nom} {msg.isGroupMessage ? '(message de groupe)' : ''}
                   </p>
                   <p style={{ fontSize: 12, color: '#666', margin: 0, marginBottom: 4 }}>
-                    {msg.sender?.role === 'admin_simple' ? 'Admin' : 'Admin Suprême'}
+                    {isAdmin ? (msg.sender?.role === 'admin_simple' ? 'Admin' : 'Admin Suprême') : `Boutique: ${msg.boutique?.nom || 'N/A'}`}
                   </p>
                   <p style={{
                     fontSize: 13,
@@ -135,7 +216,7 @@ const UserMessages = ({ embedded = false }) => {
                   </p>
                 </div>
                 <div style={{ marginLeft: 12, textAlign: 'right' }}>
-                  {isUnread && !isUnread.readAt && (
+                  {isUnread && (
                     <span style={{
                       display: 'inline-block',
                       width: 8,
@@ -164,11 +245,11 @@ const UserMessages = ({ embedded = false }) => {
 
                   {conv.replies.map(reply => (
                     <div key={reply._id} style={{
-                      backgroundColor: reply.senderType === 'admin' ? '#f0f0f0' : '#e8f5e9',
+                      backgroundColor: isAdmin || reply.senderType === 'boutique' ? '#f0f0f0' : '#e8f5e9',
                       padding: 8,
                       borderRadius: 4,
                       marginBottom: 8,
-                      borderLeft: `3px solid ${reply.senderType === 'admin' ? '#1B2A6B' : '#4CAF50'}`
+                      borderLeft: `3px solid ${isAdmin ? '#1B2A6B' : '#667eea'}`
                     }}>
                       <p style={{ fontSize: 11, fontWeight: 600, margin: '0 0 4px 0' }}>
                         {reply.sender?.nom}
@@ -202,7 +283,7 @@ const UserMessages = ({ embedded = false }) => {
                     />
                     <div style={{ display: 'flex', gap: 6 }}>
                       <button
-                        onClick={() => handleReply(msg._id)}
+                        onClick={() => isAdmin ? handleReply(msg._id) : handleBoutiqueReply(msg._id)}
                         disabled={replyLoading[msg._id]}
                         style={{
                           flex: 1,
@@ -219,7 +300,7 @@ const UserMessages = ({ embedded = false }) => {
                         {replyLoading[msg._id] ? 'Envoi...' : 'Répondre'}
                       </button>
                       <button
-                        onClick={() => handleDelete(msg._id)}
+                        onClick={() => isAdmin ? handleDelete(msg._id) : handleBoutiqueDelete(msg._id)}
                         style={{
                           padding: '8px 12px',
                           backgroundColor: '#dc3545',
@@ -252,7 +333,7 @@ const UserMessages = ({ embedded = false }) => {
     <div className="page">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
         <h1 className="page-title">Messages</h1>
-        {unreadCount > 0 && (
+        {(unreadCount + unreadBoutiqueCount) > 0 && (
           <div style={{
             backgroundColor: '#dc3545',
             color: 'white',
@@ -265,7 +346,7 @@ const UserMessages = ({ embedded = false }) => {
             fontWeight: 'bold',
             fontSize: 14
           }}>
-            {unreadCount}
+            {unreadCount + unreadBoutiqueCount}
           </div>
         )}
       </div>
