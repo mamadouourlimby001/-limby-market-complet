@@ -9,7 +9,7 @@ const adminSeed = require('./seed/adminSeed');
 dotenv.config();
 
 // Connexion à MongoDB
-connectDB();
+connectDB().catch(err => console.error('Failed to connect to MongoDB:', err));
 
 const app = express();
 
