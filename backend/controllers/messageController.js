@@ -172,11 +172,8 @@ const deleteMessage = async (req, res) => {
       return res.status(404).json({ message: 'Message non trouvé' });
     }
 
-    // Ajouter l'utilisateur à la liste des suppressions
-    if (!message.deletedBy.includes(userId)) {
-      message.deletedBy.push(userId);
-      await message.save();
-    }
+    // Hard delete - supprimer complètement de la base de données
+    await Message.findByIdAndDelete(messageId);
 
     res.json({ message: 'Message supprimé' });
   } catch (err) {

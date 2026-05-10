@@ -103,8 +103,9 @@ const deleteAnnouncement = async (req, res) => {
       await deleteImagesFromCloudinary(announcement.photos);
     }
     
-    announcement.statut = 'supprimé';
-    await announcement.save();
+    // Hard delete - supprimer complètement de la base de données
+    await Announcement.findByIdAndDelete(req.params.id);
+    
     res.json({ message: 'Annonce supprimée avec succès.' });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
