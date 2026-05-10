@@ -55,10 +55,11 @@ const ProduitsCommandes = () => {
 
     try {
       await api.delete(`/orders/${orderId}/delete-permanently`);
+      setExpandedId(null);
       fetchOrders();
       alert('Commande supprimée');
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
     }
   };
 

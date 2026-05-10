@@ -65,9 +65,11 @@ const BoutiqueMessages = () => {
     if (!window.confirm('Supprimer ce message ?')) return;
     try {
       await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
+      setExpandedId(null);
       fetchMessages();
+      alert('Message supprimé');
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur');
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
     }
   };
 
