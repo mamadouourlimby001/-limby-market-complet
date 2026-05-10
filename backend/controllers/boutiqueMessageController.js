@@ -177,17 +177,16 @@ const replyToMessage = async (req, res) => {
       return res.status(404).json({ message: 'Message non trouvé' });
     }
 
-    // Déterminer le type d'expéditeur et le destinataire
-    let senderType, recipient;
-    if (parentMessage.senderType === 'acheteur') {
-      // Si le parent vient d'un acheteur, le propriétaire répond
-      senderType = 'boutique';
-      recipient = parentMessage.sender;
-    } else {
-      // Si le parent vient du propriétaire, l'acheteur répond
-      senderType = 'acheteur';
-      recipient = parentMessage.recipient;
+    // Déterminer le senderType basé sur qui répond réellement (pas sur le parent)
+    const boutique = await Boutique.findById(parentMessage.boutique);
+    if (!boutique) {
+      return res.status(404).json({ message: 'Boutique non trouvée' });
     }
+
+    let senderType = boutique.proprietaire.toString() === userId.toString() ? 'boutique' : 'acheteur';
+
+    // Déterminer le destinataire: la personne qui a envoyé le message parent
+    let recipient = parentMessage.sender;
 
     // Créer la réponse
     const reply = new BoutiqueMessage({
