@@ -23,7 +23,7 @@ router.post('/', auth, createOrder);
 router.get('/my-orders', auth, getMyOrders);
 router.get('/boutique-orders', auth, getBoutiqueOrders);
 router.put('/:id/status', auth, updateOrderStatus);
-router.delete('/:id', auth, cancelOrder);
 router.delete('/:id/delete-permanently', auth, deleteOrder);
+router.delete('/:id', auth, cancelOrder);
 
 module.exports = router;
