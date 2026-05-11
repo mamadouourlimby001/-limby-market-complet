@@ -8,7 +8,9 @@ const {
   getSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest,
   getReports, handleReport, getUsers, deleteUser, addCredits, removeCredits, setVerified,
   setBoutiqueActive, setBoutiqueVerified, renewBoutique,
-  addAdmin, removeAdmin, getDashboardStats
+  addAdmin, removeAdmin, getDashboardStats,
+  getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, resetDashboardStats,
+  getBoutiqueDetailStats
 } = require('../controllers/adminController');
 
 // Toutes les routes admin nécessitent auth + isAdmin
@@ -30,6 +32,12 @@ router.post('/users/:id/set-verified', setVerified);
 router.post('/boutiques/:id/set-active', setBoutiqueActive);
 router.post('/boutiques/:id/set-verified', setBoutiqueVerified);
 router.post('/boutiques/:id/renew', renewBoutique);
+router.get('/boutiques', getAllBoutiques);
+router.delete('/boutiques/:id', deleteBoutique);
+router.put('/boutiques/:id/activate', activateBoutique);
+router.put('/boutiques/:id/deactivate', deactivateBoutique);
+router.get('/boutiques/:id/stats', getBoutiqueDetailStats);
+router.post('/reset-stats', resetDashboardStats);
 router.get('/dashboard-stats', getDashboardStats);
 
 // Routes admin suprême uniquement

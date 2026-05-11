@@ -320,10 +320,162 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
+// GET /api/admin/boutiques - Récupérer toutes les boutiques
+const getAllBoutiques = async (req, res) => {
+  try {
+    const boutiques = await Boutique.find()
+      .populate('proprietaire', 'nom telephone')
+      .sort({ createdAt: -1 });
+    res.json(boutiques);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// DELETE /api/admin/boutiques/:id - Supprimer une boutique
+const deleteBoutique = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Supprimer les produits
+    await BoutiqueProduct.deleteMany({ boutique: id });
+    
+    // Supprimer la boutique
+    const boutique = await Boutique.findByIdAndDelete(id);
+    if (!boutique) {
+      return res.status(404).json({ message: 'Boutique non trouvée' });
+    }
+    
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'boutique_supprimee',
+      details: { boutiqueId: id, nom: boutique.nom }
+    });
+    
+    res.json({ message: 'Boutique supprimée' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// PUT /api/admin/boutiques/:id/activate - Activer une boutique pour 30 jours
+const activateBoutique = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30);
+    
+    const boutique = await Boutique.findByIdAndUpdate(
+      id,
+      {
+        isActive: true,
+        dateExpiration: expirationDate
+      },
+      { new: true }
+    ).populate('proprietaire', 'nom telephone');
+    
+    if (!boutique) {
+      return res.status(404).json({ message: 'Boutique non trouvée' });
+    }
+    
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'boutique_activee',
+      details: { boutiqueId: id, nom: boutique.nom }
+    });
+    
+    res.json({ message: 'Boutique activée pour 30 jours', boutique });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// PUT /api/admin/boutiques/:id/deactivate - Désactiver une boutique
+const deactivateBoutique = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const boutique = await Boutique.findByIdAndUpdate(
+      id,
+      { isActive: false },
+      { new: true }
+    ).populate('proprietaire', 'nom telephone');
+    
+    if (!boutique) {
+      return res.status(404).json({ message: 'Boutique non trouvée' });
+    }
+    
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'boutique_desactivee',
+      details: { boutiqueId: id, nom: boutique.nom }
+    });
+    
+    res.json({ message: 'Boutique désactivée', boutique });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// GET /api/admin/boutiques/:id/stats - Récupérer les stats d'une boutique
+const getBoutiqueDetailStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const boutique = await Boutique.findById(id);
+    if (!boutique) {
+      return res.status(404).json({ message: 'Boutique non trouvée' });
+    }
+
+    res.json({
+      totalOrders: boutique.totalOrders,
+      totalConfirmed: boutique.totalConfirmed,
+      totalCancelled: boutique.totalCancelled,
+      totalRevenue: boutique.totalRevenue,
+      lastResetDate: boutique.lastResetDate
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Erreur lors de la récupération des stats' });
+  }
+};
+
+// POST /api/admin/reset-stats - Réinitialiser les stats du tableau de bord
+const resetDashboardStats = async (req, res) => {
+  try {
+    // Réinitialiser les contacts débloqués
+    await ContactUnlock.deleteMany({});
+    
+    // Réinitialiser les crédits et revenus (marquer comme traités)
+    await CreditRequest.updateMany(
+      { statut: 'approuvé' },
+      { statut: 'reinitialise' }
+    );
+    
+    await SubscriptionRequest.updateMany(
+      { statut: 'approuvé' },
+      { statut: 'reinitialise' }
+    );
+    
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'stats_reinitializees',
+      details: { timestamp: new Date() }
+    });
+    
+    res.json({ message: 'Statistiques réinitialisées' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 module.exports = {
   getCreditRequests, approveCreditRequest, rejectCreditRequest,
   getSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest,
   getReports, handleReport, getUsers, deleteUser, addCredits, removeCredits, setVerified,
   setBoutiqueActive, setBoutiqueVerified, renewBoutique,
-  addAdmin, removeAdmin, getDashboardStats
+  addAdmin, removeAdmin, getDashboardStats,
+  getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, resetDashboardStats,
+  getBoutiqueDetailStats
 };

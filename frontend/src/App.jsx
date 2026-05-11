@@ -32,6 +32,9 @@ import SendMessageToAdmins from './pages/SendMessageToAdmins';
 import UserBoutiqueMessages from './pages/UserBoutiqueMessages';
 import BoutiqueMessages from './pages/BoutiqueMessages';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminBoutiques from './pages/AdminBoutiques';
+import AdminBoutiqueDetail from './pages/AdminBoutiqueDetail';
+import AdminResetStats from './pages/AdminResetStats';
 import AdminCreditRequests from './pages/AdminCreditRequests';
 import AdminSubscriptions from './pages/AdminSubscriptions';
 import AdminReports from './pages/AdminReports';
@@ -81,6 +84,9 @@ function App() {
             <Route path="/admin/abonnements" element={<AdminRoute><AdminSubscriptions /></AdminRoute>} />
             <Route path="/admin/signalements" element={<AdminRoute><AdminReports /></AdminRoute>} />
             <Route path="/admin/utilisateurs" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+            <Route path="/admin/boutiques" element={<AdminRoute><AdminBoutiques /></AdminRoute>} />
+            <Route path="/admin/boutique/:id/bilan" element={<AdminRoute><AdminBoutiqueDetail /></AdminRoute>} />
+            <Route path="/admin/reset-stats" element={<AdminRoute><AdminResetStats /></AdminRoute>} />
             <Route path="/admin/send-to-users" element={<AdminRoute><AdminSendToUsers /></AdminRoute>} />
             <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />

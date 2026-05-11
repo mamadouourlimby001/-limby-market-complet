@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool } from 'lucide-react';
+import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool, ShoppingBag, RotateCcw } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
@@ -32,8 +32,8 @@ const AdminDashboard = () => {
     { path: '/admin/credits', label: 'Demandes crédits', icon: '�' },
     { path: '/admin/abonnements', label: 'Abonnements', icon: '♻️' },
     { path: '/admin/signalements', label: 'Signalements', icon: '⚠️' },
-    { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: '�‍💼' },
-    { path: '/admin/send-to-users', label: 'Écrire aux utilisateurs', icon: '✎' },
+    { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: '�‍💼' },    { path: '/admin/boutiques', label: 'Boutiques', icon: '🏪' },
+    { path: '/admin/reset-stats', label: 'Réinitialiser', icon: '🔄' },    { path: '/admin/send-to-users', label: 'Écrire aux utilisateurs', icon: '✎' },
     { path: '/admin/messages', label: 'Messages', icon: 'messages' }
   ];
 
@@ -80,6 +80,8 @@ const AdminDashboard = () => {
               {item.path === '/admin/abonnements' && <RefreshCw size={28} />}
               {item.path === '/admin/signalements' && <AlertTriangle size={28} />}
               {item.path === '/admin/utilisateurs' && <Users size={28} />}
+              {item.path === '/admin/boutiques' && <ShoppingBag size={28} />}
+              {item.path === '/admin/reset-stats' && <RotateCcw size={28} />}
               {item.path === '/admin/send-to-users' && <PenTool size={28} />}
             </span>
             <span style={{ fontSize: 13, fontWeight: 600, color: '#1B2A6B' }}>{item.label}</span>
