@@ -150,8 +150,8 @@ const deleteLocation = async (req, res) => {
       await deleteImagesFromCloudinary(location.photos);
     }
 
-    location.statut = 'supprimé';
-    await location.save();
+    // Hard delete - supprimer complètement de la base de données
+    await Location.findByIdAndDelete(req.params.id);
 
     res.json({ message: 'Location supprimée avec succès.' });
   } catch (error) {

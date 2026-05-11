@@ -255,7 +255,7 @@ const markAsRead = async (req, res) => {
   }
 };
 
-// DELETE - Supprimer (soft delete) un message
+// DELETE - Supprimer (hard delete) un message
 const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
@@ -271,11 +271,8 @@ const deleteMessage = async (req, res) => {
       return res.status(403).json({ message: 'Accès refusé' });
     }
 
-    // Soft delete
-    if (!message.deletedBy.includes(userId)) {
-      message.deletedBy.push(userId);
-      await message.save();
-    }
+    // Hard delete - supprimer complètement de la base de données
+    await BoutiqueMessage.findByIdAndDelete(messageId);
 
     res.json({ message: 'Message supprimé' });
   } catch (err) {

@@ -244,22 +244,6 @@ const BoutiqueMessages = () => {
                     >
                       Supprimer
                     </button>
-                    <button
-                      onClick={() => handleDelete(msg._id)}
-                      style={{
-                        flex: 1,
-                        padding: 8,
-                        background: '#dc3545',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: 4,
-                        fontWeight: 600,
-                        fontSize: 12,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      Supprimer
-                    </button>
                   </div>
                 </div>
               )}

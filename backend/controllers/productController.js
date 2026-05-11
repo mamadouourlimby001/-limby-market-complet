@@ -155,8 +155,8 @@ const deleteProduct = async (req, res) => {
       await deleteImagesFromCloudinary(product.photos);
     }
 
-    product.statut = 'supprimé';
-    await product.save();
+    // Hard delete - supprimer complètement de la base de données
+    await Product.findByIdAndDelete(req.params.id);
 
     res.json({ message: 'Produit supprimé avec succès.' });
   } catch (error) {
