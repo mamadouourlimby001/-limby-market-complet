@@ -7,6 +7,8 @@ const MesCommandes = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [expandedId, setExpandedId] = useState(null);
+  const [isDeletingId, setIsDeletingId] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -45,12 +47,16 @@ const MesCommandes = () => {
   const handleDelete = async (orderId) => {
     if (!window.confirm('Supprimer définitivement cette commande ?')) return;
 
+    setIsDeletingId(orderId);
     try {
       await api.delete(`/orders/${orderId}/delete-permanently`);
-      fetchOrders();
+      await fetchOrders();
+      setExpandedId(null);
       alert('Commande supprimée');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
+    } finally {
+      setIsDeletingId(null);
     }
   };
 
@@ -210,6 +216,7 @@ const MesCommandes = () => {
                 )}
                 <button
                   onClick={() => handleDelete(order._id)}
+                  disabled={isDeletingId === order._id}
                   style={{
                     flex: 1,
                     padding: 10,
@@ -219,10 +226,11 @@ const MesCommandes = () => {
                     borderRadius: 4,
                     fontWeight: 600,
                     fontSize: 12,
-                    cursor: 'pointer'
+                    cursor: isDeletingId === order._id ? 'not-allowed' : 'pointer',
+                    opacity: isDeletingId === order._id ? 0.6 : 1
                   }}
                 >
-                  Supprimer
+                  {isDeletingId === order._id ? 'Suppression...' : 'Supprimer'}
                 </button>
               </div>
             </div>

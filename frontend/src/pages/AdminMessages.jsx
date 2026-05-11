@@ -43,6 +43,7 @@ const AdminMessages = () => {
     try {
       await api.delete(`/messages/${messageId}`);
       await fetchMessages();
+      setExpandedId(null);
       alert('Message supprimé avec succès');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de la suppression');
