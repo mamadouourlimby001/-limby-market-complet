@@ -54,6 +54,26 @@ const boutiqueSchema = new mongoose.Schema({
   isVerified: {
     type: Boolean,
     default: false
+  },
+  totalOrders: {
+    type: Number,
+    default: 0
+  },
+  totalConfirmed: {
+    type: Number,
+    default: 0
+  },
+  totalCancelled: {
+    type: Number,
+    default: 0
+  },
+  totalRevenue: {
+    type: Number,
+    default: 0
+  },
+  lastResetDate: {
+    type: Date,
+    default: Date.now
   }
 });
 

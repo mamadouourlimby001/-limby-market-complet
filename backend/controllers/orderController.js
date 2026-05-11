@@ -38,6 +38,12 @@ const createOrder = async (req, res) => {
       noteAcheteur: noteAcheteur || ''
     });
 
+    // Incrémenter le compteur de commandes totales
+    await Boutique.findByIdAndUpdate(
+      product.boutique,
+      { $inc: { totalOrders: 1 } }
+    );
+
     // Notifier le vendeur
     await Notification.create({
       destinataire: boutique.proprietaire,
@@ -125,11 +131,36 @@ const updateOrderStatus = async (req, res) => {
     }
 
     // Mettre à jour
+    const oldStatus = order.status;
     order.status = status;
     if (noteVendeur) {
       order.noteVendeur = noteVendeur;
     }
     await order.save();
+
+    // Mettre à jour les stats de la boutique
+    const updateObj = {};
+    if (oldStatus !== 'confirmée' && status === 'confirmée') {
+      updateObj.$inc = { totalConfirmed: 1, totalRevenue: order.prixTotal };
+    } else if (oldStatus === 'confirmée' && status !== 'confirmée') {
+      updateObj.$inc = { totalConfirmed: -1, totalRevenue: -order.prixTotal };
+    }
+    if (oldStatus !== 'annulée' && status === 'annulée') {
+      updateObj.$inc = { ...updateObj.$inc, totalCancelled: 1 };
+      if (oldStatus === 'confirmée') {
+        updateObj.$inc.totalConfirmed = (updateObj.$inc.totalConfirmed || 0) - 1;
+        updateObj.$inc.totalRevenue = (updateObj.$inc.totalRevenue || 0) - order.prixTotal;
+      }
+    } else if (oldStatus === 'annulée' && status !== 'annulée') {
+      updateObj.$inc = { ...updateObj.$inc, totalCancelled: -1 };
+      if (status === 'confirmée') {
+        updateObj.$inc.totalConfirmed = (updateObj.$inc.totalConfirmed || 0) + 1;
+        updateObj.$inc.totalRevenue = (updateObj.$inc.totalRevenue || 0) + order.prixTotal;
+      }
+    }
+    if (Object.keys(updateObj).length > 0) {
+      await Boutique.findByIdAndUpdate(order.boutique, updateObj);
+    }
 
     // Notifier l'acheteur
     await Notification.create({
@@ -170,8 +201,17 @@ const cancelOrder = async (req, res) => {
       return res.status(403).json({ message: 'Accès refusé' });
     }
 
+    const oldStatus = order.status;
     order.status = 'annulée';
     await order.save();
+
+    // Mettre à jour les stats de la boutique
+    const updateObj = { $inc: { totalCancelled: 1 } };
+    if (oldStatus === 'confirmée') {
+      updateObj.$inc.totalConfirmed = -1;
+      updateObj.$inc.totalRevenue = -order.prixTotal;
+    }
+    await Boutique.findByIdAndUpdate(order.boutique, updateObj);
 
     res.json({ message: 'Commande annulée' });
   } catch (error) {
@@ -199,6 +239,16 @@ const deleteOrder = async (req, res) => {
     if (!isBuyer && !isVendor) {
       return res.status(403).json({ message: 'Accès refusé' });
     }
+
+    // Mettre à jour les stats de la boutique avant suppression
+    const updateObj = { $inc: { totalOrders: -1 } };
+    if (order.status === 'confirmée') {
+      updateObj.$inc.totalConfirmed = -1;
+      updateObj.$inc.totalRevenue = -order.prixTotal;
+    } else if (order.status === 'annulée') {
+      updateObj.$inc.totalCancelled = -1;
+    }
+    await Boutique.findByIdAndUpdate(order.boutique, updateObj);
 
     await Order.findByIdAndDelete(id);
 
