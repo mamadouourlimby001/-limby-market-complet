@@ -153,9 +153,17 @@ const UserMessages = ({ embedded = false }) => {
     type: 'admin'
   }));
 
-  // Grouper les messages boutique
-  const groupedBoutiqueMessages = {};
+  // Aplatir et grouper les messages boutique
+  const flatBoutiqueMessages = [];
   boutiquMessages.forEach(msg => {
+    flatBoutiqueMessages.push(msg);
+    if (msg.replies && msg.replies.length > 0) {
+      flatBoutiqueMessages.push(...msg.replies);
+    }
+  });
+
+  const groupedBoutiqueMessages = {};
+  flatBoutiqueMessages.forEach(msg => {
     const groupId = msg.parentMessage || msg._id;
     if (!groupedBoutiqueMessages[groupId]) {
       groupedBoutiqueMessages[groupId] = [];
