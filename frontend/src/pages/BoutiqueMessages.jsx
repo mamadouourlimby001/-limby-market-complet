@@ -8,6 +8,7 @@ const BoutiqueMessages = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [replyText, setReplyText] = useState({});
   const [replying, setReplying] = useState({});
+  const [isDeletingId, setIsDeletingId] = useState(null);
 
   useEffect(() => {
     fetchMessages();
@@ -43,7 +44,7 @@ const BoutiqueMessages = () => {
         contenu: replyText[messageId]
       });
       setReplyText(prev => ({ ...prev, [messageId]: '' }));
-      fetchMessages();
+      await fetchMessages();
       alert('Réponse envoyée');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
@@ -63,15 +64,17 @@ const BoutiqueMessages = () => {
 
   const handleDelete = async (messageId) => {
     if (!window.confirm('Supprimer ce message ?')) return;
+    
+    setIsDeletingId(messageId);
     try {
-      const response = await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
-      console.log('Message deleted:', response.data);
+      await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
+      await fetchMessages();
       setExpandedId(null);
-      fetchMessages();
       alert('Message supprimé avec succès');
     } catch (err) {
-      console.error('Delete error:', err.response?.data || err.message);
-      alert(err.response?.data?.message || `Erreur: ${err.message}`);
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
+    } finally {
+      setIsDeletingId(null);
     }
   };
 
@@ -230,6 +233,7 @@ const BoutiqueMessages = () => {
                     )}
                     <button
                       onClick={() => handleDelete(msg._id)}
+                      disabled={isDeletingId === msg._id}
                       style={{
                         flex: 1,
                         padding: 8,
@@ -239,10 +243,11 @@ const BoutiqueMessages = () => {
                         borderRadius: 4,
                         fontWeight: 600,
                         fontSize: 12,
-                        cursor: 'pointer'
+                        cursor: isDeletingId === msg._id ? 'not-allowed' : 'pointer',
+                        opacity: isDeletingId === msg._id ? 0.6 : 1
                       }}
                     >
-                      Supprimer
+                      {isDeletingId === msg._id ? 'Suppression...' : 'Supprimer'}
                     </button>
                   </div>
                 </div>

@@ -9,6 +9,7 @@ const AdminMessages = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [replyContent, setReplyContent] = useState({});
   const [replyLoading, setReplyLoading] = useState({});
+  const [isDeletingId, setIsDeletingId] = useState(null);
 
   useEffect(() => {
     fetchMessages();
@@ -37,11 +38,16 @@ const AdminMessages = () => {
 
   const handleDelete = async (messageId) => {
     if (!window.confirm('Supprimer ce message ?')) return;
+    
+    setIsDeletingId(messageId);
     try {
       await api.delete(`/messages/${messageId}`);
-      fetchMessages();
+      await fetchMessages();
+      alert('Message supprimé avec succès');
     } catch (err) {
-      console.error(err);
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
+    } finally {
+      setIsDeletingId(null);
     }
   };
 
@@ -58,7 +64,7 @@ const AdminMessages = () => {
       });
       setReplyContent(prev => ({ ...prev, [parentId]: '' }));
       setExpandedId(null);
-      fetchMessages();
+      await fetchMessages();
       alert('Réponse envoyée avec succès');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de l\'envoi');
@@ -254,6 +260,7 @@ const AdminMessages = () => {
                       </button>
                       <button
                         onClick={() => handleDelete(msg._id)}
+                        disabled={isDeletingId === msg._id}
                         style={{
                           padding: '8px 12px',
                           backgroundColor: '#dc3545',
@@ -261,11 +268,12 @@ const AdminMessages = () => {
                           border: 'none',
                           borderRadius: 4,
                           fontWeight: 600,
-                          cursor: 'pointer',
+                          cursor: isDeletingId === msg._id ? 'not-allowed' : 'pointer',
+                          opacity: isDeletingId === msg._id ? 0.6 : 1,
                           fontSize: 12
                         }}
                       >
-                        Supprimer
+                        {isDeletingId === msg._id ? 'Suppression...' : 'Supprimer'}
                       </button>
                     </div>
                   </div>

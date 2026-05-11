@@ -11,6 +11,7 @@ const UserMessages = ({ embedded = false }) => {
   const [expandedId, setExpandedId] = useState(null);
   const [replyContent, setReplyContent] = useState({});
   const [replyLoading, setReplyLoading] = useState({});
+  const [isDeletingId, setIsDeletingId] = useState(null);
 
   useEffect(() => {
     fetchMessages();
@@ -51,14 +52,17 @@ const UserMessages = ({ embedded = false }) => {
 
   const handleDelete = async (messageId) => {
     if (!window.confirm('Supprimer ce message ?')) return;
+    
+    setIsDeletingId(messageId);
     try {
       await api.delete(`/messages/${messageId}`);
       setExpandedId(null);
-      fetchMessages();
+      await fetchMessages();
       alert('Message supprimé');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de la suppression');
-      console.error(err);
+    } finally {
+      setIsDeletingId(null);
     }
   };
 
@@ -73,14 +77,17 @@ const UserMessages = ({ embedded = false }) => {
 
   const handleBoutiqueDelete = async (messageId) => {
     if (!window.confirm('Supprimer ce message ?')) return;
+    
+    setIsDeletingId(messageId);
     try {
       await api.delete(`/boutique-messages/${messageId}/boutique-delete`);
       setExpandedId(null);
-      fetchMessages();
+      await fetchMessages();
       alert('Message supprimé');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de la suppression');
-      console.error(err);
+    } finally {
+      setIsDeletingId(null);
     }
   };
 
@@ -97,7 +104,7 @@ const UserMessages = ({ embedded = false }) => {
       });
       setReplyContent(prev => ({ ...prev, [messageId]: '' }));
       setExpandedId(null);
-      fetchMessages();
+      await fetchMessages();
       alert('Réponse envoyée avec succès');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de l\'envoi');
@@ -119,7 +126,7 @@ const UserMessages = ({ embedded = false }) => {
       });
       setReplyContent(prev => ({ ...prev, [parentId]: '' }));
       setExpandedId(null);
-      fetchMessages();
+      await fetchMessages();
       alert('Réponse envoyée avec succès');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de l\'envoi');
@@ -307,6 +314,7 @@ const UserMessages = ({ embedded = false }) => {
                       </button>
                       <button
                         onClick={() => isAdmin ? handleDelete(msg._id) : handleBoutiqueDelete(msg._id)}
+                        disabled={isDeletingId === msg._id}
                         style={{
                           padding: '8px 12px',
                           backgroundColor: '#dc3545',
@@ -314,11 +322,12 @@ const UserMessages = ({ embedded = false }) => {
                           border: 'none',
                           borderRadius: 4,
                           fontWeight: 600,
-                          cursor: 'pointer',
+                          cursor: isDeletingId === msg._id ? 'not-allowed' : 'pointer',
+                          opacity: isDeletingId === msg._id ? 0.6 : 1,
                           fontSize: 12
                         }}
                       >
-                        Supprimer
+                        {isDeletingId === msg._id ? 'Suppression...' : 'Supprimer'}
                       </button>
                     </div>
                   </div>
