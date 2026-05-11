@@ -56,7 +56,7 @@ const BoutiqueMessages = () => {
   const handleMarkRead = async (messageId) => {
     try {
       await api.put(`/boutique-messages/${messageId}/boutique-read`);
-      fetchMessages();
+      await fetchMessages();
     } catch (err) {
       console.error(err);
     }

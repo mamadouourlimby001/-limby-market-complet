@@ -37,7 +37,7 @@ const MesCommandes = () => {
 
     try {
       await api.delete(`/orders/${orderId}`);
-      fetchOrders();
+      await fetchOrders();
       alert('Commande annulée');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');

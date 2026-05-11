@@ -30,7 +30,7 @@ const AdminMessages = () => {
   const handleMarkAsRead = async (messageId) => {
     try {
       await api.put(`/messages/${messageId}/read`);
-      fetchMessages();
+      await fetchMessages();
     } catch (err) {
       console.error(err);
     }
