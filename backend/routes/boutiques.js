@@ -4,13 +4,16 @@ const { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBou
 const { getBoutiqueStats, resetBoutiqueStats } = require('../controllers/boutiqueStatsController');
 const auth = require('../middleware/auth');
 
+// Routes statiques AVANT les routes dynamiques
 router.get('/my-boutique', auth, getMyBoutique);
 router.get('/stats/bilan', auth, getBoutiqueStats);
+router.put('/stats/reset', auth, resetBoutiqueStats);
+
+// Routes dynamiques APRÈS
 router.get('/', getBoutiques);
 router.get('/:id', getBoutique);
 router.post('/', auth, createBoutique);
 router.post('/:id/products', auth, addBoutiqueProduct);
 router.delete('/:id/products/:productId', auth, deleteBoutiqueProduct);
-router.put('/stats/reset', auth, resetBoutiqueStats);
 
 module.exports = router;
