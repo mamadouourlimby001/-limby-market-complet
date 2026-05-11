@@ -15,7 +15,6 @@ const BoutiqueDetail = () => {
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageContent, setMessageContent] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '' });
 
   useEffect(() => {
     const fetch = async () => {
@@ -52,8 +51,7 @@ const BoutiqueDetail = () => {
       });
       setMessageContent('');
       setShowMessageModal(false);
-      setToast({ show: true, message: 'Message envoyé avec succès ✓' });
-      setTimeout(() => setToast({ show: false, message: '' }), 3000);
+      alert('Message envoyé avec succès');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur lors de l\'envoi');
     } finally {
@@ -90,23 +88,6 @@ const BoutiqueDetail = () => {
         >
           <Send size={16} /> Écrire à la boutique
         </button>
-      )}
-
-      {/* Toast Message */}
-      {toast.show && (
-        <div style={{
-          background: '#059669',
-          color: '#fff',
-          padding: '12px 16px',
-          borderRadius: 6,
-          marginBottom: 14,
-          fontSize: 14,
-          fontWeight: 600,
-          textAlign: 'center',
-          animation: 'slideDown 0.3s ease'
-        }}>
-          {toast.message}
-        </div>
       )}
 
       {/* Modal d'envoi de message */}
