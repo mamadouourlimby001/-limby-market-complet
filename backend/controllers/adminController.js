@@ -93,8 +93,19 @@ const approveSubscriptionRequest = async (req, res) => {
     request.statut = 'approuvé';
     request.traitePar = req.user._id;
     await request.save();
-    await Notification.create({ destinataire: request.demandeur, message: `Votre boutique "${boutique.nom}" a été renouvelée pour 30 jours !`, type: 'abonnement_renouveler' });
+
     res.json({ message: 'Abonnement renouvelé.' });
+
+    // Notifier le demandeur (non-bloquant)
+    try {
+      await Notification.create({
+        destinataire: request.demandeur,
+        message: `Votre boutique "${boutique.nom}" a été renouvelée pour 30 jours !`,
+        type: 'abonnement_renouveler'
+      });
+    } catch (notifErr) {
+      console.error('Erreur lors de la création de la notification:', notifErr);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
