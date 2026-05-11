@@ -209,18 +209,22 @@ const replyToMessage = async (req, res) => {
       { path: 'sender', select: 'nom telephone' }
     ]);
 
-    // Notifier le destinataire
-    const senderName = await User.findById(userId).select('nom');
-    await Notification.create({
-      destinataire: recipient,
-      message: `${senderName?.nom} a répondu à votre message`,
-      type: 'message'
-    });
-
     res.status(201).json({
       message: 'Réponse envoyée avec succès',
       data: reply
     });
+
+    // Notifier le destinataire (non-bloquant)
+    try {
+      const senderName = await User.findById(userId).select('nom');
+      await Notification.create({
+        destinataire: recipient,
+        message: `${senderName?.nom} a répondu à votre message`,
+        type: 'message'
+      });
+    } catch (notifErr) {
+      console.error('Erreur lors de la création de la notification:', notifErr);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur lors de l\'envoi de la réponse' });
