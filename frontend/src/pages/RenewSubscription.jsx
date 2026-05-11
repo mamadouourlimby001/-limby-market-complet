@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../utils/api';
 
 const RenewSubscription = () => {
-  const [form, setForm] = useState({ nomBoutique: '', telephoneDepot: '', montant: '10000', boutiqueId: '' });
+  const [form, setForm] = useState({ nomBoutique: '', telephoneDepot: '', montant: '28000', boutiqueId: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -43,7 +43,7 @@ const RenewSubscription = () => {
     <div className="page" style={{ maxWidth: 500, margin: '0 auto' }}>
       <h1 className="page-title">Renouveler abonnement</h1>
       <div className="alert alert-info">
-        � Déposez <strong>10 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> puis soumettez ce formulaire.
+        💳 Déposez <strong>28 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> puis soumettez ce formulaire.
       </div>
       {error && <div className="alert alert-danger">{error}</div>}
       <form onSubmit={handleSubmit}>
