@@ -44,18 +44,22 @@ const sendMessageToBoutique = async (req, res) => {
       { path: 'boutique', select: 'nom' }
     ]);
 
-    // Notifier le propriétaire de la boutique
-    const senderUser = await User.findById(userId).select('nom');
-    await Notification.create({
-      destinataire: boutique.proprietaire,
-      message: `Nouveau message de ${senderUser?.nom} sur "${boutique.nom}"`,
-      type: 'message'
-    });
-
     res.status(201).json({
       message: 'Message envoyé avec succès',
       data: message
     });
+
+    // Notifier le propriétaire de la boutique (non-bloquant)
+    try {
+      const senderUser = await User.findById(userId).select('nom');
+      await Notification.create({
+        destinataire: boutique.proprietaire,
+        message: `Nouveau message de ${senderUser?.nom} sur "${boutique.nom}"`,
+        type: 'message'
+      });
+    } catch (notifErr) {
+      console.error('Erreur lors de la création de la notification:', notifErr);
+    }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Erreur lors de l\'envoi du message' });
