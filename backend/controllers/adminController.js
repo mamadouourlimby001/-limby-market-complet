@@ -83,44 +83,39 @@ const getSubscriptionRequests = async (req, res) => {
 // POST /api/admin/subscription-requests/:id/approve
 const approveSubscriptionRequest = async (req, res) => {
   try {
-    console.log('🔍 [approveSubscriptionRequest] Début - ID:', req.params.id);
     const request = await SubscriptionRequest.findById(req.params.id);
-    console.log('🔍 [approveSubscriptionRequest] Demande trouvée:', request ? 'oui' : 'non');
     if (!request) return res.status(404).json({ message: 'Demande introuvable.' });
     
-    console.log('🔍 [approveSubscriptionRequest] Recherche boutique ID:', request.boutique);
-    const boutique = await Boutique.findById(request.boutique);
-    console.log('🔍 [approveSubscriptionRequest] Boutique trouvée:', boutique ? 'oui' : 'non');
-    if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
-    
-    console.log('🔍 [approveSubscriptionRequest] Mise à jour boutique...');
-    boutique.isActive = true;
-    boutique.dateExpiration = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    await boutique.save();
-    console.log('🔍 [approveSubscriptionRequest] Boutique sauvegardée ✓');
-    
-    console.log('🔍 [approveSubscriptionRequest] Mise à jour demande...');
-    request.statut = 'approuvé';
-    request.traitePar = req.user._id;
-    await request.save();
-    console.log('🔍 [approveSubscriptionRequest] Demande sauvegardée ✓');
+    if (!request.boutique) return res.status(400).json({ message: 'Boutique non associée.' });
+
+    // Mettre à jour la boutique directement
+    await Boutique.findByIdAndUpdate(request.boutique, {
+      isActive: true,
+      dateExpiration: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    });
+
+    // Mettre à jour la demande directement
+    await SubscriptionRequest.findByIdAndUpdate(req.params.id, {
+      statut: 'approuvé',
+      traitePar: req.user._id
+    });
 
     res.json({ message: 'Abonnement renouvelé.' });
 
-    // Notifier le demandeur (non-bloquant)
+    // Notifier le demandeur (non-bloquant, ignore les erreurs)
     try {
-      console.log('🔍 [approveSubscriptionRequest] Création notification pour:', request.demandeur);
-      await Notification.create({
-        destinataire: request.demandeur,
-        message: `Votre boutique "${boutique.nom}" a été renouvelée pour 30 jours !`,
-        type: 'abonnement_renouveler'
-      });
-      console.log('🔍 [approveSubscriptionRequest] Notification créée ✓');
+      if (request.demandeur) {
+        const boutique = await Boutique.findById(request.boutique).select('nom');
+        await Notification.create({
+          destinataire: request.demandeur,
+          message: `Votre boutique "${boutique.nom}" a été renouvelée pour 30 jours !`,
+          type: 'abonnement_renouveler'
+        });
+      }
     } catch (notifErr) {
-      console.error('❌ Erreur lors de la création de la notification:', notifErr);
+      // Ignorer les erreurs de notification
     }
   } catch (error) {
-    console.error('❌ [approveSubscriptionRequest] Erreur:', error.message, error.stack);
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
 };
