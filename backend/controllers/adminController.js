@@ -506,6 +506,7 @@ const getUsersWithSecurityQuestions = async (req, res) => {
     }));
     res.json(usersData);
   } catch (error) {
+    console.error('Erreur getUsersWithSecurityQuestions:', error);
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
 };
