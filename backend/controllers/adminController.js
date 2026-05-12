@@ -546,6 +546,7 @@ const resetUserPassword = async (req, res) => {
 
     res.json({ message: `Mot de passe de ${user.nom} réinitialisé avec succès.` });
   } catch (error) {
+    console.error('Erreur resetUserPassword:', error);
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
 };
