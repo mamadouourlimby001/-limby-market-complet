@@ -6,7 +6,7 @@ const ForgotPassword = () => {
   const [step, setStep] = useState('phone');
   const [telephone, setTelephone] = useState('');
   const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState(['', '', '']);
+  const [answers, setAnswers] = useState(['']);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -79,7 +79,7 @@ const ForgotPassword = () => {
 
       {step === 'questions' && (
         <form onSubmit={handleVerifyAnswers}>
-          <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>Répondez aux questions de sécurité:</p>
+          <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>Répondez à votre question de sécurité:</p>
           {questions.map((q, i) => (
             <div key={i} className="form-group">
               <label>{q}</label>

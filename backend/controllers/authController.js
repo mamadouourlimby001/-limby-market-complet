@@ -104,12 +104,12 @@ const getMe = async (req, res) => {
   }
 };
 
-// POST /api/auth/security-questions - Ajouter/Modifier questions de sécurité
+// POST /api/auth/security-questions - Ajouter/Modifier question de sécurité
 const setSecurityQuestions = async (req, res) => {
   try {
     const { questions } = req.body;
-    if (!questions || questions.length !== 3) {
-      return res.status(400).json({ message: '3 questions sont requises.' });
+    if (!questions || questions.length !== 1) {
+      return res.status(400).json({ message: '1 question est requise.' });
     }
 
     const securityQuestions = await Promise.all(
@@ -126,13 +126,13 @@ const setSecurityQuestions = async (req, res) => {
       { new: true }
     ).select('-motDePasse');
 
-    res.json({ message: 'Questions de sécurité mises à jour.', user });
+    res.json({ message: 'Question de sécurité mise à jour.', user });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
 };
 
-// POST /api/auth/verify-security-questions - Vérifier les réponses aux questions de sécurité
+// POST /api/auth/verify-security-questions - Vérifier la réponse à la question de sécurité
 const verifySecurityQuestions = async (req, res) => {
   try {
     const { telephone, answers } = req.body;
@@ -142,25 +142,23 @@ const verifySecurityQuestions = async (req, res) => {
     }
 
     if (!user.securityQuestions || user.securityQuestions.length === 0) {
-      return res.status(400).json({ message: 'Questions de sécurité non configurées.' });
+      return res.status(400).json({ message: 'Question de sécurité non configurée.' });
     }
 
-    if (!answers || answers.length !== 3) {
-      return res.status(400).json({ message: '3 réponses sont requises.' });
+    if (!answers || answers.length !== 1) {
+      return res.status(400).json({ message: '1 réponse est requise.' });
     }
 
-    for (let i = 0; i < 3; i++) {
-      const isMatch = await bcrypt.compare(
-        answers[i].toLowerCase().trim(),
-        user.securityQuestions[i].answer
-      );
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Réponses incorrectes.' });
-      }
+    const isMatch = await bcrypt.compare(
+      answers[0].toLowerCase().trim(),
+      user.securityQuestions[0].answer
+    );
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Réponse incorrecte.' });
     }
 
     const token = jwt.sign({ id: user._id, purpose: 'reset-password' }, process.env.JWT_SECRET, { expiresIn: '15m' });
-    res.json({ message: 'Questions vérifiées.', token, userId: user._id });
+    res.json({ message: 'Question vérifiée.', token, userId: user._id });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }

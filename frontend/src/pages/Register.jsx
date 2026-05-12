@@ -10,8 +10,6 @@ const Register = () => {
   const [motDePasse, setMotDePasse] = useState('');
   const [confirmMdp, setConfirmMdp] = useState('');
   const [questions, setQuestions] = useState([
-    { question: '', answer: '' },
-    { question: '', answer: '' },
     { question: '', answer: '' }
   ]);
   const [error, setError] = useState('');
@@ -88,33 +86,31 @@ const Register = () => {
 
       {step === 'security' && (
         <form onSubmit={handleSecuritySubmit}>
-          <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>Définissez 3 questions de sécurité pour récupérer votre compte:</p>
-          {questions.map((q, i) => (
-            <div key={i}>
-              <div className="form-group">
-                <label>Question {i + 1}</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Ex: Quel est le nom de votre animal de compagnie ?"
-                  value={q.question}
-                  onChange={e => handleQuestionsChange(i, 'question', e.target.value)}
-                  required
-                />
-              </div>
-              <div className="form-group">
-                <label>Réponse</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Votre réponse"
-                  value={q.answer}
-                  onChange={e => handleQuestionsChange(i, 'answer', e.target.value)}
-                  required
-                />
-              </div>
+          <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>Définissez une question de sécurité pour récupérer votre compte:</p>
+          <div>
+            <div className="form-group">
+              <label>Question</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Ex: Quel est le nom de votre animal de compagnie ?"
+                value={questions[0].question}
+                onChange={e => handleQuestionsChange(0, 'question', e.target.value)}
+                required
+              />
             </div>
-          ))}
+            <div className="form-group">
+              <label>Réponse</label>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Votre réponse"
+                value={questions[0].answer}
+                onChange={e => handleQuestionsChange(0, 'answer', e.target.value)}
+                required
+              />
+            </div>
+          </div>
           <button type="submit" disabled={loading} className="btn btn-primary btn-block" style={{ marginTop: 8 }}>
             {loading ? 'Inscription...' : "S'inscrire"}
           </button>
