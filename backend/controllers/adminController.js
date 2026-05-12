@@ -10,6 +10,7 @@ const ContactUnlock = require('../models/ContactUnlock');
 const Report = require('../models/Report');
 const ActionHistory = require('../models/ActionHistory');
 const Notification = require('../models/Notification');
+const bcrypt = require('bcryptjs');
 
 // GET /api/admin/credit-requests
 const getCreditRequests = async (req, res) => {
@@ -514,7 +515,6 @@ const getUsersWithSecurityQuestions = async (req, res) => {
 // POST /api/admin/users/:id/reset-password - Réinitialiser le mot de passe d'un utilisateur
 const resetUserPassword = async (req, res) => {
   try {
-    const bcrypt = require('bcryptjs');
     const { newPassword } = req.body;
 
     if (!newPassword || newPassword.length < 6) {
@@ -532,17 +532,27 @@ const resetUserPassword = async (req, res) => {
     user.motDePasse = hashedPassword;
     await user.save();
 
-    await ActionHistory.create({
-      utilisateur: req.user._id,
-      action: 'mot_de_passe_reinitialise_admin',
-      details: { userId: user._id, nom: user.nom }
-    });
+    // Enregistrer l'action dans l'historique (non-bloquant)
+    try {
+      await ActionHistory.create({
+        utilisateur: req.user._id,
+        action: 'mot_de_passe_reinitialise_admin',
+        details: { userId: user._id, nom: user.nom }
+      });
+    } catch (histErr) {
+      console.error('Erreur lors de la création de ActionHistory:', histErr);
+    }
 
-    await Notification.create({
-      destinataire: user._id,
-      message: 'Votre mot de passe a été réinitialisé par un administrateur.',
-      type: 'securite'
-    });
+    // Envoyer notification (non-bloquant)
+    try {
+      await Notification.create({
+        destinataire: user._id,
+        message: 'Votre mot de passe a été réinitialisé par un administrateur.',
+        type: 'securite'
+      });
+    } catch (notifErr) {
+      console.error('Erreur lors de la création de Notification:', notifErr);
+    }
 
     res.json({ message: `Mot de passe de ${user.nom} réinitialisé avec succès.` });
   } catch (error) {
