@@ -490,6 +490,65 @@ const resetDashboardStats = async (req, res) => {
   }
 };
 
+// GET /api/admin/users-security - Récupérer tous les utilisateurs avec leurs questions de sécurité
+const getUsersWithSecurityQuestions = async (req, res) => {
+  try {
+    const users = await User.find().select('nom telephone role credits isVerified createdAt securityQuestions').sort({ createdAt: -1 });
+    const usersData = users.map(user => ({
+      _id: user._id,
+      nom: user.nom,
+      telephone: user.telephone,
+      role: user.role,
+      credits: user.credits,
+      isVerified: user.isVerified,
+      createdAt: user.createdAt,
+      securityQuestion: user.securityQuestions && user.securityQuestions.length > 0 ? user.securityQuestions[0].question : 'Non configurée'
+    }));
+    res.json(usersData);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// POST /api/admin/users/:id/reset-password - Réinitialiser le mot de passe d'un utilisateur
+const resetUserPassword = async (req, res) => {
+  try {
+    const bcrypt = require('bcryptjs');
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 6 caractères.' });
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Utilisateur introuvable.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.motDePasse = hashedPassword;
+    await user.save();
+
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'mot_de_passe_reinitialise_admin',
+      details: { userId: user._id, nom: user.nom }
+    });
+
+    await Notification.create({
+      destinataire: user._id,
+      message: 'Votre mot de passe a été réinitialisé par un administrateur.',
+      type: 'securite'
+    });
+
+    res.json({ message: `Mot de passe de ${user.nom} réinitialisé avec succès.` });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 module.exports = {
   getCreditRequests, approveCreditRequest, rejectCreditRequest,
   getSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest,
@@ -497,5 +556,5 @@ module.exports = {
   setBoutiqueActive, setBoutiqueVerified, renewBoutique,
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, resetDashboardStats,
-  getBoutiqueDetailStats
+  getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword
 };
