@@ -45,7 +45,7 @@ const MyBoutique = () => {
     }
 
     try {
-      await api.delete(`/boutique-products/${productId}`);
+      await api.delete(`/boutiques/${boutique._id}/products/${productId}`);
       alert('Produit supprimé avec succès');
       fetchBoutique();
     } catch (err) {
