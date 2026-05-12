@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, SortAsc, RotateCcw, Package } from 'lucide-react';
+import { Search, SortAsc, RotateCcw, Package, Trash2 } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import { useAuth } from '../context/AuthContext';
@@ -36,6 +36,21 @@ const MyBoutique = () => {
       console.error(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const deleteProduct = async (productId) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
+      return;
+    }
+
+    try {
+      await api.delete(`/boutique-products/${productId}`);
+      alert('Produit supprimé avec succès');
+      fetchBoutique();
+    } catch (err) {
+      alert('Erreur lors de la suppression du produit');
+      console.error(err);
     }
   };
 
@@ -173,16 +188,43 @@ const MyBoutique = () => {
       ) : (
         <div className="grid-2">
           {filteredProducts.map(p => (
-            <Link key={p._id} to={`/boutiques/${boutique._id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="card">
-                <PhotoSlider photos={p.photos} />
-                <div style={{ padding: 8 }}>
-                  <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
-                  <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
-                  <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
+            <div key={p._id} style={{ position: 'relative' }}>
+              <Link to={`/boutiques/${boutique._id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                <div className="card">
+                  <PhotoSlider photos={p.photos} />
+                  <div style={{ padding: 8 }}>
+                    <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
+                    <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
+                    <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
+                  </div>
                 </div>
-              </div>
-            </Link>
+              </Link>
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  deleteProduct(p._id);
+                }}
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  right: 8,
+                  background: '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 4,
+                  padding: '6px 8px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 12,
+                  fontWeight: 600
+                }}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
           ))}
         </div>
       )}
