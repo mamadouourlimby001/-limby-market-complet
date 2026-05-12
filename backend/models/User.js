@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  securityQuestions: [{
+    question: String,
+    answer: String
+  }],
   createdAt: {
     type: Date,
     default: Date.now

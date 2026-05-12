@@ -94,6 +94,7 @@ const UserDashboard = () => {
           </div>
           <Link to="/credits/acheter" className="btn btn-primary btn-block" style={{ marginBottom: 8 }}> Acheter des crédits</Link>
           <Link to="/mes-commandes" className="btn btn-secondary btn-block" style={{ marginBottom: 8 }}>📦 Mes commandes</Link>
+          <Link to="/change-password" className="btn btn-secondary btn-block" style={{ marginBottom: 8 }}>🔐 Modifier le mot de passe</Link>
           <button onClick={handleLogout} className="btn btn-danger btn-block" style={{ marginBottom: 8 }}>Déconnexion</button>
           {boutique && <Link to="/credits/renouveler-abonnement" className="btn btn-secondary btn-block" style={{ marginBottom: 8 }}>Renouveler mon abonnement</Link>}
           {boutique && (

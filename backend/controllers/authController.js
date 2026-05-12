@@ -104,4 +104,146 @@ const getMe = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getMe };
+// POST /api/auth/security-questions - Ajouter/Modifier questions de sécurité
+const setSecurityQuestions = async (req, res) => {
+  try {
+    const { questions } = req.body;
+    if (!questions || questions.length !== 3) {
+      return res.status(400).json({ message: '3 questions sont requises.' });
+    }
+
+    const securityQuestions = await Promise.all(
+      questions.map(async (q) => {
+        const salt = await bcrypt.genSalt(10);
+        const hashedAnswer = await bcrypt.hash(q.answer.toLowerCase().trim(), salt);
+        return { question: q.question, answer: hashedAnswer };
+      })
+    );
+
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { securityQuestions },
+      { new: true }
+    ).select('-motDePasse');
+
+    res.json({ message: 'Questions de sécurité mises à jour.', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// POST /api/auth/verify-security-questions - Vérifier les réponses aux questions de sécurité
+const verifySecurityQuestions = async (req, res) => {
+  try {
+    const { telephone, answers } = req.body;
+    const user = await User.findOne({ telephone });
+    if (!user) {
+      return res.status(400).json({ message: 'Utilisateur non trouvé.' });
+    }
+
+    if (!user.securityQuestions || user.securityQuestions.length === 0) {
+      return res.status(400).json({ message: 'Questions de sécurité non configurées.' });
+    }
+
+    if (!answers || answers.length !== 3) {
+      return res.status(400).json({ message: '3 réponses sont requises.' });
+    }
+
+    for (let i = 0; i < 3; i++) {
+      const isMatch = await bcrypt.compare(
+        answers[i].toLowerCase().trim(),
+        user.securityQuestions[i].answer
+      );
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Réponses incorrectes.' });
+      }
+    }
+
+    const token = jwt.sign({ id: user._id, purpose: 'reset-password' }, process.env.JWT_SECRET, { expiresIn: '15m' });
+    res.json({ message: 'Questions vérifiées.', token, userId: user._id });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// GET /api/auth/get-security-questions/:telephone - Récupérer les questions de sécurité
+const getSecurityQuestions = async (req, res) => {
+  try {
+    const { telephone } = req.params;
+    const user = await User.findOne({ telephone });
+    if (!user) {
+      return res.status(400).json({ message: 'Utilisateur non trouvé.' });
+    }
+
+    if (!user.securityQuestions || user.securityQuestions.length === 0) {
+      return res.status(400).json({ message: 'Questions de sécurité non configurées.' });
+    }
+
+    const questions = user.securityQuestions.map(q => q.question);
+    res.json({ questions });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// POST /api/auth/reset-password - Réinitialiser mot de passe après vérification
+const resetPassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    const userId = req.user._id;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 6 caractères.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { motDePasse: hashedPassword },
+      { new: true }
+    ).select('-motDePasse');
+
+    res.json({ message: 'Mot de passe réinitialisé.', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// POST /api/auth/update-password - Modifier mot de passe avec ancien mot de passe
+const updatePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const userId = req.user._id;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: 'Ancien et nouveau mot de passe requis.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Le mot de passe doit contenir au moins 6 caractères.' });
+    }
+
+    const user = await User.findById(userId);
+    const isMatch = await bcrypt.compare(oldPassword, user.motDePasse);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Ancien mot de passe incorrect.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { motDePasse: hashedPassword },
+      { new: true }
+    ).select('-motDePasse');
+
+    res.json({ message: 'Mot de passe modifié.', user: updatedUser });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+module.exports = { register, login, getMe, setSecurityQuestions, verifySecurityQuestions, getSecurityQuestions, resetPassword, updatePassword };

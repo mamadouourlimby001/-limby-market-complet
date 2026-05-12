@@ -50,6 +50,12 @@ const Login = () => {
         </button>
       </form>
 
+      <div style={{ textAlign: 'center', marginTop: 12 }}>
+        <Link to="/forgot-password" style={{ fontSize: 13, color: '#1B2A6B', fontWeight: 600, textDecoration: 'none' }}>
+          Mot de passe oublié ?
+        </Link>
+      </div>
+
       <p style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: '#6b7280' }}>
         Pas encore de compte ? <Link to="/register" style={{ color: '#1B2A6B', fontWeight: 600 }}>S'inscrire</Link>
       </p>

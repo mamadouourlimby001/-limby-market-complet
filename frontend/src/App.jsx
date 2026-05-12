@@ -7,6 +7,9 @@ import AdminRoute from './components/AdminRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import ChangePassword from './pages/ChangePassword';
 import ProductsList from './pages/ProductsList';
 import ProductDetail from './pages/ProductDetail';
 import AddProduct from './pages/AddProduct';
@@ -53,6 +56,9 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/change-password" element={<ProtectedRoute><ChangePassword /></ProtectedRoute>} />
             <Route path="/occasion" element={<ProductsList />} />
             <Route path="/occasion/:id" element={<ProductDetail />} />
             <Route path="/occasion/ajouter" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
