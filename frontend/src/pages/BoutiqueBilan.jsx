@@ -136,7 +136,7 @@ const BoutiqueBilan = () => {
 
       {/* Retour */}
       <button
-        onClick={() => navigate('/my-boutique')}
+        onClick={() => navigate('/ma-boutique')}
         style={{
           width: '100%',
           padding: 12,

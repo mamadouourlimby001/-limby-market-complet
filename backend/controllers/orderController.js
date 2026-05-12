@@ -130,34 +130,50 @@ const updateOrderStatus = async (req, res) => {
       return res.status(403).json({ message: 'Accès refusé' });
     }
 
-    // Mettre à jour
+    // Sauvegarder l'ancien statut
     const oldStatus = order.status;
+
+    // Mettre à jour le statut
     order.status = status;
     if (noteVendeur) {
       order.noteVendeur = noteVendeur;
     }
     await order.save();
 
-    // Mettre à jour les stats de la boutique
+    // Mettre à jour les stats de la boutique selon les changements de statut
     const updateObj = {};
-    if (oldStatus !== 'confirmée' && status === 'confirmée') {
-      updateObj.$inc = { totalConfirmed: 1, totalRevenue: order.prixTotal };
-    } else if (oldStatus === 'confirmée' && status !== 'confirmée') {
-      updateObj.$inc = { totalConfirmed: -1, totalRevenue: -order.prixTotal };
+
+    // Logique pour les transitions de statut
+    const wasConfirmed = oldStatus === 'confirmée';
+    const isnowConfirmed = status === 'confirmée';
+    const wasAnnulled = oldStatus === 'annulée';
+    const isNowAnnulled = status === 'annulée';
+
+    // Gestion du changement de confirmée
+    if (wasConfirmed && !isnowConfirmed) {
+      // Passage de confirmée à autre état (en attente, livrée ou annulée)
+      updateObj.$inc = updateObj.$inc || {};
+      updateObj.$inc.totalConfirmed = -1;
+      updateObj.$inc.totalRevenue = -order.prixTotal;
+    } else if (!wasConfirmed && isnowConfirmed) {
+      // Passage d'autre état à confirmée
+      updateObj.$inc = updateObj.$inc || {};
+      updateObj.$inc.totalConfirmed = 1;
+      updateObj.$inc.totalRevenue = order.prixTotal;
     }
-    if (oldStatus !== 'annulée' && status === 'annulée') {
-      updateObj.$inc = { ...updateObj.$inc, totalCancelled: 1 };
-      if (oldStatus === 'confirmée') {
-        updateObj.$inc.totalConfirmed = (updateObj.$inc.totalConfirmed || 0) - 1;
-        updateObj.$inc.totalRevenue = (updateObj.$inc.totalRevenue || 0) - order.prixTotal;
-      }
-    } else if (oldStatus === 'annulée' && status !== 'annulée') {
-      updateObj.$inc = { ...updateObj.$inc, totalCancelled: -1 };
-      if (status === 'confirmée') {
-        updateObj.$inc.totalConfirmed = (updateObj.$inc.totalConfirmed || 0) + 1;
-        updateObj.$inc.totalRevenue = (updateObj.$inc.totalRevenue || 0) + order.prixTotal;
-      }
+
+    // Gestion du changement d'annulée
+    if (wasAnnulled && !isNowAnnulled) {
+      // Passage de annulée à autre état
+      updateObj.$inc = updateObj.$inc || {};
+      updateObj.$inc.totalCancelled = -1;
+    } else if (!wasAnnulled && isNowAnnulled) {
+      // Passage d'autre état à annulée
+      updateObj.$inc = updateObj.$inc || {};
+      updateObj.$inc.totalCancelled = 1;
     }
+
+    // Appliquer les modifications
     if (Object.keys(updateObj).length > 0) {
       await Boutique.findByIdAndUpdate(order.boutique, updateObj);
     }
@@ -206,11 +222,19 @@ const cancelOrder = async (req, res) => {
     await order.save();
 
     // Mettre à jour les stats de la boutique
-    const updateObj = { $inc: { totalCancelled: 1 } };
+    const updateObj = { $inc: {} };
+
+    // Si la commande était confirmée, on doit décrémenter totalConfirmed et totalRevenue
     if (oldStatus === 'confirmée') {
       updateObj.$inc.totalConfirmed = -1;
       updateObj.$inc.totalRevenue = -order.prixTotal;
     }
+
+    // Si la commande n'était pas déjà annulée, on incrémente totalCancelled
+    if (oldStatus !== 'annulée') {
+      updateObj.$inc.totalCancelled = 1;
+    }
+
     await Boutique.findByIdAndUpdate(order.boutique, updateObj);
 
     res.json({ message: 'Commande annulée' });
@@ -242,14 +266,15 @@ const deleteOrder = async (req, res) => {
 
     // Mettre à jour les stats de la boutique avant suppression
     const updateObj = { $inc: { totalOrders: -1 } };
+
     if (order.status === 'confirmée') {
       updateObj.$inc.totalConfirmed = -1;
       updateObj.$inc.totalRevenue = -order.prixTotal;
     } else if (order.status === 'annulée') {
       updateObj.$inc.totalCancelled = -1;
     }
-    await Boutique.findByIdAndUpdate(order.boutique, updateObj);
 
+    await Boutique.findByIdAndUpdate(order.boutique, updateObj);
     await Order.findByIdAndDelete(id);
 
     res.json({ message: 'Commande supprimée' });

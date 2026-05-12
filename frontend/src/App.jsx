@@ -22,7 +22,6 @@ import ProductBoutiqueDetail from './pages/ProductBoutiqueDetail';
 import CreateBoutique from './pages/CreateBoutique';
 import AddBoutiqueProduct from './pages/AddBoutiqueProduct';
 import MyBoutique from './pages/MyBoutique';
-import BoutiqueBilan from './pages/BoutiqueBilan';
 import MesCommandes from './pages/MesCommandes';
 import ProduitsCommandes from './pages/ProduitsCommandes';
 import BuyCredits from './pages/BuyCredits';
@@ -69,7 +68,6 @@ function App() {
             <Route path="/boutiques/creer" element={<ProtectedRoute><CreateBoutique /></ProtectedRoute>} />
             <Route path="/boutiques/:id/ajouter-produit" element={<ProtectedRoute><AddBoutiqueProduct /></ProtectedRoute>} />
             <Route path="/ma-boutique" element={<ProtectedRoute><MyBoutique /></ProtectedRoute>} />
-            <Route path="/boutique-bilan" element={<ProtectedRoute><BoutiqueBilan /></ProtectedRoute>} />
             <Route path="/mes-commandes" element={<ProtectedRoute><MesCommandes /></ProtectedRoute>} />
             <Route path="/boutique-commandes" element={<ProtectedRoute><ProduitsCommandes /></ProtectedRoute>} />
             <Route path="/credits/acheter" element={<ProtectedRoute><BuyCredits /></ProtectedRoute>} />
