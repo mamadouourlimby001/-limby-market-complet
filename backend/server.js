@@ -3,6 +3,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
 const path = require('path');
+const fs = require('fs');
 const connectDB = require('./config/db');
 const adminSeed = require('./seed/adminSeed');
 
@@ -38,18 +39,35 @@ app.get('/', (req, res) => {
   res.json({ message: 'Bienvenue sur l\'API Limby Market 🇬🇳' });
 });
 
-// ===== SERVIR LE FRONTEND STATIQUEMENT EN PRODUCTION =====
-if (process.env.NODE_ENV === 'production') {
-  const frontendBuildPath = path.join(__dirname, '../frontend/dist');
+// ===== SERVIR LE FRONTEND STATIQUEMENT =====
+const frontendBuildPath = path.join(__dirname, '../frontend/dist');
+
+console.log('Frontend build path:', frontendBuildPath);
+console.log('Frontend exists:', fs.existsSync(frontendBuildPath));
+
+// Servir les fichiers statiques du frontend
+if (fs.existsSync(frontendBuildPath)) {
   app.use(express.static(frontendBuildPath));
   
   // Réécriture SPA : toutes les routes non-API vers index.html
   app.get('*', (req, res) => {
+    console.log(`Requête non-routée: ${req.path}`);
     // Ne pas rediriger les routes API
     if (!req.path.startsWith('/api')) {
-      res.sendFile(path.join(frontendBuildPath, 'index.html'));
+      const indexPath = path.join(frontendBuildPath, 'index.html');
+      console.log(`Envoi de ${indexPath}`);
+      res.sendFile(indexPath, (err) => {
+        if (err) {
+          console.error('Erreur sendFile:', err);
+          res.status(404).json({ message: 'Fichier non trouvé' });
+        }
+      });
+    } else {
+      res.status(404).json({ message: 'Route API non trouvée' });
     }
   });
+} else {
+  console.warn('⚠️ Frontend build not found at', frontendBuildPath);
 }
 
 // Seed des admins au démarrage
