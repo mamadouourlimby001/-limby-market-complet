@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const cron = require('node-cron');
+const path = require('path');
 const connectDB = require('./config/db');
 const adminSeed = require('./seed/adminSeed');
 
@@ -36,6 +37,20 @@ app.use('/api/orders', require('./routes/orders'));
 app.get('/', (req, res) => {
   res.json({ message: 'Bienvenue sur l\'API Limby Market 🇬🇳' });
 });
+
+// ===== SERVIR LE FRONTEND STATIQUEMENT EN PRODUCTION =====
+if (process.env.NODE_ENV === 'production') {
+  const frontendBuildPath = path.join(__dirname, '../frontend/dist');
+  app.use(express.static(frontendBuildPath));
+  
+  // Réécriture SPA : toutes les routes non-API vers index.html
+  app.get('*', (req, res) => {
+    // Ne pas rediriger les routes API
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(frontendBuildPath, 'index.html'));
+    }
+  });
+}
 
 // Seed des admins au démarrage
 adminSeed();
