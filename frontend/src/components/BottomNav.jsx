@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home as HomeIcon, ShoppingBag, Building2, FileText, Warehouse } from 'lucide-react';
+import { Home as HomeIcon, ShoppingBag, Building2, FileText, Warehouse, Store } from 'lucide-react';
 
 const tabs = [
   { path: '/', label: 'Accueil', icon: 'home' },
   { path: '/occasion', label: 'Occasion', icon: 'shopping' },
   { path: '/locations', label: 'Locations', icon: 'building' },
   { path: '/annonces', label: 'Annonces', icon: 'announce' },
+  { path: '/ma-boutique', label: 'Ma Boutique', icon: 'store' },
   { path: '/boutiques', label: 'Boutiques', icon: 'warehouse' },
 ];
 
@@ -35,6 +36,7 @@ const BottomNav = () => {
               {tab.icon === 'shopping' && <ShoppingBag size={20} />}
               {tab.icon === 'building' && <Building2 size={20} />}
               {tab.icon === 'announce' && <FileText size={20} />}
+              {tab.icon === 'store' && <Store size={20} />}
               {tab.icon === 'warehouse' && <Warehouse size={20} />}
             </span>
             <span style={{
