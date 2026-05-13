@@ -77,6 +77,13 @@ const Home = () => {
           ))}
         </div>
       </div>
+
+      <div style={{ maxWidth: 400, margin: '20px auto 0', padding: '16px', background: 'rgba(255,255,255,0.15)', borderRadius: 12, textAlign: 'center' }}>
+        <p style={{ color: 'rgba(255,255,255,0.9)', fontSize: 12, lineHeight: 1.5, marginBottom: 8 }}>
+          <strong>Besoin d'aide?</strong> Vous pouvez contacter les admins du site via <strong>Messages</strong> dans <strong>Mon compte</strong>, ou nous appeler/WhatsApp:
+        </p>
+        <p style={{ color: '#fff', fontSize: 13, fontWeight: 600, margin: 0 }}>📱 625223418 ou 620768276</p>
+      </div>
     </div>
   );
 };
