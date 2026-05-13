@@ -5,10 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
 const AdminDashboard = () => {
-  const { isSupremeAdmin } = useAuth();
+  const { user, isSupremeAdmin } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+
+  // Vérifier si c'est l'admin suprême spécifique
+  const isSuperAdmin = isSupremeAdmin && user?.telephone === '+224629043181' && user?.nom?.toLowerCase() === 'diallo mamadou oury';
 
   useEffect(() => {
     const fetch = async () => {
@@ -28,17 +31,34 @@ const AdminDashboard = () => {
 
   if (loading) return <div className="loader"><div className="spinner"></div></div>;
 
-  const menuItems = [
-    { path: '/admin/credits', label: 'Demandes crédits', icon: '�' },
+  let menuItems = [
+    { path: '/admin/credits', label: 'Demandes crédits', icon: '💳' },
     { path: '/admin/abonnements', label: 'Abonnements', icon: '♻️' },
     { path: '/admin/signalements', label: 'Signalements', icon: '⚠️' },
-    { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: '👥' },
-    { path: '/admin/boutiques', label: 'Boutiques', icon: '🏪' },
-    { path: '/admin/reset-stats', label: 'Réinitialiser', icon: '🔄' },
-    { path: '/admin/send-to-users', label: 'Écrire aux utilisateurs', icon: '✎' },
-    { path: '/admin/passwords', label: 'Mots de passe', icon: '🔐' },
-    { path: '/admin/messages', label: 'Messages', icon: '💬' }
+    { path: '/admin/utilisateurs', label: 'Utilisateurs', icon: '👥' }
   ];
+
+  // Ajouter ces boutons uniquement pour le super admin spécifique
+  if (isSuperAdmin) {
+    menuItems.push(
+      { path: '/admin/boutiques', label: 'Boutiques', icon: '🏪' },
+      { path: '/admin/reset-stats', label: 'Réinitialiser', icon: '🔄' }
+    );
+  }
+
+  menuItems.push(
+    { path: '/admin/send-to-users', label: 'Écrire aux utilisateurs', icon: '✎' },
+    { path: '/admin/passwords', label: 'Mots de passe', icon: '🔐', superAdminOnly: true },
+    { path: '/admin/messages', label: 'Messages', icon: '💬' }
+  );
+
+  // Filtrer les items non accessibles
+  menuItems = menuItems.filter(item => {
+    if (item.superAdminOnly) {
+      return isSuperAdmin;
+    }
+    return true;
+  });
 
   return (
     <div className="page">
