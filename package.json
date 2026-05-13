@@ -5,8 +5,9 @@
   "main": "backend/server.js",
   "scripts": {
     "dev": "cd backend && npm run dev",
-    "start": "npm run build && cd backend && npm start",
-    "build": "cd frontend && npm run build"
+    "build": "cd frontend && npm install && npm run build",
+    "postinstall": "cd frontend && npm install && cd ../backend && npm install",
+    "start": "npm run build && cd backend && npm start"
   },
   "engines": {
     "node": "18.x"
