@@ -4,14 +4,14 @@ const PhotoSlider = ({ photos = [] }) => {
   const [current, setCurrent] = useState(0);
   if (!photos || photos.length === 0) {
     return (
-      <div style={{ width: '100%', height: '140px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '12px' }}>
+      <div style={{ width: '100%', height: '180px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '12px' }}>
         Pas de photo
       </div>
     );
   }
   return (
-    <div style={{ position: 'relative', width: '100%', height: '140px', overflow: 'hidden', background: '#f0f0f0' }}>
-      <img src={photos[current]} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+    <div style={{ position: 'relative', width: '100%', height: '180px', overflow: 'hidden', background: '#f0f0f0' }}>
+      <img src={photos[current]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#f0f0f0' }} />
       {photos.length > 1 && (
         <>
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCurrent(c => c > 0 ? c - 1 : photos.length - 1); }}
