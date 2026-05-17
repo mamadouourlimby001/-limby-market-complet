@@ -18,9 +18,11 @@ const BottomNav = () => {
     <nav style={{
       position: 'fixed', bottom: 0, left: 0, right: 0, height: '60px',
       background: '#fff', borderTop: '1px solid #e5e7eb',
-      display: 'flex', alignItems: 'center', justifyContent: 'space-around',
+      display: 'flex', alignItems: 'center', justifyContent: 'flex-start',
+      overflowX: 'auto', overflowY: 'hidden',
       zIndex: 100, boxShadow: '0 -1px 6px rgba(0,0,0,0.05)',
-      paddingBottom: 'env(safe-area-inset-bottom)'
+      paddingBottom: 'env(safe-area-inset-bottom)',
+      WebkitOverflowScrolling: 'touch'
     }}>
       {tabs.map(tab => {
         const isActive = location.pathname === tab.path ||
@@ -28,9 +30,9 @@ const BottomNav = () => {
         return (
           <Link key={tab.path} to={tab.path} style={{
             display: 'flex', flexDirection: 'column', alignItems: 'center',
-            gap: '2px', textDecoration: 'none', flex: 1,
+            gap: '2px', textDecoration: 'none', minWidth: '70px', flex: '0 0 auto',
             color: isActive ? '#1B2A6B' : '#9ca3af',
-            transition: 'color 0.2s'
+            transition: 'color 0.2s', padding: '4px 8px'
           }}>
             <span style={{ fontSize: '20px' }}>
               {tab.icon === 'home' && <HomeIcon size={20} />}
@@ -42,8 +44,9 @@ const BottomNav = () => {
               {tab.icon === 'warehouse' && <Warehouse size={20} />}
             </span>
             <span style={{
-              fontSize: '10px', fontWeight: isActive ? 700 : 500,
-              color: isActive ? '#1B2A6B' : '#9ca3af'
+              fontSize: '9px', fontWeight: isActive ? 700 : 500,
+              color: isActive ? '#1B2A6B' : '#9ca3af',
+              whiteSpace: 'nowrap'
             }}>{tab.label}</span>
           </Link>
         );
