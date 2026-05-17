@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, SortAsc, RotateCcw, Package, Trash2 } from 'lucide-react';
+import { Search, SortAsc, RotateCcw, Package, Trash2, Check, X } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import { useAuth } from '../context/AuthContext';
@@ -12,6 +12,7 @@ const MyBoutique = () => {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState('recent');
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [updatingProductId, setUpdatingProductId] = useState(null);
 
   useEffect(() => {
     fetchBoutique();
@@ -45,12 +46,27 @@ const MyBoutique = () => {
     }
 
     try {
+      const boutique = data.boutique;
       await api.delete(`/boutiques/${boutique._id}/products/${productId}`);
       alert('Produit supprimé avec succès');
       fetchBoutique();
     } catch (err) {
       alert('Erreur lors de la suppression du produit');
       console.error(err);
+    }
+  };
+
+  const toggleDisponibilite = async (productId) => {
+    try {
+      setUpdatingProductId(productId);
+      const boutique = data.boutique;
+      await api.put(`/boutiques/${boutique._id}/products/${productId}/disponibilite`);
+      fetchBoutique();
+    } catch (err) {
+      alert('Erreur lors de la mise à jour');
+      console.error(err);
+    } finally {
+      setUpdatingProductId(null);
     }
   };
 
@@ -190,7 +206,7 @@ const MyBoutique = () => {
           {filteredProducts.map(p => (
             <div key={p._id} style={{ position: 'relative' }}>
               <Link to={`/boutiques/${boutique._id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="card">
+                <div className="card" style={{ opacity: p.disponible ? 1 : 0.6 }}>
                   <PhotoSlider photos={p.photos} />
                   <div style={{ padding: 8 }}>
                     <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
@@ -199,6 +215,38 @@ const MyBoutique = () => {
                   </div>
                 </div>
               </Link>
+              
+              {/* Bouton Disponible/Indisponible */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleDisponibilite(p._id);
+                }}
+                disabled={updatingProductId === p._id}
+                style={{
+                  position: 'absolute',
+                  top: 8,
+                  left: 8,
+                  background: p.disponible ? '#059669' : '#ef4444',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 4,
+                  padding: '6px 8px',
+                  cursor: updatingProductId === p._id ? 'not-allowed' : 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  opacity: updatingProductId === p._id ? 0.6 : 1
+                }}
+              >
+                {p.disponible ? <Check size={14} /> : <X size={14} />}
+                {p.disponible ? 'Dispo' : 'Indispo'}
+              </button>
+
+              {/* Bouton Supprimer */}
               <button
                 onClick={(e) => {
                   e.preventDefault();

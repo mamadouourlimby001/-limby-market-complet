@@ -130,4 +130,26 @@ const getMyBoutique = async (req, res) => {
   }
 };
 
-module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique };
+// PUT /api/boutiques/:id/products/:productId/disponibilite - Mettre à jour la disponibilité
+const toggleProductDisponibilite = async (req, res) => {
+  try {
+    const boutique = await Boutique.findById(req.params.id);
+    if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
+    
+    const isOwner = boutique.proprietaire.toString() === req.user._id.toString();
+    const isAdmin = req.user.role === 'admin_simple' || req.user.role === 'admin_supreme';
+    if (!isOwner && !isAdmin) return res.status(403).json({ message: 'Accès refusé.' });
+    
+    const product = await BoutiqueProduct.findById(req.params.productId);
+    if (!product) return res.status(404).json({ message: 'Produit introuvable.' });
+    
+    product.disponible = !product.disponible;
+    await product.save();
+    
+    res.json({ message: 'Disponibilité mise à jour.', product });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite };

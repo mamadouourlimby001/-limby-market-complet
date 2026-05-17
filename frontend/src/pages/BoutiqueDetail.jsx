@@ -175,8 +175,8 @@ const BoutiqueDetail = () => {
       {products.length === 0 ? <div className="empty-state"><p>Aucun produit</p></div> : (
         <div className="grid-2">
           {products.map(p => (
-            <Link key={p._id} to={`/boutiques/${id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <div className="card">
+            <Link key={p._id} to={`/boutiques/${id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit', position: 'relative' }}>
+              <div className="card" style={{ opacity: p.disponible ? 1 : 0.6 }}>
                 <PhotoSlider photos={p.photos} />
                 <div style={{ padding: 8 }}>
                   <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
@@ -184,6 +184,23 @@ const BoutiqueDetail = () => {
                   <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
                 </div>
               </div>
+              {!p.disponible && (
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  background: 'rgba(239, 68, 68, 0.9)',
+                  color: '#fff',
+                  padding: '8px 12px',
+                  borderRadius: 6,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  textAlign: 'center'
+                }}>
+                  Indisponible
+                </div>
+              )}
             </Link>
           ))}
         </div>

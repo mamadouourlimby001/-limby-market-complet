@@ -205,49 +205,71 @@ const ProductBoutiqueDetail = () => {
         </div>
       </div>
 
+      {/* État de disponibilité */}
+      <div style={{ 
+        padding: 12, 
+        background: product.disponible ? '#dcfce7' : '#fee2e2', 
+        border: `2px solid ${product.disponible ? '#22c55e' : '#ef4444'}`,
+        borderRadius: 6, 
+        marginBottom: 20, 
+        textAlign: 'center' 
+      }}>
+        <p style={{ 
+          fontSize: 14, 
+          fontWeight: 700, 
+          color: product.disponible ? '#22c55e' : '#ef4444' 
+        }}>
+          {product.disponible ? '✓ Produit disponible' : '✗ Produit indisponible'}
+        </p>
+      </div>
+
       {/* Actions */}
       {!isOwner ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {/* Quantité */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <label style={{ fontSize: 14, fontWeight: 600, minWidth: 80 }}>Quantité:</label>
-            <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: 4, width: 100 }}>
-              <button
-                onClick={() => setQuantite(Math.max(1, quantite - 1))}
-                style={{ flex: 1, padding: 6, border: 'none', background: 'none', cursor: 'pointer' }}
-              >
-                −
-              </button>
-              <span style={{ flex: 1, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
-                {quantite}
-              </span>
-              <button
-                onClick={() => setQuantite(quantite + 1)}
-                style={{ flex: 1, padding: 6, border: 'none', background: 'none', cursor: 'pointer' }}
-              >
-                +
-              </button>
-            </div>
-          </div>
+          {product.disponible && (
+            <>
+              {/* Quantité */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <label style={{ fontSize: 14, fontWeight: 600, minWidth: 80 }}>Quantité:</label>
+                <div style={{ display: 'flex', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: 4, width: 100 }}>
+                  <button
+                    onClick={() => setQuantite(Math.max(1, quantite - 1))}
+                    style={{ flex: 1, padding: 6, border: 'none', background: 'none', cursor: 'pointer' }}
+                  >
+                    −
+                  </button>
+                  <span style={{ flex: 1, textAlign: 'center', fontSize: 14, fontWeight: 600 }}>
+                    {quantite}
+                  </span>
+                  <button
+                    onClick={() => setQuantite(quantite + 1)}
+                    style={{ flex: 1, padding: 6, border: 'none', background: 'none', cursor: 'pointer' }}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
 
-          {/* Bouton Commander */}
-          <button
-            onClick={handleOrder}
-            disabled={orderLoading}
-            style={{
-              padding: 12,
-              background: '#059669',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 6,
-              fontWeight: 600,
-              fontSize: 14,
-              cursor: orderLoading ? 'not-allowed' : 'pointer',
-              opacity: orderLoading ? 0.6 : 1
-            }}
-          >
-            {orderLoading ? 'Traitement...' : 'Commander maintenant'}
-          </button>
+              {/* Bouton Commander */}
+              <button
+                onClick={handleOrder}
+                disabled={orderLoading}
+                style={{
+                  padding: 12,
+                  background: '#059669',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 6,
+                  fontWeight: 600,
+                  fontSize: 14,
+                  cursor: orderLoading ? 'not-allowed' : 'pointer',
+                  opacity: orderLoading ? 0.6 : 1
+                }}
+              >
+                {orderLoading ? 'Traitement...' : 'Commander maintenant'}
+              </button>
+            </>
+          )}
 
           {/* Toast Message */}
           {toast.show && (

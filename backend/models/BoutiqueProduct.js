@@ -42,6 +42,10 @@ const boutiqueProductSchema = new mongoose.Schema({
     enum: ['actif', 'supprimé'],
     default: 'actif'
   },
+  disponible: {
+    type: Boolean,
+    default: true
+  },
   createdAt: {
     type: Date,
     default: Date.now
