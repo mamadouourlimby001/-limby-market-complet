@@ -1,16 +1,16 @@
 import { useState } from 'react';
 
-const PhotoSlider = ({ photos = [] }) => {
+const PhotoSlider = ({ photos = [], height = '180px' }) => {
   const [current, setCurrent] = useState(0);
   if (!photos || photos.length === 0) {
     return (
-      <div style={{ width: '100%', height: '180px', background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '12px' }}>
+      <div style={{ width: '100%', height, background: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '12px' }}>
         Pas de photo
       </div>
     );
   }
   return (
-    <div style={{ position: 'relative', width: '100%', height: '180px', overflow: 'hidden', background: '#f0f0f0' }}>
+    <div style={{ position: 'relative', width: '100%', height, overflow: 'hidden', background: '#f0f0f0' }}>
       <img src={photos[current]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#f0f0f0' }} />
       {photos.length > 1 && (
         <>

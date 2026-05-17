@@ -134,8 +134,8 @@ const ProductBoutiqueDetail = () => {
       </div>
 
       {/* Photos */}
-      <div style={{ marginBottom: 20, height: 450, borderRadius: 8, overflow: 'hidden', background: '#f3f4f6' }}>
-        <PhotoSlider photos={product.photos || []} />
+      <div style={{ marginBottom: 20 }}>
+        <PhotoSlider photos={product.photos || []} height="400px" />
       </div>
 
       {/* Titre et Prix */}
