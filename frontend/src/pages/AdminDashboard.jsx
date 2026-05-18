@@ -13,7 +13,7 @@ const AdminDashboard = () => {
   // Vérifier si c'est l'admin suprême spécifique
   const isSuperAdmin = isSupremeAdmin && (
     (user?.telephone === '+224629043181' && user?.nom?.toLowerCase() === 'diallo mamadou oury') ||
-    (user?.telephone === '+224625223418' && user?.nom?.toLowerCase() === 'barry binta')
+    (user?.telephone === '+224625223418' && user?.nom?.toLowerCase() === 'barry fatoumata binta')
   );
 
   useEffect(() => {
