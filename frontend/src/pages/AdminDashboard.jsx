@@ -11,7 +11,10 @@ const AdminDashboard = () => {
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
   // Vérifier si c'est l'admin suprême spécifique
-  const isSuperAdmin = isSupremeAdmin && user?.telephone === '+224629043181' && user?.nom?.toLowerCase() === 'diallo mamadou oury';
+  const isSuperAdmin = isSupremeAdmin && (
+    (user?.telephone === '+224629043181' && user?.nom?.toLowerCase() === 'diallo mamadou oury') ||
+    (user?.telephone === '+224625223418' && user?.nom?.toLowerCase() === 'barry binta')
+  );
 
   useEffect(() => {
     const fetch = async () => {
