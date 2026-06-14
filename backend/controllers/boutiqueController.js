@@ -152,4 +152,42 @@ const toggleProductDisponibilite = async (req, res) => {
   }
 };
 
-module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite };
+// PUT /api/boutiques/:id - Mettre à jour une boutique existante
+const updateBoutique = async (req, res) => {
+  try {
+    const boutique = await Boutique.findById(req.params.id);
+    if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
+    
+    // Vérifier que l'utilisateur est le propriétaire
+    if (boutique.proprietaire.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Accès refusé. Vous n\'êtes pas le propriétaire.' });
+    }
+    
+    const { nom, description, logo, telephone, categorie, ville, quartier } = req.body;
+    
+    // Valider que la description ne contient pas de chiffres
+    if (description && /\d/.test(description)) {
+      return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
+    }
+    
+    // Mettre à jour les champs
+    if (nom) boutique.nom = nom;
+    if (description) boutique.description = description;
+    if (logo) boutique.logo = logo;
+    if (telephone) boutique.telephone = telephone;
+    if (categorie) boutique.categorie = categorie;
+    if (ville) boutique.ville = ville;
+    if (quartier) boutique.quartier = quartier;
+    
+    await boutique.save();
+    
+    res.json({ message: 'Boutique mise à jour avec succès.', boutique });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'Une boutique avec ce nom existe déjà.' });
+    }
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique };

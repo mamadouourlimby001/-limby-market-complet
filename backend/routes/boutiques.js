@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite } = require('../controllers/boutiqueController');
+const { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique } = require('../controllers/boutiqueController');
 const { getBoutiqueStats, resetBoutiqueStats } = require('../controllers/boutiqueStatsController');
 const auth = require('../middleware/auth');
 
@@ -13,6 +13,7 @@ router.put('/stats/reset', auth, resetBoutiqueStats);
 router.get('/', getBoutiques);
 router.get('/:id', getBoutique);
 router.post('/', auth, createBoutique);
+router.put('/:id', auth, updateBoutique);
 router.post('/:id/products', auth, addBoutiqueProduct);
 router.delete('/:id/products/:productId', auth, deleteBoutiqueProduct);
 router.put('/:id/products/:productId/disponibilite', auth, toggleProductDisponibilite);

@@ -148,6 +148,9 @@ const MyBoutique = () => {
         <Link to="/boutique-messages-inbox" className="btn btn-secondary btn-block">
           💬 Messages ({unreadMessagesCount})
         </Link>
+        <Link to="/boutiques/creer" className="btn btn-secondary btn-block">
+          ✏️ Modifier Boutique
+        </Link>
       </div>
 
       {/* Barre de recherche et filtres */}
