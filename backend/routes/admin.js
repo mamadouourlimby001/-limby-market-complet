@@ -9,7 +9,7 @@ const {
   getReports, handleReport, getUsers, deleteUser, addCredits, removeCredits, setVerified,
   setBoutiqueActive, setBoutiqueVerified, renewBoutique,
   addAdmin, removeAdmin, getDashboardStats,
-  getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, resetDashboardStats,
+  getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword
 } = require('../controllers/adminController');
 
@@ -38,6 +38,7 @@ router.get('/boutiques', getAllBoutiques);
 router.delete('/boutiques/:id', deleteBoutique);
 router.put('/boutiques/:id/activate', activateBoutique);
 router.put('/boutiques/:id/deactivate', deactivateBoutique);
+router.put('/boutiques/:id/certify', certifyBoutique);
 router.get('/boutiques/:id/stats', getBoutiqueDetailStats);
 router.post('/reset-stats', resetDashboardStats);
 router.get('/dashboard-stats', getDashboardStats);

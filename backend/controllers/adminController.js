@@ -439,6 +439,33 @@ const deactivateBoutique = async (req, res) => {
   }
 };
 
+// PUT /api/admin/boutiques/:id/certify - Certifier une boutique
+const certifyBoutique = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const boutique = await Boutique.findByIdAndUpdate(
+      id,
+      { isCertified: true },
+      { new: true }
+    ).populate('proprietaire', 'nom telephone');
+    
+    if (!boutique) {
+      return res.status(404).json({ message: 'Boutique non trouvée' });
+    }
+    
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'boutique_certifiee',
+      details: { boutiqueId: id, nom: boutique.nom }
+    });
+    
+    res.json({ message: 'Boutique certifiée', boutique });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 // GET /api/admin/boutiques/:id/stats - Récupérer les stats d'une boutique
 const getBoutiqueDetailStats = async (req, res) => {
   try {
@@ -567,6 +594,6 @@ module.exports = {
   getReports, handleReport, getUsers, deleteUser, addCredits, removeCredits, setVerified,
   setBoutiqueActive, setBoutiqueVerified, renewBoutique,
   addAdmin, removeAdmin, getDashboardStats,
-  getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, resetDashboardStats,
+  getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword
 };

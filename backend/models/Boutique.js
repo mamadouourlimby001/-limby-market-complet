@@ -55,6 +55,10 @@ const boutiqueSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  isCertified: {
+    type: Boolean,
+    default: false
+  },
   totalOrders: {
     type: Number,
     default: 0

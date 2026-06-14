@@ -71,6 +71,20 @@ const AdminBoutiques = () => {
     }
   };
 
+  const handleCertify = async (id) => {
+    setActionId(id);
+    try {
+      const res = await api.put(`/admin/boutiques/${id}/certify`);
+      setBoutiques(boutiques.map(b => b._id === id ? res.data.boutique : b));
+      alert('Boutique certifiée');
+    } catch (err) {
+      alert('Erreur lors de la certification');
+      console.error(err);
+    } finally {
+      setActionId(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="page">
@@ -140,6 +154,18 @@ const AdminBoutiques = () => {
                         ✓ Vérifiée
                       </span>
                     )}
+                    {boutique.isCertified && (
+                      <span style={{
+                        padding: '2px 8px',
+                        borderRadius: 4,
+                        fontSize: 10,
+                        fontWeight: 600,
+                        background: '#dbeafe',
+                        color: '#1e40af'
+                      }}>
+                        ✓ Boutique Certifiée
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -165,6 +191,28 @@ const AdminBoutiques = () => {
                   }}
                 >
                   <BarChart3 size={14} /> Bilan
+                </button>
+
+                <button
+                  onClick={() => handleCertify(boutique._id)}
+                  disabled={actionId === boutique._id || boutique.isCertified}
+                  style={{
+                    padding: 8,
+                    background: boutique.isCertified ? '#cbd5e1' : '#06b6d4',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 4,
+                    fontSize: 12,
+                    fontWeight: 600,
+                    cursor: actionId === boutique._id || boutique.isCertified ? 'not-allowed' : 'pointer',
+                    opacity: actionId === boutique._id || boutique.isCertified ? 0.6 : 1,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 6
+                  }}
+                >
+                  {boutique.isCertified ? '✓ Certifiée' : '⭐ Certifier'}
                 </button>
 
                 {boutique.isActive ? (
