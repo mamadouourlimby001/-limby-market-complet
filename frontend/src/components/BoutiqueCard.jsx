@@ -14,10 +14,10 @@ const BoutiqueCard = ({ boutique }) => {
           )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
-            <h3 style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{boutique.nom}</h3>
-            {boutique.isVerified && <span title="Vérifiée" style={{ color: '#4A90D9' }}><Check size={14} style={{ display: 'inline' }} /></span>}
-            {boutique.isCertified && <span style={{ fontSize: '10px', fontWeight: 600, background: '#0ea5e9', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>Boutique Certifiée</span>}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2, flexWrap: 'wrap' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', flex: 1, minWidth: 0 }}>{boutique.nom}</h3>
+            {boutique.isVerified && <span title="Vérifiée" style={{ color: '#4A90D9', flexShrink: 0 }}><Check size={14} style={{ display: 'inline' }} /></span>}
+            {boutique.isCertified && <span style={{ fontSize: '10px', fontWeight: 600, background: '#0ea5e9', color: '#fff', padding: '2px 6px', borderRadius: '4px', flexShrink: 0 }}>Boutique Certifiée</span>}
           </div>
           <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2, display: 'flex', alignItems: 'center', gap: '3px' }}><Phone size={12} /> {boutique.telephone}</p>
           <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2, display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={12} /> {boutique.quartier}, {boutique.ville}</p>
