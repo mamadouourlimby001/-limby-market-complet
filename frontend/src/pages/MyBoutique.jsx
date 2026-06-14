@@ -120,7 +120,7 @@ const MyBoutique = () => {
         <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>
           📍 {boutique.quartier}, {boutique.ville}
         </p>
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12 }}>
+        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 12, flexWrap: 'wrap' }}>
           <span
             style={{
               padding: '4px 10px',
@@ -134,6 +134,18 @@ const MyBoutique = () => {
             {statusLabel}
           </span>
           <span className="badge badge-primary">{boutique.categorie}</span>
+          {boutique.isCertified && (
+            <span style={{
+              padding: '4px 10px',
+              borderRadius: 4,
+              fontSize: 11,
+              fontWeight: 600,
+              background: '#dbeafe',
+              color: '#1e40af'
+            }}>
+              ⭐ Boutique Certifiée
+            </span>
+          )}
         </div>
       </div>
 

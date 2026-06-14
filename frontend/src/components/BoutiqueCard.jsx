@@ -17,6 +17,7 @@ const BoutiqueCard = ({ boutique }) => {
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 2 }}>
             <h3 style={{ fontSize: '14px', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{boutique.nom}</h3>
             {boutique.isVerified && <span title="Vérifiée" style={{ color: '#4A90D9' }}><Check size={14} style={{ display: 'inline' }} /></span>}
+            {boutique.isCertified && <span title="Boutique Certifiée" style={{ color: '#0ea5e9', fontSize: '16px' }}>⭐</span>}
           </div>
           <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2, display: 'flex', alignItems: 'center', gap: '3px' }}><Phone size={12} /> {boutique.telephone}</p>
           <p style={{ fontSize: '12px', color: '#6b7280', marginBottom: 2, display: 'flex', alignItems: 'center', gap: '3px' }}><MapPin size={12} /> {boutique.quartier}, {boutique.ville}</p>
