@@ -66,7 +66,7 @@ const BoutiqueDetail = () => {
           {boutique.logo && <img src={boutique.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />}
         </div>
         <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 4 }}>
-          {boutique.nom} {boutique.isVerified && <span style={{ color: '#4A90D9' }}>✔️</span>} {boutique.isCertified && <span style={{ color: '#0ea5e9', fontSize: '24px' }}>⭐</span>}
+          {boutique.nom} {boutique.isVerified && <span style={{ color: '#4A90D9' }}>✔️</span>} {boutique.isCertified && <span style={{ fontSize: '12px', fontWeight: 600, background: '#0ea5e9', color: '#fff', padding: '4px 8px', borderRadius: '4px', marginLeft: '8px' }}>Boutique Certifiée</span>}
         </h1>
         <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 4 }}>{boutique.description}</p>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', marginBottom: 8, fontSize: 13, color: '#6b7280' }}>
