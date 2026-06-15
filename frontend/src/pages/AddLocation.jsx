@@ -14,7 +14,7 @@ const AddLocation = () => {
 
   const handlePhoto = async (e) => {
     const files = Array.from(e.target.files);
-    if (photos.length + files.length > 3) { setError('Maximum 3 photos'); return; }
+    if (photos.length + files.length > 10) { setError('Maximum 10 photos'); return; }
     
     try {
       for (const file of files) {
@@ -59,10 +59,10 @@ const AddLocation = () => {
         }} required style={{ minHeight: 80 }} placeholder="Décrivez la maison..." /></div>
         <div className="form-group"><label>Prix (GNF)</label><input type="number" className="form-control" value={form.prix} onChange={e => setForm({...form, prix: e.target.value})} required /></div>
         <div className="form-group"><label>Contact (caché aux acheteurs)</label><input type="tel" className="form-control" placeholder="+224..." value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} required /></div>
-        <div className="form-group"><label>Photos (max 3)</label>
+        <div className="form-group"><label>Photos (max 10)</label>
           <div className="photo-upload">
             {photos.map((p, i) => (<div key={i} className="photo-upload-item"><img src={p} alt="" /><button type="button" className="remove-photo" onClick={() => setPhotos(prev => prev.filter((_, idx) => idx !== i))}>×</button></div>))}
-            {photos.length < 3 && (<label className="photo-upload-item" style={{ cursor: 'pointer' }}><span style={{ fontSize: 20, color: '#9ca3af' }}>+</span><input type="file" accept="image/*" onChange={handlePhoto} style={{ display: 'none' }} /></label>)}
+            {photos.length < 10 && (<label className="photo-upload-item" style={{ cursor: 'pointer' }}><span style={{ fontSize: 20, color: '#9ca3af' }}>+</span><input type="file" accept="image/*" onChange={handlePhoto} style={{ display: 'none' }} /></label>)}
           </div></div>
         <button type="submit" disabled={loading} className="btn btn-primary btn-block">{loading ? 'Publication...' : 'Publier'}</button>
       </form>

@@ -35,9 +35,9 @@ const locationSchema = new mongoose.Schema({
     type: [String],
     validate: {
       validator: function(v) {
-        return v.length <= 3;
+        return v.length <= 10;
       },
-      message: 'Maximum 3 photos autorisées'
+      message: 'Maximum 10 photos autorisées'
     }
   },
   proprietaire: {
