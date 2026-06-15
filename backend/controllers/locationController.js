@@ -186,13 +186,13 @@ const unlockContact = async (req, res) => {
       return res.json({ contact: location.contact, message: 'Contact déjà débloqué.' });
     }
 
-    // Vérifier le solde
-    if (user.credits < 1) {
+    // Vérifier le solde (10 crédits pour locations)
+    if (user.credits < 10) {
       return res.status(400).json({ message: 'Solde de crédits insuffisant.' });
     }
 
-    // Décrémenter le crédit
-    user.credits -= 1;
+    // Décrémenter les crédits (10 pour locations)
+    user.credits -= 10;
     user.loyaltyCount += 1;
 
     // Système de fidélité
@@ -209,7 +209,7 @@ const unlockContact = async (req, res) => {
       utilisateur: user._id,
       typeContenu: 'location',
       contenuId: location._id,
-      creditsDepenses: 1
+      creditsDepenses: 10
     });
 
     await ActionHistory.create({
