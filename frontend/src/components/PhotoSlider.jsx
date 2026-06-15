@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-const PhotoSlider = ({ photos = [], height = '180px' }) => {
+const PhotoSlider = ({ photos = [], height = '180px', onPhotoClick = null }) => {
   const [current, setCurrent] = useState(0);
   if (!photos || photos.length === 0) {
     return (
@@ -11,7 +11,7 @@ const PhotoSlider = ({ photos = [], height = '180px' }) => {
   }
   return (
     <div style={{ position: 'relative', width: '100%', height, overflow: 'hidden', background: '#f0f0f0' }}>
-      <img src={photos[current]} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#f0f0f0' }} />
+      <img src={photos[current]} alt="" onClick={() => onPhotoClick && onPhotoClick(current)} style={{ width: '100%', height: '100%', objectFit: 'contain', backgroundColor: '#f0f0f0', cursor: onPhotoClick ? 'pointer' : 'default' }} />
       {photos.length > 1 && (
         <>
           <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setCurrent(c => c > 0 ? c - 1 : photos.length - 1); }}
