@@ -13,6 +13,7 @@ const CreateBoutique = () => {
   const [initialLoading, setInitialLoading] = useState(false);
   const [error, setError] = useState('');
   const [boutique, setBoutique] = useState(null);
+  const [showCustomCategorie, setShowCustomCategorie] = useState(false);
 
   useEffect(() => {
     // Vérifier si on est en mode édition (détection par la présence d'une boutique existante)
@@ -116,7 +117,17 @@ const CreateBoutique = () => {
       <form onSubmit={handleSubmit}>
         <div className="form-group"><label>Nom de la boutique</label><input className="form-control" value={form.nom} onChange={e => setForm({...form, nom: e.target.value})} required /></div>
         <div className="form-group"><label>Description</label><textarea className="form-control" value={form.description} onChange={e => setForm({...form, description: e.target.value})} required /></div>
-        <div className="form-group"><label>Catégorie</label><input type="text" className="form-control" value={form.categorie} onChange={e => setForm({...form, categorie: e.target.value})} placeholder="Saisissez votre catégorie" required /></div>
+        <div className="form-group"><label>Catégorie</label>
+          {!showCustomCategorie ? (
+            <select className="form-control" value={form.categorie} onChange={e => { if (e.target.value === 'custom') { setShowCustomCategorie(true); } else { setForm({...form, categorie: e.target.value}); } }} required>
+              <option value="">Sélectionner</option>
+              <option value="Électronique">Électronique</option><option value="Mode">Mode</option><option value="Alimentation">Alimentation</option>
+              <option value="Beauté">Beauté</option><option value="Maison">Maison</option><option value="Services">Services</option><option value="custom">Saisissez la catégorie</option>
+            </select>
+          ) : (
+            <input type="text" className="form-control" value={form.categorie} onChange={e => setForm({...form, categorie: e.target.value})} placeholder="Saisissez votre catégorie" required />
+          )}
+        </div>
         <div className="form-group"><label>Ville</label><input className="form-control" value={form.ville} onChange={e => setForm({...form, ville: e.target.value})} placeholder="Ex: Conakry" required /></div>
         <div className="form-group"><label>Quartier</label><input className="form-control" value={form.quartier} onChange={e => setForm({...form, quartier: e.target.value})} placeholder="Ex: Kaloum" required /></div>
         <div className="form-group"><label>Téléphone</label><input type="tel" className="form-control" placeholder="+224..." value={form.telephone} onChange={e => setForm({...form, telephone: e.target.value})} required /></div>
