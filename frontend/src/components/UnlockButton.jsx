@@ -12,6 +12,7 @@ const UnlockButton = ({ type, id, contact, quartier }) => {
   const [unlockedQuartier, setUnlockedQuartier] = useState(quartier !== 'hidden' ? quartier : null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const creditCost = type === 'location' ? 10 : 1;
 
   const handleUnlock = async () => {
     if (!user) { navigate('/login'); return; }
@@ -45,14 +46,14 @@ const UnlockButton = ({ type, id, contact, quartier }) => {
     <>
       <button onClick={() => { if (!user) { navigate('/login'); return; } setShowConfirm(true); }}
         className="btn btn-primary btn-sm btn-block" style={{ marginBottom: 4, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-        <Unlock size={14} /> Débloquer contact (1 crédit)
+        <Unlock size={14} /> Débloquer contact ({creditCost} crédit{creditCost > 1 ? 's' : ''})
       </button>
       {showConfirm && (
         <div className="modal-overlay" onClick={() => setShowConfirm(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h3 style={{ fontSize: 16, marginBottom: 12, color: '#1B2A6B' }}>Débloquer ce contact ?</h3>
             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
-              Cela vous coûtera <strong>1 crédit (1000 GNF)</strong>.<br />
+              Cela vous coûtera <strong>{creditCost} crédit{creditCost > 1 ? 's' : ''} ({creditCost * 1000} GNF)</strong>.<br />
               Votre solde actuel : <strong>{user?.credits || 0} crédits</strong>
             </p>
             {error && <div className="alert alert-danger">{error}</div>}
