@@ -26,7 +26,7 @@ const LocationDetail = () => {
   if (!location) return <div className="page"><div className="empty-state"><p>Location introuvable</p></div></div>;
 
   return (
-    <div className="page" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: '90vh' }}>
+    <div className="page" style={{ padding: 0, display: 'flex', flexDirection: 'column', height: '85vh' }}>
       <div style={{ flex: 1, width: '100vw', marginLeft: 'calc(-50vw + 50%)', marginRight: 'calc(-50vw + 50%)', overflow: 'hidden' }}><PhotoSlider photos={location.photos} height="100%" onPhotoClick={setExpandedPhotoIndex} /></div>
       {expandedPhotoIndex !== null && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.95)', display: 'flex', flexDirection: 'column', zIndex: 1000 }}>
