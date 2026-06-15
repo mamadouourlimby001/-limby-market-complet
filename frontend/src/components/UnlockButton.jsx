@@ -52,7 +52,7 @@ const UnlockButton = ({ type, id, contact, quartier }) => {
           <div className="modal-content" onClick={e => e.stopPropagation()}>
             <h3 style={{ fontSize: 16, marginBottom: 12, color: '#1B2A6B' }}>Débloquer ce contact ?</h3>
             <p style={{ fontSize: 13, color: '#6b7280', marginBottom: 16 }}>
-              Cela vous coûtera <strong>1 crédit (200 GNF)</strong>.<br />
+              Cela vous coûtera <strong>1 crédit (1000 GNF)</strong>.<br />
               Votre solde actuel : <strong>{user?.credits || 0} crédits</strong>
             </p>
             {error && <div className="alert alert-danger">{error}</div>}

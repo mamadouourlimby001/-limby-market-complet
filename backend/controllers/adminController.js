@@ -32,9 +32,9 @@ const approveCreditRequest = async (req, res) => {
     // Calcul des crédits selon packs
     let credits = 0;
     const montant = request.montant;
-    if (montant >= 2000) { credits = Math.floor(montant / 2000) * 12; const reste = montant % 2000; if (reste >= 1000) { credits += 6; } else { credits += Math.floor(reste / 200); } }
-    else if (montant >= 1000) { credits = 6 + Math.floor((montant - 1000) / 200); }
-    else { credits = Math.floor(montant / 200); }
+    if (montant >= 10000) { credits = Math.floor(montant / 10000) * 10; const reste = montant % 10000; if (reste >= 5000) { credits += 5; } else { credits += Math.floor(reste / 1000); } }
+    else if (montant >= 5000) { credits = 5 + Math.floor((montant - 5000) / 1000); }
+    else { credits = Math.floor(montant / 1000); }
 
     // Trouver l'utilisateur par téléphone
     const user = await User.findOne({ telephone: request.telephoneCompte });

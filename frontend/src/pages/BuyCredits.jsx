@@ -3,9 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 
 const packs = [
-  { credits: 2, prix: 400, bonus: 0, label: '2 crédits' },
-  { credits: 5, prix: 1000, bonus: 1, label: '5 crédits + 1 bonus' },
-  { credits: 10, prix: 2000, bonus: 2, label: '10 crédits + 2 bonus' },
+  { credits: 2, prix: 2000, bonus: 0, label: '2 crédits' },
+  { credits: 5, prix: 5000, bonus: 1, label: '5 crédits + 1 bonus' },
+  { credits: 10, prix: 10000, bonus: 2, label: '10 crédits + 2 bonus' },
 ];
 
 const BuyCredits = () => {
