@@ -7,7 +7,7 @@ const villes = ['Conakry', 'Kindia', 'Boké', 'Mamou', 'Labé', 'Faranah', 'Kank
 
 const AddLocation = () => {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ titre: '', categorie: '', ville: '', quartier: '', prix: '', contact: '' });
+  const [form, setForm] = useState({ titre: '', categorie: '', ville: '', quartier: '', description: '', prix: '', contact: '' });
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -53,6 +53,10 @@ const AddLocation = () => {
             </select></div>
           <div className="form-group" style={{ flex: 1 }}><label>Quartier</label><input className="form-control" value={form.quartier} onChange={e => setForm({...form, quartier: e.target.value})} required /></div>
         </div>
+        <div className="form-group"><label>Description (max 4 chiffres)</label><textarea className="form-control" value={form.description} onChange={e => {
+          const digitCount = (e.target.value.match(/\d/g) || []).length;
+          if (digitCount <= 4) setForm({...form, description: e.target.value});
+        }} required style={{ minHeight: 80 }} placeholder="Décrivez la maison..." /></div>
         <div className="form-group"><label>Prix (GNF)</label><input type="number" className="form-control" value={form.prix} onChange={e => setForm({...form, prix: e.target.value})} required /></div>
         <div className="form-group"><label>Contact (caché aux acheteurs)</label><input type="tel" className="form-control" placeholder="+224..." value={form.contact} onChange={e => setForm({...form, contact: e.target.value})} required /></div>
         <div className="form-group"><label>Photos (max 3)</label>

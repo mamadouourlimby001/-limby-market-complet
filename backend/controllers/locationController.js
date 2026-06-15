@@ -33,7 +33,7 @@ const getLocations = async (req, res) => {
       .populate('proprietaire', 'nom telephone isVerified')
       .sort({ createdAt: -1 });
 
-    // Masquer les contacts
+    // Masquer les contacts et les quartiers
     const userId = req.user ? req.user._id : null;
     let unlockedIds = [];
     if (userId) {
@@ -48,6 +48,7 @@ const getLocations = async (req, res) => {
       const location = l.toObject();
       if (!unlockedIds.includes(location._id.toString())) {
         location.contact = 'hidden';
+        location.quartier = 'hidden';
       }
       return location;
     });
@@ -79,9 +80,11 @@ const getLocation = async (req, res) => {
       });
       if (!unlock) {
         locationObj.contact = 'hidden';
+        locationObj.quartier = 'hidden';
       }
     } else {
       locationObj.contact = 'hidden';
+      locationObj.quartier = 'hidden';
     }
 
     res.json(locationObj);
@@ -95,9 +98,12 @@ const createLocation = async (req, res) => {
   try {
     const { titre, categorie, ville, quartier, prix, description, photos, contact } = req.body;
 
-    // Valider que la description ne contient pas de chiffres
-    if (description && /\d/.test(description)) {
-      return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
+    // Valider que la description ne contient pas plus de 4 chiffres
+    if (description) {
+      const digitCount = (description.match(/\d/g) || []).length;
+      if (digitCount > 4) {
+        return res.status(400).json({ message: 'Maximum 4 chiffres autorisés dans la description.' });
+      }
     }
 
     // Uploader les images vers Cloudinary si elles sont en base64
@@ -227,7 +233,8 @@ const unlockContact = async (req, res) => {
     }
 
     res.json({ 
-      contact: location.contact, 
+      contact: location.contact,
+      quartier: location.quartier,
       credits: user.credits,
       bonusCredit,
       message: bonusCredit ? 'Contact débloqué ! Bonus fidélité : +1 crédit gratuit !' : 'Contact débloqué avec succès.'

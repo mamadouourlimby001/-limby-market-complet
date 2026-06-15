@@ -4,11 +4,12 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 
-const UnlockButton = ({ type, id, contact }) => {
+const UnlockButton = ({ type, id, contact, quartier }) => {
   const { user, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
   const [unlockedContact, setUnlockedContact] = useState(contact !== 'hidden' ? contact : null);
+  const [unlockedQuartier, setUnlockedQuartier] = useState(quartier !== 'hidden' ? quartier : null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -20,6 +21,9 @@ const UnlockButton = ({ type, id, contact }) => {
       const endpoint = type === 'product' ? `/products/${id}/unlock-contact` : type === 'location' ? `/locations/${id}/unlock-contact` : `/announcements/${id}/unlock-contact`;
       const res = await api.post(endpoint);
       setUnlockedContact(res.data.contact);
+      if (res.data.quartier) {
+        setUnlockedQuartier(res.data.quartier);
+      }
       setShowConfirm(false);
       await refreshUser();
     } catch (err) {

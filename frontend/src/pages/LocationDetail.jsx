@@ -32,9 +32,10 @@ const LocationDetail = () => {
         <p className="price" style={{ fontSize: 20, marginBottom: 10 }}>{location.prix?.toLocaleString('fr-GN')} GNF</p>
         <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
           <span className="badge badge-primary">{catLabels[location.categorie]}</span>
-          <span className="badge badge-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} /> {location.ville}, {location.quartier}</span>
+          <span className="badge badge-primary" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><MapPin size={14} /> {location.ville}, {location.quartier === 'hidden' ? 'Quartier masqué' : location.quartier}</span>
         </div>
-        <UnlockButton type="location" id={location._id} contact={location.contact} />
+        {location.description && <p style={{ fontSize: 14, color: '#4b5563', marginBottom: 12, lineHeight: 1.5 }}>{location.description}</p>}
+        <UnlockButton type="location" id={location._id} contact={location.contact} quartier={location.quartier} />
         <div style={{ marginTop: 8 }}><ReportButton typeContenu="location" contenuId={location._id} /></div>
       </div>
     </div>

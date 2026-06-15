@@ -27,6 +27,10 @@ const locationSchema = new mongoose.Schema({
     type: Number,
     required: [true, 'Le prix est requis']
   },
+  description: {
+    type: String,
+    required: [true, 'La description est requise']
+  },
   photos: {
     type: [String],
     validate: {
