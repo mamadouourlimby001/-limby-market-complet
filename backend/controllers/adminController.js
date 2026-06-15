@@ -601,8 +601,9 @@ const getVisites = async (req, res) => {
     const visitesFormatees = visites.map(visite => ({
       _id: visite._id,
       utilisateur: visite.utilisateur,
+      visitorId: visite.visitorId,
       nom: visite.nom || 'Visiteur anonyme',
-      telephone: visite.telephone || visite.identifier || 'Pas de compte',
+      telephone: visite.telephone || visite.visitorId || 'Non enregistré',
       nombrePages: visite.pagesVisitees.length,
       dureeTotale: visite.dureeTotale || 0,
       dateDebut: visite.dateDebut,
@@ -618,44 +619,85 @@ const getVisites = async (req, res) => {
 // POST /api/admin/track-page-visit - Enregistrer une visite de page
 const trackPageVisit = async (req, res) => {
   try {
-    const { page } = req.body;
+    const { page, visitorId } = req.body;
+    console.log('trackPageVisit reçu:', { page, visitorId, hasUser: !!req.user, userId: req.user?._id });
+    
     if (!page) {
       return res.status(400).json({ message: 'Page requise.' });
     }
 
-    const userId = req.user._id;
     const now = new Date();
+    let visit = null;
 
-    // Chercher une visite ouverte pour cet utilisateur
-    let visit = await Visit.findOne({
-      utilisateur: userId,
-      dateFin: null
-    });
+    if (req.user && req.user._id) {
+      // Utilisateur authentifié
+      const userId = req.user._id;
+      console.log('Enregistrement visite authentifiée pour:', userId);
 
-    if (visit) {
-      // Ajouter la page à la visite existante
-      visit.pagesVisitees.push({
-        page: page,
-        tempsDebut: now
-      });
-      visit.nombrePages = visit.pagesVisitees.length;
-      await visit.save();
-    } else {
-      // Créer une nouvelle visite
-      visit = await Visit.create({
+      // Chercher une visite ouverte pour cet utilisateur
+      visit = await Visit.findOne({
         utilisateur: userId,
-        nom: req.user.nom,
-        telephone: req.user.telephone,
-        pagesVisitees: [{
+        dateFin: null
+      });
+
+      if (visit) {
+        // Ajouter la page à la visite existante
+        visit.pagesVisitees.push({
           page: page,
           tempsDebut: now
-        }],
-        dateDebut: now,
-        nombrePages: 1
+        });
+        visit.nombrePages = visit.pagesVisitees.length;
+        await visit.save();
+      } else {
+        // Créer une nouvelle visite
+        visit = await Visit.create({
+          utilisateur: userId,
+          nom: req.user.nom,
+          telephone: req.user.telephone,
+          pagesVisitees: [{
+            page: page,
+            tempsDebut: now
+          }],
+          dateDebut: now,
+          nombrePages: 1
+        });
+      }
+    } else if (visitorId) {
+      // Visiteur anonyme
+      console.log('Enregistrement visite anonyme pour:', visitorId);
+      
+      visit = await Visit.findOne({
+        visitorId: visitorId,
+        dateFin: null
       });
+
+      if (visit) {
+        // Ajouter la page à la visite existante
+        visit.pagesVisitees.push({
+          page: page,
+          tempsDebut: now
+        });
+        visit.nombrePages = visit.pagesVisitees.length;
+        await visit.save();
+      } else {
+        // Créer une nouvelle visite anonyme
+        visit = await Visit.create({
+          visitorId: visitorId,
+          nom: 'Visiteur anonyme',
+          pagesVisitees: [{
+            page: page,
+            tempsDebut: now
+          }],
+          dateDebut: now,
+          nombrePages: 1
+        });
+      }
+    } else {
+      console.log('Ni utilisateur ni visitorId fourni');
     }
 
-    res.json({ message: 'Visite enregistrée', visitId: visit._id });
+    console.log('Visite créée/mise à jour:', visit?._id);
+    res.json({ message: 'Visite enregistrée', visitId: visit?._id });
   } catch (error) {
     console.error('Erreur trackPageVisit:', error);
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
@@ -671,7 +713,7 @@ const getVisiteDetails = async (req, res) => {
     res.json({
       _id: visite._id,
       nom: visite.nom || 'Visiteur anonyme',
-      telephone: visite.telephone || visite.identifier || 'Pas de compte',
+      telephone: visite.telephone || visite.visitorId || 'Non enregistré',
       dateDebut: visite.dateDebut,
       dateFin: visite.dateFin,
       dureeTotale: visite.dureeTotale,

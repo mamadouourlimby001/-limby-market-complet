@@ -3,16 +3,21 @@ import { useLocation } from 'react-router-dom';
 import api from './api';
 import { useAuth } from '../context/AuthContext';
 
+// Générer un ID unique pour les visiteurs anonymes
+const getVisitorId = () => {
+  let visitorId = localStorage.getItem('visitorId');
+  if (!visitorId) {
+    visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('visitorId', visitorId);
+  }
+  return visitorId;
+};
+
 export const useTrackVisit = () => {
   const location = useLocation();
   const { user } = useAuth();
 
   useEffect(() => {
-    // Ne tracker que si l'utilisateur est connecté
-    if (!user || !user._id) {
-      return;
-    }
-
     // Ignorer les pages d'authentification et certaines routes admin
     const ignoredPaths = ['/login', '/register', '/forgot-password'];
     if (ignoredPaths.includes(location.pathname)) {
@@ -22,7 +27,13 @@ export const useTrackVisit = () => {
     // Envoyer le tracking de page visit
     const trackVisit = async () => {
       try {
-        await api.post('/admin/track-page-visit', { page: location.pathname }).catch(err => {
+        const visitorId = getVisitorId();
+        const trackData = {
+          page: location.pathname,
+          visitorId: visitorId
+        };
+
+        await api.post('/admin/track-page-visit', trackData).catch(err => {
           // Ne pas bloquer l'expérience utilisateur si le tracking échoue
           console.error('Erreur tracking:', err);
         });

@@ -55,7 +55,7 @@ const AdminVisites = () => {
                   <td style={{ padding: 12 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                       <Phone size={14} color="#6b7280" />
-                      <span>{visite.telephone}</span>
+                      <span style={{ fontSize: 12, color: '#6b7280', wordBreak: 'break-all' }}>{visite.telephone}</span>
                     </div>
                   </td>
                   <td style={{ padding: 12, textAlign: 'center' }}>

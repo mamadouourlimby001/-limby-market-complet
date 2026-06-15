@@ -30,4 +30,31 @@ const auth = async (req, res, next) => {
   }
 };
 
+/**
+ * Middleware d'authentification optionnel
+ * N'attache l'utilisateur que s'il existe
+ * Continue même si pas d'authentification
+ */
+const authOptional = async (req, res, next) => {
+  try {
+    const authHeader = req.header('Authorization');
+    
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.replace('Bearer ', '');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      const user = await User.findById(decoded.id).select('-motDePasse');
+      if (user) {
+        req.user = user;
+      }
+    }
+    
+    next();
+  } catch (error) {
+    // Ignorer les erreurs et continuer
+    next();
+  }
+};
+
 module.exports = auth;
+module.exports.optional = authOptional;

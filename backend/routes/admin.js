@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/auth');
+const authOptional = auth.optional;
 const isAdmin = require('../middleware/isAdmin');
 const isSupremeAdmin = require('../middleware/isSupremeAdmin');
 const {
@@ -14,7 +15,10 @@ const {
   getVisites, getVisiteDetails, trackPageVisit
 } = require('../controllers/adminController');
 
-// Toutes les routes admin nécessitent auth + isAdmin
+// Route de tracking accessible à tous (public - avec authentification optionnelle)
+router.post('/track-page-visit', authOptional, trackPageVisit);
+
+// Toutes les autres routes admin nécessitent auth + isAdmin
 router.use(auth, isAdmin);
 
 router.get('/credit-requests', getCreditRequests);
@@ -45,7 +49,6 @@ router.post('/reset-stats', resetDashboardStats);
 router.get('/dashboard-stats', getDashboardStats);
 router.get('/visites', getVisites);
 router.get('/visites/:id', getVisiteDetails);
-router.post('/track-page-visit', trackPageVisit);
 
 // Routes admin suprême uniquement
 router.post('/admins/add', isSupremeAdmin, addAdmin);

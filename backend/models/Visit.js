@@ -4,7 +4,11 @@ const visitSchema = new mongoose.Schema({
   utilisateur: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    default: null
+  },
+  visitorId: {
+    type: String,
+    default: null // ID unique pour les visiteurs non authentifiés
   },
   nom: String,
   telephone: String,
