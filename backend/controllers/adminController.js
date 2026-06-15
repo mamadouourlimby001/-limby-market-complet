@@ -596,8 +596,7 @@ const getVisites = async (req, res) => {
     
     const visites = await Visit.find({
       createdAt: { $gte: vingtQuatreHeures }
-    }).sort({ createdAt: -1 });,
-  getVisites, getVisiteDetails
+    }).sort({ createdAt: -1 });
 
     const visitesFormatees = visites.map(visite => ({
       _id: visite._id,
@@ -648,5 +647,6 @@ module.exports = {
   setBoutiqueActive, setBoutiqueVerified, renewBoutique,
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
-  getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword
+  getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
+  getVisites, getVisiteDetails
 };
