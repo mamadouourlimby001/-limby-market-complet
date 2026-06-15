@@ -3,48 +3,42 @@ const crypto = require('crypto');
 
 const trackVisits = async (req, res, next) => {
   try {
-    let visitId = null;
-    let identifier = null;
-
-    // Déterminer l'identifiant du visiteur
-    if (req.user && req.user._id) {
-      visitId = req.user._id;
-    } else {
-      // Créer un identifiant unique pour les visiteurs non authentifiés
-      identifier = req.ip || req.connection.remoteAddress || crypto.randomBytes(8).toString('hex');
+    // Ne tracker que les utilisateurs authentifiés
+    if (!req.user || !req.user._id) {
+      return next();
     }
 
-    // Enregistrer la visite si ce n'est pas une requête API
-    const isApiRequest = req.path.startsWith('/api/');
-    if (!isApiRequest) {
-      const now = new Date();
+    const now = new Date();
 
-      if (req.user && req.user._id) {
-        const visit = await Visit.findOne({
-          utilisateur: req.user._id,
-          dateFin: null
-        });
+    // Chercher une visite ouverte pour cet utilisateur
+    const visit = await Visit.findOne({
+      utilisateur: req.user._id,
+      dateFin: null
+    }).catch(err => {
+      console.error('Erreur recherche visite:', err);
+      return null;
+    });
 
-        if (visit) {
-          visit.pagesVisitees.push({
-            page: req.path,
-            tempsDebut: now,
-            tempsFin: null
-          });
-          visit.save().catch(err => console.error('Erreur sauvegarde visite:', err));
-        } else {
-          await Visit.create({
-            utilisateur: req.user._id,
-            nom: req.user.nom,
-            telephone: req.user.telephone,
-            pagesVisitees: [{
-              page: req.path,
-              tempsDebut: now
-            }],
-            nombrePages: 1
-          });
-        }
-      }
+    if (visit) {
+      // Ajouter la page à la visite existante
+      visit.pagesVisitees.push({
+        page: req.path,
+        tempsDebut: now
+      });
+      visit.save().catch(err => console.error('Erreur mise à jour visite:', err));
+    } else {
+      // Créer une nouvelle visite
+      Visit.create({
+        utilisateur: req.user._id,
+        nom: req.user.nom,
+        telephone: req.user.telephone,
+        pagesVisitees: [{
+          page: req.path,
+          tempsDebut: now
+        }],
+        dateDebut: now,
+        nombrePages: 1
+      }).catch(err => console.error('Erreur création visite:', err));
     }
 
     next();

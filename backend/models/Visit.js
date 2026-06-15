@@ -4,29 +4,25 @@ const visitSchema = new mongoose.Schema({
   utilisateur: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    default: null // null si l'utilisateur n'a pas de compte
+    required: true
   },
-  identifier: {
-    type: String,
-    default: null // ID unique pour les visiteurs non authentifiés
-  },
-  nom: String, // Nom de l'utilisateur (s'il a un compte)
-  telephone: String, // Téléphone de l'utilisateur (s'il a un compte)
+  nom: String,
+  telephone: String,
   pagesVisitees: [
     {
-      page: String, // URL ou nom de la page
-      tempsDebut: Date,
+      page: String,
+      tempsDebut: { type: Date, default: Date.now },
       tempsFin: Date,
-      duree: Number // en secondes
+      duree: Number
     }
   ],
   dateDebut: { type: Date, default: Date.now },
   dateFin: Date,
-  dureeTotale: Number, // en secondes
+  dureeTotale: { type: Number, default: 0 },
   nombrePages: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// Index pour nettoyer les visites après 24h
+// TTL Index : les documents sont supprimés après 86400 secondes (24h)
 visitSchema.index({ createdAt: 1 }, { expireAfterSeconds: 86400 });
 
 module.exports = mongoose.model('Visit', visitSchema);
