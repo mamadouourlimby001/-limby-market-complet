@@ -47,14 +47,21 @@ import AdminMessages from './pages/AdminMessages';
 import AdminVisites from './pages/AdminVisites';
 import AdminVisiteDetails from './pages/AdminVisiteDetails';
 import NotFound from './pages/NotFound';
+import useTrackVisit from './utils/useTrackVisit';
 import './index.css';
+
+function TrackingWrapper({ children }) {
+  useTrackVisit();
+  return children;
+}
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <Navbar />
-        <div className="app-content">
+        <TrackingWrapper>
+          <Navbar />
+          <div className="app-content">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -103,6 +110,7 @@ function App() {
           </Routes>
         </div>
         <BottomNav />
+        </TrackingWrapper>
       </Router>
     </AuthProvider>
   );

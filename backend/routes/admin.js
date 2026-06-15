@@ -11,7 +11,7 @@ const {
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
-  getVisites, getVisiteDetails
+  getVisites, getVisiteDetails, trackPageVisit
 } = require('../controllers/adminController');
 
 // Toutes les routes admin nécessitent auth + isAdmin
@@ -45,6 +45,7 @@ router.post('/reset-stats', resetDashboardStats);
 router.get('/dashboard-stats', getDashboardStats);
 router.get('/visites', getVisites);
 router.get('/visites/:id', getVisiteDetails);
+router.post('/track-page-visit', trackPageVisit);
 
 // Routes admin suprême uniquement
 router.post('/admins/add', isSupremeAdmin, addAdmin);

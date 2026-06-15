@@ -22,8 +22,6 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Routes API
 app.use('/api/auth', require('./routes/auth'));
-const trackVisits = require('./middleware/trackVisits');
-app.use('/api/', trackVisits); // Appliquer le tracking après les routes d'auth
 app.use('/api/products', require('./routes/products'));
 app.use('/api/locations', require('./routes/locations'));
 app.use('/api/announcements', require('./routes/announcements'));

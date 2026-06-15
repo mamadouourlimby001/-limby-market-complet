@@ -615,6 +615,53 @@ const getVisites = async (req, res) => {
   }
 };
 
+// POST /api/admin/track-page-visit - Enregistrer une visite de page
+const trackPageVisit = async (req, res) => {
+  try {
+    const { page } = req.body;
+    if (!page) {
+      return res.status(400).json({ message: 'Page requise.' });
+    }
+
+    const userId = req.user._id;
+    const now = new Date();
+
+    // Chercher une visite ouverte pour cet utilisateur
+    let visit = await Visit.findOne({
+      utilisateur: userId,
+      dateFin: null
+    });
+
+    if (visit) {
+      // Ajouter la page à la visite existante
+      visit.pagesVisitees.push({
+        page: page,
+        tempsDebut: now
+      });
+      visit.nombrePages = visit.pagesVisitees.length;
+      await visit.save();
+    } else {
+      // Créer une nouvelle visite
+      visit = await Visit.create({
+        utilisateur: userId,
+        nom: req.user.nom,
+        telephone: req.user.telephone,
+        pagesVisitees: [{
+          page: page,
+          tempsDebut: now
+        }],
+        dateDebut: now,
+        nombrePages: 1
+      });
+    }
+
+    res.json({ message: 'Visite enregistrée', visitId: visit._id });
+  } catch (error) {
+    console.error('Erreur trackPageVisit:', error);
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 // GET /api/admin/visites/:id - Récupérer les détails d'une visite
 const getVisiteDetails = async (req, res) => {
   try {
@@ -648,5 +695,5 @@ module.exports = {
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
-  getVisites, getVisiteDetails
+  getVisites, getVisiteDetails, trackPageVisit
 };
