@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Phone, MapPin, Store, Send } from 'lucide-react';
+import { ArrowLeft, Phone, MapPin, Store } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import { useAuth } from '../context/AuthContext';
@@ -15,10 +15,7 @@ const ProductBoutiqueDetail = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [quantite, setQuantite] = useState(1);
-  const [showMessageForm, setShowMessageForm] = useState(false);
-  const [messageContent, setMessageContent] = useState('');
   const [orderLoading, setOrderLoading] = useState(false);
-  const [messageLoading, setMessageLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
 
   useEffect(() => {
@@ -71,35 +68,6 @@ const ProductBoutiqueDetail = () => {
       alert(err.response?.data?.message || 'Erreur lors de la création de la commande');
     } finally {
       setOrderLoading(false);
-    }
-  };
-
-  const handleSendMessage = async () => {
-    if (!messageContent.trim()) {
-      alert('Veuillez écrire un message');
-      return;
-    }
-
-    if (!user) {
-      alert('Veuillez vous connecter');
-      navigate('/login');
-      return;
-    }
-
-    setMessageLoading(true);
-    try {
-      await api.post('/boutique-messages/send-to-boutique', {
-        boutiqueId,
-        contenu: messageContent
-      });
-      setMessageContent('');
-      setShowMessageForm(false);
-      setToast({ show: true, message: 'Message envoyé avec succès ✓' });
-      setTimeout(() => setToast({ show: false, message: '' }), 3000);
-    } catch (err) {
-      alert(err.response?.data?.message || 'Erreur lors de l\'envoi du message');
-    } finally {
-      setMessageLoading(false);
     }
   };
 
@@ -288,11 +256,16 @@ const ProductBoutiqueDetail = () => {
             </div>
           )}
 
-          {/* Bouton Message */}
-          <button
-            onClick={() => setShowMessageForm(!showMessageForm)}
-            disabled={messageLoading}
+          {/* Bouton WhatsApp */}
+          <a
+            href={`https://wa.me/${boutique.telephone?.replace(/\D/g, '')}`}
+            target="_blank"
+            rel="noopener noreferrer"
             style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
               padding: 12,
               background: '#3b82f6',
               color: '#fff',
@@ -301,71 +274,11 @@ const ProductBoutiqueDetail = () => {
               fontWeight: 600,
               fontSize: 14,
               cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8
+              textDecoration: 'none'
             }}
           >
-            <Send size={16} /> Écrire à la boutique
-          </button>
-
-          {/* Formulaire Message */}
-          {showMessageForm && (
-            <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: 16 }}>
-              <textarea
-                placeholder="Votre message..."
-                value={messageContent}
-                onChange={(e) => setMessageContent(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: 10,
-                  border: '1px solid #e5e7eb',
-                  borderRadius: 6,
-                  fontSize: 14,
-                  fontFamily: 'inherit',
-                  marginBottom: 8,
-                  minHeight: 80,
-                  resize: 'vertical'
-                }}
-              />
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button
-                  onClick={handleSendMessage}
-                  style={{
-                    flex: 1,
-                    padding: 10,
-                    background: '#3b82f6',
-                    color: '#fff',
-                    border: 'none',
-                    borderRadius: 6,
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Envoyer
-                </button>
-                <button
-                  onClick={() => {
-                    setShowMessageForm(false);
-                    setMessageContent('');
-                  }}
-                  style={{
-                    flex: 1,
-                    padding: 10,
-                    background: '#e5e7eb',
-                    color: '#1f2937',
-                    border: 'none',
-                    borderRadius: 6,
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  Annuler
-                </button>
-              </div>
-            </div>
-          )}
+            💬 Contacter par WhatsApp
+          </a>
         </div>
       ) : (
         <div style={{ textAlign: 'center', padding: 20, background: '#f3f4f6', borderRadius: 6 }}>

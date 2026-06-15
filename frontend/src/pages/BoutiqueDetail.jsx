@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import ReportButton from '../components/ReportButton';
-import { MapPin, Send } from 'lucide-react';
+import { MapPin } from 'lucide-react';
 
 const BoutiqueDetail = () => {
   const { id } = useParams();
@@ -12,9 +12,6 @@ const BoutiqueDetail = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageContent, setMessageContent] = useState('');
-  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -30,34 +27,6 @@ const BoutiqueDetail = () => {
 
   const { boutique, products } = data;
   const isOwner = user && boutique.proprietaire?._id === user._id;
-
-  const handleSendMessage = async () => {
-    if (!messageContent.trim()) {
-      alert('Écrivez un message');
-      return;
-    }
-
-    if (!user) {
-      alert('Veuillez vous connecter');
-      navigate('/login');
-      return;
-    }
-
-    setSendingMessage(true);
-    try {
-      await api.post('/boutique-messages/send-to-boutique', {
-        boutiqueId: id,
-        contenu: messageContent
-      });
-      setMessageContent('');
-      setShowMessageModal(false);
-      alert('Message envoyé avec succès');
-    } catch (err) {
-      alert(err.response?.data?.message || 'Erreur lors de l\'envoi');
-    } finally {
-      setSendingMessage(false);
-    }
-  };
 
   return (
     <div className="page">
@@ -81,94 +50,15 @@ const BoutiqueDetail = () => {
       )}
 
       {!isOwner && (
-        <button
-          onClick={() => setShowMessageModal(true)}
+        <a
+          href={`https://wa.me/${boutique.telephone?.replace(/\D/g, '')}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="btn btn-secondary btn-block"
-          style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+          style={{ marginBottom: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, textDecoration: 'none', color: 'inherit' }}
         >
-          <Send size={16} /> Écrire à la boutique
-        </button>
-      )}
-
-      {/* Modal d'envoi de message */}
-      {showMessageModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.5)',
-          display: 'flex',
-          alignItems: 'flex-end',
-          zIndex: 1000
-        }} onClick={() => setShowMessageModal(false)}>
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: '100%',
-              background: '#fff',
-              borderRadius: '12px 12px 0 0',
-              padding: 16,
-              animation: 'slideUp 0.3s ease'
-            }}
-          >
-            <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 12 }}>Écrire à {boutique.nom}</h3>
-            <textarea
-              placeholder="Votre message..."
-              value={messageContent}
-              onChange={(e) => setMessageContent(e.target.value)}
-              style={{
-                width: '100%',
-                padding: 10,
-                border: '1px solid #e5e7eb',
-                borderRadius: 6,
-                fontSize: 14,
-                fontFamily: 'inherit',
-                minHeight: 100,
-                resize: 'vertical',
-                marginBottom: 12
-              }}
-            />
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button
-                onClick={handleSendMessage}
-                disabled={sendingMessage}
-                style={{
-                  flex: 1,
-                  padding: 12,
-                  background: '#1B2A6B',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 6,
-                  fontWeight: 600,
-                  cursor: sendingMessage ? 'not-allowed' : 'pointer',
-                  opacity: sendingMessage ? 0.6 : 1
-                }}
-              >
-                {sendingMessage ? 'Envoi...' : 'Envoyer'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowMessageModal(false);
-                  setMessageContent('');
-                }}
-                style={{
-                  flex: 1,
-                  padding: 12,
-                  background: '#e5e7eb',
-                  color: '#1f2937',
-                  border: 'none',
-                  borderRadius: 6,
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                Annuler
-              </button>
-            </div>
-          </div>
-        </div>
+          💬 Contacter par WhatsApp
+        </a>
       )}
 
       <h2 style={{ fontSize: 16, fontWeight: 700, marginBottom: 10 }}>Produits ({products.length})</h2>
