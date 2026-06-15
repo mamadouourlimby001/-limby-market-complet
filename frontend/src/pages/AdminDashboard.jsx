@@ -50,6 +50,7 @@ const AdminDashboard = () => {
   menuItems.push(
     { path: '/admin/send-to-users', label: 'Écrire aux utilisateurs', icon: '✎' },
     { path: '/admin/passwords', label: 'Mots de passe', icon: '🔐', superAdminOnly: true },
+    { path: '/admin/visites', label: 'Visites', icon: '👁️', superAdminOnly: true },
     { path: '/admin/messages', label: 'Messages', icon: '💬' }
   );
 

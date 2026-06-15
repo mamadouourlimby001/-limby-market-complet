@@ -10,7 +10,8 @@ const {
   setBoutiqueActive, setBoutiqueVerified, renewBoutique,
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
-  getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword
+  getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
+  getVisites, getVisiteDetails
 } = require('../controllers/adminController');
 
 // Toutes les routes admin nécessitent auth + isAdmin
@@ -42,6 +43,8 @@ router.put('/boutiques/:id/certify', certifyBoutique);
 router.get('/boutiques/:id/stats', getBoutiqueDetailStats);
 router.post('/reset-stats', resetDashboardStats);
 router.get('/dashboard-stats', getDashboardStats);
+router.get('/visites', getVisites);
+router.get('/visites/:id', getVisiteDetails);
 
 // Routes admin suprême uniquement
 router.post('/admins/add', isSupremeAdmin, addAdmin);

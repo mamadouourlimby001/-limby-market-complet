@@ -10,6 +10,7 @@ const ContactUnlock = require('../models/ContactUnlock');
 const Report = require('../models/Report');
 const ActionHistory = require('../models/ActionHistory');
 const Notification = require('../models/Notification');
+const Visit = require('../models/Visit');
 const bcrypt = require('bcryptjs');
 
 // GET /api/admin/credit-requests
@@ -584,6 +585,58 @@ const resetUserPassword = async (req, res) => {
     res.json({ message: `Mot de passe de ${user.nom} réinitialisé avec succès.` });
   } catch (error) {
     console.error('Erreur resetUserPassword:', error);
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// GET /api/admin/visites - Récupérer toutes les visites des 24 dernières heures
+const getVisites = async (req, res) => {
+  try {
+    const vingtQuatreHeures = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    
+    const visites = await Visit.find({
+      createdAt: { $gte: vingtQuatreHeures }
+    }).sort({ createdAt: -1 });,
+  getVisites, getVisiteDetails
+
+    const visitesFormatees = visites.map(visite => ({
+      _id: visite._id,
+      utilisateur: visite.utilisateur,
+      nom: visite.nom || 'Visiteur anonyme',
+      telephone: visite.telephone || visite.identifier || 'Pas de compte',
+      nombrePages: visite.pagesVisitees.length,
+      dureeTotale: visite.dureeTotale || 0,
+      dateDebut: visite.dateDebut,
+      dateFin: visite.dateFin
+    }));
+
+    res.json(visitesFormatees);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// GET /api/admin/visites/:id - Récupérer les détails d'une visite
+const getVisiteDetails = async (req, res) => {
+  try {
+    const visite = await Visit.findById(req.params.id);
+    if (!visite) return res.status(404).json({ message: 'Visite introuvable.' });
+
+    res.json({
+      _id: visite._id,
+      nom: visite.nom || 'Visiteur anonyme',
+      telephone: visite.telephone || visite.identifier || 'Pas de compte',
+      dateDebut: visite.dateDebut,
+      dateFin: visite.dateFin,
+      dureeTotale: visite.dureeTotale,
+      pagesVisitees: visite.pagesVisitees.map(page => ({
+        page: page.page,
+        tempsDebut: page.tempsDebut,
+        tempsFin: page.tempsFin,
+        duree: page.duree
+      }))
+    });
+  } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
 };

@@ -44,6 +44,8 @@ import AdminUsers from './pages/AdminUsers';
 import AdminSendToUsers from './pages/AdminSendToUsers';
 import AdminPasswords from './pages/AdminPasswords';
 import AdminMessages from './pages/AdminMessages';
+import AdminVisites from './pages/AdminVisites';
+import AdminVisiteDetails from './pages/AdminVisiteDetails';
 import NotFound from './pages/NotFound';
 import './index.css';
 
@@ -95,6 +97,8 @@ function App() {
             <Route path="/admin/send-to-users" element={<AdminRoute><AdminSendToUsers /></AdminRoute>} />
             <Route path="/admin/passwords" element={<AdminRoute><AdminPasswords /></AdminRoute>} />
             <Route path="/admin/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
+            <Route path="/admin/visites" element={<AdminRoute><AdminVisites /></AdminRoute>} />
+            <Route path="/admin/visites/:id" element={<AdminRoute><AdminVisiteDetails /></AdminRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
