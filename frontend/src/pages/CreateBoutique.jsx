@@ -6,7 +6,7 @@ import api from '../utils/api';
 const CreateBoutique = () => {
   const navigate = useNavigate();
   const [isEditMode, setIsEditMode] = useState(false);
-  const [form, setForm] = useState({ nom: '', description: '', categorie: '', telephone: '', ville: '', quartier: '' });
+  const [form, setForm] = useState({ nom: '', description: '', categorie: '', telephone: '+224', ville: '', quartier: '' });
   const [logo, setLogo] = useState('');
   const [originalLogo, setOriginalLogo] = useState('');
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,7 @@ const CreateBoutique = () => {
           nom: res.data.boutique.nom,
           description: res.data.boutique.description,
           categorie: res.data.boutique.categorie,
-          telephone: res.data.boutique.telephone,
+          telephone: res.data.boutique.telephone || '+224',
           ville: res.data.boutique.ville,
           quartier: res.data.boutique.quartier
         });
@@ -130,7 +130,18 @@ const CreateBoutique = () => {
         </div>
         <div className="form-group"><label>Ville</label><input className="form-control" value={form.ville} onChange={e => setForm({...form, ville: e.target.value})} placeholder="Ex: Conakry" required /></div>
         <div className="form-group"><label>Quartier</label><input className="form-control" value={form.quartier} onChange={e => setForm({...form, quartier: e.target.value})} placeholder="Ex: Kaloum" required /></div>
-        <div className="form-group"><label>Téléphone</label><input type="tel" className="form-control" placeholder="+224..." value={form.telephone} onChange={e => setForm({...form, telephone: e.target.value})} required /></div>
+        <div className="form-group"><label>Téléphone</label><input type="tel" className="form-control" placeholder="+224..." value={form.telephone} onChange={e => {
+          let val = e.target.value;
+          // Garder le format +224 au début
+          if (!val.startsWith('+224')) {
+            val = '+224' + val.replace(/\D/g, '');
+          } else {
+            // Enlever les caractères non numériques après +224
+            const digits = val.replace(/\D/g, '');
+            val = '+224' + digits.substring(3, 12); // Garder max 9 chiffres après +224
+          }
+          setForm({...form, telephone: val});
+        }} maxLength="13" required /></div>
         <div className="form-group"><label>Logo</label>
           <div className="photo-upload">
             {logo ? (
