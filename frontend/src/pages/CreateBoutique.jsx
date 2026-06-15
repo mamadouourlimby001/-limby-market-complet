@@ -104,10 +104,10 @@ const CreateBoutique = () => {
       {!isEditMode && (
         <>
           <div className="alert alert-info" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Info size={18} /> Votre boutique sera créée mais inactive. Pour l'activer, vous devez payer un abonnement de 10000 GNF et obtenir l'approbation d'un administrateur.
+            <Info size={18} /> Votre boutique sera créée mais inactive. Pour l'activer, vous devez payer un abonnement de 38000 GNF et obtenir l'approbation d'un administrateur.
           </div>
           <div className="alert alert-info" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <CreditCard size={18} /> Déposez <strong>10 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> pour activer votre boutique.
+            <CreditCard size={18} /> Déposez <strong>38 000 GNF</strong> sur le numéro Orange Money <strong>+224625223418</strong> pour activer votre boutique.
           </div>
         </>
       )}
