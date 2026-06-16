@@ -630,6 +630,28 @@ const getVisites = async (req, res) => {
   }
 };
 
+// Fonction pour obtenir les infos géographiques par coordonnées GPS (Reverse Geocoding)
+const getReverseGeoInfo = async (latitude, longitude) => {
+  try {
+    // Utiliser Nominatim (OpenStreetMap) pour le reverse geocoding - API gratuite
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`,
+      { headers: { 'User-Agent': 'Limby-App' } }
+    );
+    const data = await response.json();
+    
+    const address = data.address || {};
+    return {
+      pays: address.country || null,
+      region: address.state || address.province || null,
+      ville: address.city || address.town || address.village || null
+    };
+  } catch (error) {
+    console.error('Erreur reverse geocoding:', error);
+    return { pays: null, region: null, ville: null };
+  }
+};
+
 // Fonction pour obtenir les infos géographiques (pays, région, ville)
 const getGeoInfo = async (ip) => {
   try {
@@ -650,8 +672,8 @@ const getGeoInfo = async (ip) => {
 // POST /api/admin/track-page-visit - Enregistrer une visite de page
 const trackPageVisit = async (req, res) => {
   try {
-    const { page, visitorId } = req.body;
-    console.log('trackPageVisit reçu:', { page, visitorId, hasUser: !!req.user, userId: req.user?._id });
+    const { page, visitorId, latitude, longitude } = req.body;
+    console.log('trackPageVisit reçu:', { page, visitorId, hasUser: !!req.user, userId: req.user?._id, hasGPS: !!(latitude && longitude) });
     
     if (!page) {
       return res.status(400).json({ message: 'Page requise.' });
@@ -660,9 +682,19 @@ const trackPageVisit = async (req, res) => {
     const now = new Date();
     let visit = null;
     
-    // Récupérer l'IP du client
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-    const geoInfo = await getGeoInfo(clientIp.split(',')[0]);
+    // Déterminer la géolocalisation: priorité aux coordonnées GPS
+    let geoInfo = { pays: null, region: null, ville: null };
+    
+    if (latitude && longitude) {
+      // Utiliser les coordonnées GPS si disponibles
+      console.log('Utilisation reverse geocoding GPS:', { latitude, longitude });
+      geoInfo = await getReverseGeoInfo(latitude, longitude);
+    } else {
+      // Sinon, utiliser la géolocalisation par IP
+      const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+      console.log('Utilisation géolocalisation IP:', clientIp);
+      geoInfo = await getGeoInfo(clientIp.split(',')[0]);
+    }
 
     if (req.user && req.user._id) {
       // Utilisateur authentifié
@@ -682,6 +714,10 @@ const trackPageVisit = async (req, res) => {
           tempsDebut: now
         });
         visit.nombrePages = visit.pagesVisitees.length;
+        // Mettre à jour la géolocalisation si elle n'était pas disponible
+        if (!visit.pays) visit.pays = geoInfo.pays;
+        if (!visit.region) visit.region = geoInfo.region;
+        if (!visit.ville) visit.ville = geoInfo.ville;
         await visit.save();
       } else {
         // Créer une nouvelle visite
@@ -716,6 +752,10 @@ const trackPageVisit = async (req, res) => {
           tempsDebut: now
         });
         visit.nombrePages = visit.pagesVisitees.length;
+        // Mettre à jour la géolocalisation si elle n'était pas disponible
+        if (!visit.pays) visit.pays = geoInfo.pays;
+        if (!visit.region) visit.region = geoInfo.region;
+        if (!visit.ville) visit.ville = geoInfo.ville;
         await visit.save();
       } else {
         // Créer une nouvelle visite anonyme
@@ -737,7 +777,7 @@ const trackPageVisit = async (req, res) => {
       console.log('Ni utilisateur ni visitorId fourni');
     }
 
-    console.log('Visite créée/mise à jour:', visit?._id);
+    console.log('Visite créée/mise à jour:', visit?._id, 'Géolocalisation:', geoInfo);
     res.json({ message: 'Visite enregistrée', visitId: visit?._id });
   } catch (error) {
     console.error('Erreur trackPageVisit:', error);

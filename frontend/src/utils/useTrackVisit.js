@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import api from './api';
 import { useAuth } from '../context/AuthContext';
@@ -13,9 +13,50 @@ const getVisitorId = () => {
   return visitorId;
 };
 
+// Récupérer les coordonnées GPS
+const getGPSCoordinates = () => {
+  return new Promise((resolve) => {
+    // Vérifier si les coordonnées sont déjà en cache
+    const cachedCoords = localStorage.getItem('gpsCoordinates');
+    if (cachedCoords) {
+      resolve(JSON.parse(cachedCoords));
+      return;
+    }
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const coords = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          };
+          localStorage.setItem('gpsCoordinates', JSON.stringify(coords));
+          resolve(coords);
+        },
+        (error) => {
+          console.log('Géolocalisation non disponible:', error.message);
+          resolve(null);
+        },
+        { timeout: 5000, maximumAge: 3600000 } // 1 heure de cache
+      );
+    } else {
+      resolve(null);
+    }
+  });
+};
+
 export const useTrackVisit = () => {
   const location = useLocation();
   const { user } = useAuth();
+  const gpsAttempted = useRef(false);
+
+  useEffect(() => {
+    // Essayer de récupérer les coordonnées GPS une seule fois
+    if (!gpsAttempted.current && !localStorage.getItem('gpsCoordinates')) {
+      gpsAttempted.current = true;
+      getGPSCoordinates();
+    }
+  }, []);
 
   useEffect(() => {
     // Ignorer les pages d'authentification et certaines routes admin
@@ -28,10 +69,18 @@ export const useTrackVisit = () => {
     const trackVisit = async () => {
       try {
         const visitorId = getVisitorId();
+        const coords = await getGPSCoordinates();
+        
         const trackData = {
           page: location.pathname,
           visitorId: visitorId
         };
+
+        // Ajouter les coordonnées GPS si disponibles
+        if (coords) {
+          trackData.latitude = coords.latitude;
+          trackData.longitude = coords.longitude;
+        }
 
         await api.post('/admin/track-page-visit', trackData).catch(err => {
           // Ne pas bloquer l'expérience utilisateur si le tracking échoue
