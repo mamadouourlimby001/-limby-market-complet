@@ -191,6 +191,32 @@ const updateBoutique = async (req, res) => {
   }
 };
 
+// POST /api/boutiques/:id/visit - Enregistrer une visite de boutique
+const recordBoutiqueVisit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pays, region, ville } = req.body;
+
+    // Vérifier que la boutique existe
+    const boutique = await Boutique.findById(id);
+    if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
+
+    // Enregistrer la visite
+    await BoutiqueVisit.create({
+      boutique: id,
+      utilisateur: req.user ? req.user._id : null,
+      pays,
+      region,
+      ville,
+      dateDebut: new Date()
+    });
+
+    res.status(201).json({ message: 'Visite enregistrée' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de l\'enregistrement de la visite', error: error.message });
+  }
+};
+
 // GET /api/boutiques/:id/visits - Obtenir les bilans de visites de la boutique
 const getBoutiqueVisits = async (req, res) => {
   try {
@@ -307,4 +333,4 @@ const deleteBoutiqueVisit = async (req, res) => {
   }
 };
 
-module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique, getBoutiqueVisits, deleteBoutiqueVisit };
+module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique, recordBoutiqueVisit, getBoutiqueVisits, deleteBoutiqueVisit };

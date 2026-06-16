@@ -20,22 +20,37 @@ const BoutiqueDetail = () => {
       finally { setLoading(false); }
     };
     fetch();
-
-    // Enregistrer la visite
-    const trackVisit = async () => {
-      try {
-        const visitorId = localStorage.getItem('visitorId') || `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        if (!localStorage.getItem('visitorId')) {
-          localStorage.setItem('visitorId', visitorId);
-        }
-        
-        await api.post(`/boutiques/${id}/visits/track`, { visitorId });
-      } catch (err) {
-        console.error('Erreur lors de l\'enregistrement de la visite:', err);
-      }
-    };
-    trackVisit();
   }, [id]);
+
+  // Enregistrer la visite si l'utilisateur n'est pas le propriétaire
+  useEffect(() => {
+    if (data && user && data.boutique.proprietaire._id !== user._id) {
+      const recordVisit = async () => {
+        try {
+          const cachedCoords = localStorage.getItem('gpsCoordinates');
+          let visitData = {};
+          
+          if (cachedCoords) {
+            const { latitude, longitude } = JSON.parse(cachedCoords);
+            // Faire la géolocalisation inverse avec Nominatim
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
+            const addressData = await response.json();
+            const address = addressData.address || {};
+            visitData = {
+              pays: address.country || null,
+              region: address.state || address.province || null,
+              ville: address.city || address.town || address.village || null
+            };
+          }
+          
+          await api.post(`/boutiques/${id}/visit`, visitData);
+        } catch (error) {
+          console.log('Visite non enregistrée:', error);
+        }
+      };
+      recordVisit();
+    }
+  }, [data, user, id]);
 
   if (loading) return <div className="loader"><div className="spinner"></div></div>;
   if (!data) return <div className="page"><div className="empty-state"><p>Boutique introuvable</p></div></div>;
