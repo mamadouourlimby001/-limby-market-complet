@@ -107,6 +107,10 @@ const MyBoutique = () => {
     filteredProducts.sort((a, b) => b.prix - a.prix);
   }
 
+  // Séparer les produits disponibles et non disponibles
+  const availableProducts = filteredProducts.filter(p => p.disponible);
+  const unavailableProducts = filteredProducts.filter(p => !p.disponible);
+
   const statusColor = boutique.isActive ? '#059669' : '#dc3545';
   const statusLabel = boutique.isActive ? 'Active' : 'Inactive';
 
@@ -230,79 +234,167 @@ const MyBoutique = () => {
           <p>{search ? 'Aucun produit ne correspond à votre recherche' : 'Aucun produit'}</p>
         </div>
       ) : (
-        <div className="grid-2">
-          {filteredProducts.map(p => (
-            <div key={p._id} style={{ position: 'relative' }}>
-              <Link to={`/boutiques/${boutique._id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-                <div className="card" style={{ opacity: p.disponible ? 1 : 0.6 }}>
-                  <PhotoSlider photos={p.photos} />
-                  <div style={{ padding: 8 }}>
-                    <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
-                    <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
-                    <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
-                  </div>
-                </div>
-              </Link>
-              
-              {/* Bouton Disponible/Indisponible */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleDisponibilite(p._id);
-                }}
-                disabled={updatingProductId === p._id}
-                style={{
-                  position: 'absolute',
-                  top: 8,
-                  left: 8,
-                  background: p.disponible ? '#059669' : '#ef4444',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 4,
-                  padding: '6px 8px',
-                  cursor: updatingProductId === p._id ? 'not-allowed' : 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  fontSize: 12,
-                  fontWeight: 600,
-                  opacity: updatingProductId === p._id ? 0.6 : 1
-                }}
-              >
-                {p.disponible ? <Check size={14} /> : <X size={14} />}
-                {p.disponible ? 'Dispo' : 'Indispo'}
-              </button>
+        <>
+          {/* Produits disponibles */}
+          {availableProducts.length > 0 && (
+            <>
+              <h3 style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, color: '#059669' }}>✓ Disponibles ({availableProducts.length})</h3>
+              <div className="grid-2" style={{ marginBottom: 24 }}>
+                {availableProducts.map(p => (
+                  <div key={p._id} style={{ position: 'relative' }}>
+                    <Link to={`/boutiques/${boutique._id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <div className="card">
+                        <PhotoSlider photos={p.photos} />
+                        <div style={{ padding: 8 }}>
+                          <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
+                          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
+                          <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
+                        </div>
+                      </div>
+                    </Link>
+                    
+                    {/* Bouton Disponible/Indisponible */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleDisponibilite(p._id);
+                      }}
+                      disabled={updatingProductId === p._id}
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        background: p.disponible ? '#059669' : '#ef4444',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 4,
+                        padding: '6px 8px',
+                        cursor: updatingProductId === p._id ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        opacity: updatingProductId === p._id ? 0.6 : 1
+                      }}
+                    >
+                      {p.disponible ? <Check size={14} /> : <X size={14} />}
+                      {p.disponible ? 'Dispo' : 'Indispo'}
+                    </button>
 
-              {/* Bouton Supprimer */}
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  deleteProduct(p._id);
-                }}
-                style={{
-                  position: 'absolute',
-                  top: 8,
-                  right: 8,
-                  background: '#ef4444',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: 4,
-                  padding: '6px 8px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 4,
-                  fontSize: 12,
-                  fontWeight: 600
-                }}
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
-          ))}
-        </div>
+                    {/* Bouton Supprimer */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        deleteProduct(p._id);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        background: '#ef4444',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 4,
+                        padding: '6px 8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 12,
+                        fontWeight: 600
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Produits non disponibles */}
+          {unavailableProducts.length > 0 && (
+            <>
+              <h3 style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, color: '#ef4444' }}>✗ Non disponibles ({unavailableProducts.length})</h3>
+              <div className="grid-2">
+                {unavailableProducts.map(p => (
+                  <div key={p._id} style={{ position: 'relative' }}>
+                    <Link to={`/boutiques/${boutique._id}/produits/${p._id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                      <div className="card" style={{ opacity: 0.6 }}>
+                        <PhotoSlider photos={p.photos} />
+                        <div style={{ padding: 8 }}>
+                          <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>{p.titre}</h3>
+                          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 4 }}>{p.categorie}</p>
+                          <p className="price" style={{ fontSize: 14 }}>{p.prix?.toLocaleString('fr-GN')} GNF</p>
+                        </div>
+                      </div>
+                    </Link>
+                    
+                    {/* Bouton Disponible/Indisponible */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleDisponibilite(p._id);
+                      }}
+                      disabled={updatingProductId === p._id}
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        left: 8,
+                        background: p.disponible ? '#059669' : '#ef4444',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 4,
+                        padding: '6px 8px',
+                        cursor: updatingProductId === p._id ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 12,
+                        fontWeight: 600,
+                        opacity: updatingProductId === p._id ? 0.6 : 1
+                      }}
+                    >
+                      {p.disponible ? <Check size={14} /> : <X size={14} />}
+                      {p.disponible ? 'Dispo' : 'Indispo'}
+                    </button>
+
+                    {/* Bouton Supprimer */}
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        deleteProduct(p._id);
+                      }}
+                      style={{
+                        position: 'absolute',
+                        top: 8,
+                        right: 8,
+                        background: '#ef4444',
+                        color: '#fff',
+                        border: 'none',
+                        borderRadius: 4,
+                        padding: '6px 8px',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 4,
+                        fontSize: 12,
+                        fontWeight: 600
+                      }}
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </>
       )}
     </div>
   );
