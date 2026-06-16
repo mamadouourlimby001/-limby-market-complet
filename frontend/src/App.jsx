@@ -1,9 +1,11 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import BottomNav from './components/BottomNav';
 import ProtectedRoute from './components/ProtectedRoute';
 import AdminRoute from './components/AdminRoute';
+import LocationPermissionModal from './components/LocationPermissionModal';
+import { useState, useEffect } from 'react';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -55,13 +57,25 @@ function TrackingWrapper({ children }) {
   return children;
 }
 
-function App() {
+function AppContent() {
+  const { user } = useAuth();
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [hasShownModal, setHasShownModal] = useState(false);
+
+  useEffect(() => {
+    if (user && !hasShownModal && !localStorage.getItem('locationPermissionAsked')) {
+      setShowLocationModal(true);
+      setHasShownModal(true);
+    }
+  }, [user, hasShownModal]);
+
   return (
-    <AuthProvider>
-      <Router>
-        <TrackingWrapper>
-          <Navbar />
-          <div className="app-content">
+    <>
+      {showLocationModal && (
+        <LocationPermissionModal onClose={() => setShowLocationModal(false)} />
+      )}
+      <Navbar />
+      <div className="app-content">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -110,6 +124,16 @@ function App() {
           </Routes>
         </div>
         <BottomNav />
+      </>
+    );
+  }
+
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <TrackingWrapper>
+          <AppContent />
         </TrackingWrapper>
       </Router>
     </AuthProvider>
