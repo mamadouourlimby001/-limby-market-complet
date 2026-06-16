@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, SortAsc, RotateCcw, Package, Trash2, Check, X } from 'lucide-react';
+import { Search, SortAsc, RotateCcw, Package, Trash2, Check, X, Eye } from 'lucide-react';
 import api from '../utils/api';
 import PhotoSlider from '../components/PhotoSlider';
 import { useAuth } from '../context/AuthContext';
+import BoutiqueVisits from './BoutiqueVisits';
 
 const MyBoutique = () => {
   const { user } = useAuth();
@@ -13,6 +14,7 @@ const MyBoutique = () => {
   const [sort, setSort] = useState('recent');
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [updatingProductId, setUpdatingProductId] = useState(null);
+  const [showBoutiqueVisits, setShowBoutiqueVisits] = useState(false);
 
   useEffect(() => {
     fetchBoutique();
@@ -108,6 +110,10 @@ const MyBoutique = () => {
   const statusColor = boutique.isActive ? '#059669' : '#dc3545';
   const statusLabel = boutique.isActive ? 'Active' : 'Inactive';
 
+  if (showBoutiqueVisits) {
+    return <BoutiqueVisits boutiqueId={boutique._id} onClose={() => setShowBoutiqueVisits(false)} />;
+  }
+
   return (
     <div className="page">
       {/* En-tête */}
@@ -163,6 +169,13 @@ const MyBoutique = () => {
         <Link to="/boutiques/creer" className="btn btn-secondary btn-block">
           ✏️ Modifier Boutique
         </Link>
+        <button
+          onClick={() => setShowBoutiqueVisits(true)}
+          className="btn btn-secondary btn-block"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+        >
+          <Eye size={16} /> Visite de la boutique
+        </button>
       </div>
 
       {/* Barre de recherche et filtres */}
