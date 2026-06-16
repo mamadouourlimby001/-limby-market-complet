@@ -12,6 +12,7 @@ router.put('/stats/reset', auth, resetBoutiqueStats);
 // Routes dynamiques APRÈS
 router.get('/', getBoutiques);
 router.get('/:id', getBoutique);
+router.post('/:id/visit', auth, recordBoutiqueVisit);
 router.get('/:id/visits', auth, getBoutiqueVisits);
 router.post('/', auth, createBoutique);
 router.put('/:id', auth, updateBoutique);
