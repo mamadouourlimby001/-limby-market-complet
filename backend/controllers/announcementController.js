@@ -9,7 +9,7 @@ const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../uti
 const getAnnouncements = async (req, res) => {
   try {
     const { villeDeTravail, entreprise, dateLimite, search } = req.query;
-    let filter = { statut: 'actif', disponible: true };
+    let filter = { statut: 'actif', $or: [{ disponible: true }, { disponible: { $exists: false } }] };
     if (villeDeTravail) filter.villeDeTravail = { $regex: villeDeTravail, $options: 'i' };
     if (entreprise) filter.entreprise = { $regex: entreprise, $options: 'i' };
     if (dateLimite) filter.dateLimite = { $gte: new Date(dateLimite) };

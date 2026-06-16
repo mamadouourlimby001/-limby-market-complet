@@ -14,7 +14,7 @@ const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../uti
 const getLocations = async (req, res) => {
   try {
     const { ville, categorie, prixMin, prixMax, search } = req.query;
-    let filter = { statut: 'actif', disponible: true };
+    let filter = { statut: 'actif', $or: [{ disponible: true }, { disponible: { $exists: false } }] };
 
     if (ville) filter.ville = { $regex: ville, $options: 'i' };
     if (categorie) filter.categorie = categorie;
