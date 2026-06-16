@@ -128,67 +128,107 @@ const TrafficSummaryModal = ({ onClose }) => {
       doc.text('Rapport d\'Analyse du Trafic', pageWidth / 2, yPosition, { align: 'center' });
       yPosition += 12;
 
-      filteredBilans.forEach((bilan, idx) => {
-        if (yPosition > 250) {
-          doc.addPage();
-          yPosition = 20;
+      // Fusionner toutes les données
+      let totalConnexions = 0;
+      const regionMap = new Map();
+      const villeMap = new Map();
+
+      filteredBilans.forEach((bilan) => {
+        totalConnexions += bilan.totalConnexions;
+        if (bilan.parRegion) {
+          bilan.parRegion.forEach((region) => {
+            const existing = regionMap.get(region.nom);
+            regionMap.set(region.nom, (existing || 0) + region.connexions);
+          });
         }
-
-        doc.setFontSize(11);
-        doc.setTextColor(27, 42, 107);
-        doc.text(`Analyse ${idx + 1}`, 20, yPosition);
-        yPosition += 6;
-
-        doc.setFontSize(9);
-        doc.setTextColor(0, 0, 0);
-        doc.text(`Connexions totales: ${bilan.totalConnexions}`, 25, yPosition);
-        yPosition += 4;
-        doc.text(`Utilisateurs uniques: ${bilan.utilisateursUniques}`, 25, yPosition);
-        yPosition += 8;
-
-        if (exportDataType === 'region' || exportDataType === 'both') {
-          if (bilan.parRegion && bilan.parRegion.length > 0) {
-            const regionData = bilan.parRegion.map((region) => [
-              region.nom || '-',
-              region.connexions.toString(),
-              ((region.connexions / bilan.totalConnexions) * 100).toFixed(1) + '%'
-            ]);
-
-            doc.autoTable({
-              startY: yPosition,
-              head: [['Région', 'Connexions', '%']],
-              body: regionData,
-              theme: 'grid',
-              headStyles: { fillColor: [27, 42, 107], textColor: [255, 255, 255], fontSize: 8 },
-              bodyStyles: { fontSize: 7 },
-              margin: { left: 20, right: 20 }
+        if (bilan.parVille) {
+          bilan.parVille.forEach((ville) => {
+            const key = `${ville.nom}|${ville.region}`;
+            const existing = villeMap.get(key);
+            villeMap.set(key, {
+              nom: ville.nom,
+              region: ville.region,
+              connexions: (existing?.connexions || 0) + ville.connexions
             });
-            yPosition = doc.lastAutoTable.finalY + 6;
-          }
-        }
-
-        if (exportDataType === 'city' || exportDataType === 'both') {
-          if (bilan.parVille && bilan.parVille.length > 0) {
-            const villeData = bilan.parVille.map((ville) => [
-              ville.nom || '-',
-              ville.region || '-',
-              ville.connexions.toString(),
-              ((ville.connexions / bilan.totalConnexions) * 100).toFixed(1) + '%'
-            ]);
-
-            doc.autoTable({
-              startY: yPosition,
-              head: [['Ville', 'Région', 'Connexions', '%']],
-              body: villeData,
-              theme: 'grid',
-              headStyles: { fillColor: [27, 42, 107], textColor: [255, 255, 255], fontSize: 8 },
-              bodyStyles: { fontSize: 7 },
-              margin: { left: 20, right: 20 }
-            });
-            yPosition = doc.lastAutoTable.finalY + 10;
-          }
+          });
         }
       });
+
+      // Afficher les statistiques globales
+      doc.setFontSize(10);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Connexions totales: ${totalConnexions}`, 25, yPosition);
+      yPosition += 4;
+      doc.text(`Nombre de bilans: ${filteredBilans.length}`, 25, yPosition);
+      yPosition += 8;
+
+      // Afficher les données par région
+      if (exportDataType === 'region' || exportDataType === 'both') {
+        if (regionMap.size > 0) {
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          doc.setFontSize(12);
+          doc.setTextColor(27, 42, 107);
+          doc.text('Connexions par Région', 20, yPosition);
+          yPosition += 8;
+
+          const sortedRegions = Array.from(regionMap.entries())
+            .sort((a, b) => b[1] - a[1])
+            .map((entry) => [
+              entry[0],
+              entry[1].toString(),
+              ((entry[1] / totalConnexions) * 100).toFixed(1) + '%'
+            ]);
+
+          doc.autoTable({
+            startY: yPosition,
+            head: [['Région', 'Connexions', '%']],
+            body: sortedRegions,
+            theme: 'grid',
+            headStyles: { fillColor: [27, 42, 107], textColor: [255, 255, 255], fontSize: 9 },
+            bodyStyles: { fontSize: 8 },
+            margin: { left: 20, right: 20 }
+          });
+          yPosition = doc.lastAutoTable.finalY + 10;
+        }
+      }
+
+      // Afficher les données par ville
+      if (exportDataType === 'city' || exportDataType === 'both') {
+        if (villeMap.size > 0) {
+          if (yPosition > 250) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          doc.setFontSize(12);
+          doc.setTextColor(27, 42, 107);
+          doc.text('Connexions par Ville', 20, yPosition);
+          yPosition += 8;
+
+          const sortedVilles = Array.from(villeMap.values())
+            .sort((a, b) => b.connexions - a.connexions)
+            .map((ville) => [
+              ville.nom,
+              ville.region,
+              ville.connexions.toString(),
+              ((ville.connexions / totalConnexions) * 100).toFixed(1) + '%'
+            ]);
+
+          doc.autoTable({
+            startY: yPosition,
+            head: [['Ville', 'Région', 'Connexions', '%']],
+            body: sortedVilles,
+            theme: 'grid',
+            headStyles: { fillColor: [27, 42, 107], textColor: [255, 255, 255], fontSize: 9 },
+            bodyStyles: { fontSize: 8 },
+            margin: { left: 20, right: 20 }
+          });
+        }
+      }
 
       doc.save('analyse_trafic.pdf');
       resetExportModal();
@@ -208,22 +248,42 @@ const TrafficSummaryModal = ({ onClose }) => {
 
       const wb = XLSX.utils.book_new();
 
-      if (exportDataType === 'region' || exportDataType === 'both') {
-        const regionData = [];
-        filteredBilans.forEach((bilan, idx) => {
-          if (bilan.parRegion && bilan.parRegion.length > 0) {
-            bilan.parRegion.forEach(region => {
-              regionData.push({
-                'Analyse': idx + 1,
-                'Région': region.nom || '-',
-                'Connexions': region.connexions,
-                'Pourcentage': ((region.connexions / bilan.totalConnexions) * 100).toFixed(1) + '%',
-                'Total Connexions': bilan.totalConnexions,
-                'Utilisateurs Uniques': bilan.utilisateursUniques
-              });
+      // Fusionner toutes les données
+      let totalConnexions = 0;
+      const regionMap = new Map();
+      const villeMap = new Map();
+
+      filteredBilans.forEach((bilan) => {
+        totalConnexions += bilan.totalConnexions;
+        if (bilan.parRegion) {
+          bilan.parRegion.forEach((region) => {
+            const existing = regionMap.get(region.nom);
+            regionMap.set(region.nom, (existing || 0) + region.connexions);
+          });
+        }
+        if (bilan.parVille) {
+          bilan.parVille.forEach((ville) => {
+            const key = `${ville.nom}|${ville.region}`;
+            const existing = villeMap.get(key);
+            villeMap.set(key, {
+              nom: ville.nom,
+              region: ville.region,
+              connexions: (existing?.connexions || 0) + ville.connexions
             });
-          }
-        });
+          });
+        }
+      });
+
+      if (exportDataType === 'region' || exportDataType === 'both') {
+        const regionData = Array.from(regionMap.entries())
+          .sort((a, b) => b[1] - a[1])
+          .map(([region, connexions]) => ({
+            'Région': region,
+            'Connexions': connexions,
+            'Pourcentage': ((connexions / totalConnexions) * 100).toFixed(1) + '%',
+            'Total Connexions': totalConnexions
+          }));
+
         if (regionData.length > 0) {
           const wsRegion = XLSX.utils.json_to_sheet(regionData);
           XLSX.utils.book_append_sheet(wb, wsRegion, 'Par Région');
@@ -231,22 +291,16 @@ const TrafficSummaryModal = ({ onClose }) => {
       }
 
       if (exportDataType === 'city' || exportDataType === 'both') {
-        const cityData = [];
-        filteredBilans.forEach((bilan, idx) => {
-          if (bilan.parVille && bilan.parVille.length > 0) {
-            bilan.parVille.forEach(ville => {
-              cityData.push({
-                'Analyse': idx + 1,
-                'Ville': ville.nom || '-',
-                'Région': ville.region || '-',
-                'Connexions': ville.connexions,
-                'Pourcentage': ((ville.connexions / bilan.totalConnexions) * 100).toFixed(1) + '%',
-                'Total Connexions': bilan.totalConnexions,
-                'Utilisateurs Uniques': bilan.utilisateursUniques
-              });
-            });
-          }
-        });
+        const cityData = Array.from(villeMap.values())
+          .sort((a, b) => b.connexions - a.connexions)
+          .map((ville) => ({
+            'Ville': ville.nom,
+            'Région': ville.region,
+            'Connexions': ville.connexions,
+            'Pourcentage': ((ville.connexions / totalConnexions) * 100).toFixed(1) + '%',
+            'Total Connexions': totalConnexions
+          }));
+
         if (cityData.length > 0) {
           const wsCity = XLSX.utils.json_to_sheet(cityData);
           XLSX.utils.book_append_sheet(wb, wsCity, 'Par Ville');
