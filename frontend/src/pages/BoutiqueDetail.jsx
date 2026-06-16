@@ -20,6 +20,21 @@ const BoutiqueDetail = () => {
       finally { setLoading(false); }
     };
     fetch();
+
+    // Enregistrer la visite
+    const trackVisit = async () => {
+      try {
+        const visitorId = localStorage.getItem('visitorId') || `visitor_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        if (!localStorage.getItem('visitorId')) {
+          localStorage.setItem('visitorId', visitorId);
+        }
+        
+        await api.post(`/boutiques/${id}/visits/track`, { visitorId });
+      } catch (err) {
+        console.error('Erreur lors de l\'enregistrement de la visite:', err);
+      }
+    };
+    trackVisit();
   }, [id]);
 
   if (loading) return <div className="loader"><div className="spinner"></div></div>;
