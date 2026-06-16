@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, Phone, Clock, Globe, Trash2, MapPin } from 'lucide-react';
+import { Eye, Phone, Clock, Globe, Trash2, MapPin, BarChart3 } from 'lucide-react';
 import api from '../utils/api';
+import TrafficSummaryModal from './TrafficSummary';
 
 const AdminVisites = () => {
   const navigate = useNavigate();
@@ -9,6 +10,7 @@ const AdminVisites = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleting, setDeleting] = useState(null);
+  const [showTrafficSummary, setShowTrafficSummary] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -41,9 +43,36 @@ const AdminVisites = () => {
 
   if (loading) return <div className="loader"><div className="spinner"></div></div>;
 
+  if (showTrafficSummary) {
+    return <TrafficSummaryModal onClose={() => setShowTrafficSummary(false)} />;
+  }
+
   return (
     <div className="page">
-      <h1 className="page-title">Visites des 24 dernières heures</h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, gap: 12 }}>
+        <h1 className="page-title" style={{ margin: 0 }}>Visites des 24 dernières heures</h1>
+        <button
+          onClick={() => setShowTrafficSummary(true)}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: '10px 16px',
+            backgroundColor: '#1B2A6B',
+            color: 'white',
+            border: 'none',
+            borderRadius: 6,
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+          }}
+          onMouseEnter={(e) => (e.target.style.backgroundColor = '#1a2361')}
+          onMouseLeave={(e) => (e.target.style.backgroundColor = '#1B2A6B')}
+        >
+          <BarChart3 size={16} /> Bilan du trafic
+        </button>
+      </div>
       
       {error && <div className="alert alert-danger">{error}</div>}
 

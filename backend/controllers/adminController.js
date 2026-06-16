@@ -785,6 +785,96 @@ const deleteVisite = async (req, res) => {
   }
 };
 
+// GET /api/admin/traffic-summary - Récupérer le bilan du trafic par 24h
+const getTrafficSummary = async (req, res) => {
+  try {
+    const septJours = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    
+    // Récupérer tous les IDs des admins
+    const admins = await User.find({ role: { $in: ['admin_simple', 'admin_supreme'] } }).select('_id');
+    const adminIds = admins.map(a => a._id.toString());
+    
+    // Récupérer les visites des 7 derniers jours (non-admins)
+    const visites = await Visit.find({
+      createdAt: { $gte: septJours },
+      $or: [
+        { utilisateur: { $nin: admins.map(a => a._id) } },
+        { utilisateur: null }
+      ]
+    }).sort({ createdAt: -1 });
+
+    // Regrouper par jour
+    const bilanParJour = {};
+    
+    visites.forEach(visite => {
+      const date = new Date(visite.dateDebut);
+      const jour = date.toLocaleDateString('fr-GN');
+      const dateDebut = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      const dateFin = new Date(dateDebut.getTime() + 24 * 60 * 60 * 1000 - 1);
+      
+      if (!bilanParJour[jour]) {
+        bilanParJour[jour] = {
+          date: jour,
+          dateDebut: dateDebut.toLocaleDateString('fr-GN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+          dateFin: dateFin.toLocaleDateString('fr-GN', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+          totalConnexions: 0,
+          utilisateurs: new Set(),
+          parRegion: {},
+          parVille: {}
+        };
+      }
+      
+      bilanParJour[jour].totalConnexions++;
+      if (visite.utilisateur) {
+        bilanParJour[jour].utilisateurs.add(visite.utilisateur.toString());
+      } else if (visite.visitorId) {
+        bilanParJour[jour].utilisateurs.add(visite.visitorId);
+      }
+      
+      // Comptabiliser par région
+      const region = visite.region || 'Non disponible';
+      if (!bilanParJour[jour].parRegion[region]) {
+        bilanParJour[jour].parRegion[region] = 0;
+      }
+      bilanParJour[jour].parRegion[region]++;
+      
+      // Comptabiliser par ville
+      const ville = visite.ville || 'Non disponible';
+      const regionVille = region;
+      const keyVille = `${ville}__${regionVille}`;
+      if (!bilanParJour[jour].parVille[keyVille]) {
+        bilanParJour[jour].parVille[keyVille] = {
+          nom: ville,
+          region: regionVille,
+          connexions: 0
+        };
+      }
+      bilanParJour[jour].parVille[keyVille].connexions++;
+    });
+
+    // Transformer les données en format lisible
+    const bilans = Object.values(bilanParJour).map(bilan => ({
+      date: bilan.date,
+      dateDebut: bilan.dateDebut,
+      dateFin: bilan.dateFin,
+      totalConnexions: bilan.totalConnexions,
+      utilisateursUniques: bilan.utilisateurs.size,
+      parRegion: Object.entries(bilan.parRegion)
+        .map(([nom, connexions]) => ({ nom, connexions }))
+        .sort((a, b) => b.connexions - a.connexions),
+      parVille: Object.values(bilan.parVille)
+        .sort((a, b) => b.connexions - a.connexions)
+    }));
+
+    // Trier par date décroissante (les plus récents en premier)
+    bilans.sort((a, b) => new Date(b.dateDebut) - new Date(a.dateDebut));
+
+    res.json({ bilans });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 module.exports = {
   getCreditRequests, approveCreditRequest, rejectCreditRequest,
   getSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest,
@@ -793,5 +883,5 @@ module.exports = {
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
-  getVisites, getVisiteDetails, trackPageVisit, deleteVisite
+  getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary
 };

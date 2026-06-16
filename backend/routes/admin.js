@@ -12,7 +12,7 @@ const {
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
-  getVisites, getVisiteDetails, trackPageVisit, deleteVisite
+  getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary
 } = require('../controllers/adminController');
 
 // Route de tracking accessible à tous (public - avec authentification optionnelle)
@@ -50,6 +50,7 @@ router.get('/dashboard-stats', getDashboardStats);
 router.get('/visites', getVisites);
 router.get('/visites/:id', getVisiteDetails);
 router.delete('/visites/:id', deleteVisite);
+router.get('/traffic-summary', getTrafficSummary);
 
 // Routes admin suprême uniquement
 router.post('/admins/add', isSupremeAdmin, addAdmin);
