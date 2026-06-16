@@ -1,5 +1,6 @@
 const Boutique = require('../models/Boutique');
 const BoutiqueProduct = require('../models/BoutiqueProduct');
+const BoutiqueVisit = require('../models/BoutiqueVisit');
 const User = require('../models/User');
 const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../utils/cloudinaryUpload');
 
@@ -190,4 +191,120 @@ const updateBoutique = async (req, res) => {
   }
 };
 
-module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique };
+// GET /api/boutiques/:id/visits - Obtenir les bilans de visites de la boutique
+const getBoutiqueVisits = async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    // Vérifier que la boutique existe
+    const boutique = await Boutique.findById(id);
+    if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
+    
+    // Vérifier que l'utilisateur est le propriétaire
+    if (boutique.proprietaire.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+
+    // Récupérer les visites des 30 derniers jours
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const visits = await BoutiqueVisit.find({
+      boutique: id,
+      createdAt: { $gte: thirtyDaysAgo }
+    }).sort({ dateDebut: -1 });
+
+    // Grouper par jour
+    const groupedByDate = {};
+    visits.forEach(visit => {
+      const dateStr = visit.dateDebut.toLocaleDateString('fr-GN');
+      if (!groupedByDate[dateStr]) {
+        groupedByDate[dateStr] = [];
+      }
+      groupedByDate[dateStr].push(visit);
+    });
+
+    // Créer les bilans
+    const bilans = Object.entries(groupedByDate).map(([date, dayVisits]) => {
+      const totalVisites = dayVisits.length;
+      const visitantsUniques = new Set();
+      
+      dayVisits.forEach(v => {
+        if (v.utilisateur) visitantsUniques.add(v.utilisateur.toString());
+        if (v.visitorId) visitantsUniques.add(v.visitorId);
+      });
+
+      // Compter par région
+      const regionMap = new Map();
+      dayVisits.forEach(v => {
+        const region = v.region || 'Non disponible';
+        regionMap.set(region, (regionMap.get(region) || 0) + 1);
+      });
+
+      // Compter par ville
+      const villeMap = new Map();
+      dayVisits.forEach(v => {
+        const ville = v.ville || 'Non disponible';
+        const region = v.region || 'Non disponible';
+        const key = `${ville}|${region}`;
+        const existing = villeMap.get(key);
+        villeMap.set(key, {
+          nom: ville,
+          region: region,
+          visites: (existing?.visites || 0) + 1
+        });
+      });
+
+      return {
+        date,
+        dateDebut: dayVisits[0].dateDebut.toLocaleString('fr-GN'),
+        dateFin: new Date(dayVisits[0].dateDebut.getTime() + 86400000).toLocaleString('fr-GN'),
+        totalVisites,
+        visitantsUniques: visitantsUniques.size,
+        parRegion: Array.from(regionMap.entries())
+          .map(([nom, visites]) => ({ nom, visites }))
+          .sort((a, b) => b.visites - a.visites),
+        parVille: Array.from(villeMap.values())
+          .sort((a, b) => b.visites - a.visites)
+      };
+    });
+
+    res.json({ bilans: bilans.sort((a, b) => new Date(b.date) - new Date(a.date)) });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors du chargement des visites', error: error.message });
+  }
+};
+
+// POST /api/boutiques/:id/visits/delete - Supprimer un bilan de visite par date
+const deleteBoutiqueVisit = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { date } = req.body;
+
+    // Vérifier que la boutique existe
+    const boutique = await Boutique.findById(id);
+    if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
+    
+    // Vérifier que l'utilisateur est le propriétaire
+    if (boutique.proprietaire.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+
+    // Parser la date
+    const [day, month, year] = date.split('/');
+    const dateDebut = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const dateFin = new Date(year, month - 1, parseInt(day) + 1, 0, 0, 0, 0);
+
+    // Supprimer les visites
+    const result = await BoutiqueVisit.deleteMany({
+      boutique: id,
+      dateDebut: { $gte: dateDebut, $lt: dateFin }
+    });
+
+    res.json({ message: 'Bilan supprimé', deletedCount: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur lors de la suppression', error: error.message });
+  }
+};
+
+module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique, getBoutiqueVisits, deleteBoutiqueVisit };
