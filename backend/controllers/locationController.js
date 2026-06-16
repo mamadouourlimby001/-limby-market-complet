@@ -14,7 +14,7 @@ const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../uti
 const getLocations = async (req, res) => {
   try {
     const { ville, categorie, prixMin, prixMax, search } = req.query;
-    let filter = { statut: 'actif' };
+    let filter = { statut: 'actif', disponible: true };
 
     if (ville) filter.ville = { $regex: ville, $options: 'i' };
     if (categorie) filter.categorie = categorie;
@@ -244,4 +244,26 @@ const unlockContact = async (req, res) => {
   }
 };
 
-module.exports = { getLocations, getLocation, createLocation, deleteLocation, unlockContact };
+// PUT /api/locations/:id/disponibilite - Basculer la disponibilité d'une location
+const toggleDisponibilite = async (req, res) => {
+  try {
+    const location = await Location.findById(req.params.id);
+    if (!location) {
+      return res.status(404).json({ message: 'Location introuvable.' });
+    }
+
+    // Vérifier que l'utilisateur est le propriétaire
+    if (location.proprietaire.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+
+    location.disponible = !location.disponible;
+    await location.save();
+
+    res.json({ message: 'Disponibilité mise à jour.', location });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+module.exports = { getLocations, getLocation, createLocation, deleteLocation, unlockContact, toggleDisponibilite };

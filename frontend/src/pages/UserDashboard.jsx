@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Check, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import UserMessages from './UserMessages';
@@ -17,6 +17,7 @@ const UserDashboard = () => {
   const [tab, setTab] = useState('profil');
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [unreadBoutiqueMessagesCount, setUnreadBoutiqueMessagesCount] = useState(0);
+  const [updatingItemId, setUpdatingItemId] = useState(null);
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -61,6 +62,15 @@ const UserDashboard = () => {
       await api.delete(`/${type}/${id}`);
       fetchAll();
     } catch (err) { console.error(err); }
+  };
+
+  const toggleItemDisponibilite = async (type, id) => {
+    try {
+      setUpdatingItemId(id);
+      await api.put(`/${type}/${id}/disponibilite`);
+      fetchAll();
+    } catch (err) { console.error(err); }
+    finally { setUpdatingItemId(null); }
   };
 
   const handleLogout = () => { logout(); navigate('/'); };
@@ -111,23 +121,92 @@ const UserDashboard = () => {
         <div>
           <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8 }}>Mes produits ({products.length})</h3>
           {products.map(p => (
-            <div key={p._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={p._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: p.disponible ? 1 : 0.6 }}>
               <div><p style={{ fontSize: 13, fontWeight: 600 }}>{p.titre}</p><p style={{ fontSize: 11, color: '#6b7280' }}>{p.prix?.toLocaleString('fr-GN')} GNF</p></div>
-              <button onClick={() => handleDelete('products', p._id)} className="btn btn-danger btn-sm">🗑</button>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => toggleItemDisponibilite('products', p._id)}
+                  disabled={updatingItemId === p._id}
+                  style={{
+                    background: p.disponible ? '#059669' : '#ef4444',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 4,
+                    padding: '6px 8px',
+                    cursor: updatingItemId === p._id ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    opacity: updatingItemId === p._id ? 0.6 : 1
+                  }}
+                >
+                  {p.disponible ? <Check size={14} /> : <X size={14} />}
+                  {p.disponible ? 'Dispo' : 'Indispo'}
+                </button>
+                <button onClick={() => handleDelete('products', p._id)} className="btn btn-danger btn-sm">🗑</button>
+              </div>
             </div>
           ))}
           <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, marginTop: 16 }}>Mes locations ({locations.length})</h3>
           {locations.map(l => (
-            <div key={l._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={l._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: l.disponible ? 1 : 0.6 }}>
               <div><p style={{ fontSize: 13, fontWeight: 600 }}>{l.titre}</p><p style={{ fontSize: 11, color: '#6b7280' }}>{l.prix?.toLocaleString('fr-GN')} GNF</p></div>
-              <button onClick={() => handleDelete('locations', l._id)} className="btn btn-danger btn-sm">🗑</button>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => toggleItemDisponibilite('locations', l._id)}
+                  disabled={updatingItemId === l._id}
+                  style={{
+                    background: l.disponible ? '#059669' : '#ef4444',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 4,
+                    padding: '6px 8px',
+                    cursor: updatingItemId === l._id ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    opacity: updatingItemId === l._id ? 0.6 : 1
+                  }}
+                >
+                  {l.disponible ? <Check size={14} /> : <X size={14} />}
+                  {l.disponible ? 'Dispo' : 'Indispo'}
+                </button>
+                <button onClick={() => handleDelete('locations', l._id)} className="btn btn-danger btn-sm">🗑</button>
+              </div>
             </div>
           ))}
           <h3 style={{ fontSize: 14, fontWeight: 700, marginBottom: 8, marginTop: 16 }}>Mes annonces ({announcements.length})</h3>
           {announcements.map(a => (
-            <div key={a._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={a._id} className="card" style={{ padding: 10, marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: a.disponible ? 1 : 0.6 }}>
               <div><p style={{ fontSize: 13, fontWeight: 600 }}>{a.titre}</p><p style={{ fontSize: 11, color: '#6b7280' }}>{a.salaireMensuel?.toLocaleString('fr-GN')} GNF</p></div>
-              <button onClick={() => handleDelete('announcements', a._id)} className="btn btn-danger btn-sm">🗑</button>
+              <div style={{ display: 'flex', gap: 6 }}>
+                <button
+                  onClick={() => toggleItemDisponibilite('announcements', a._id)}
+                  disabled={updatingItemId === a._id}
+                  style={{
+                    background: a.disponible ? '#059669' : '#ef4444',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: 4,
+                    padding: '6px 8px',
+                    cursor: updatingItemId === a._id ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    fontSize: 11,
+                    fontWeight: 600,
+                    opacity: updatingItemId === a._id ? 0.6 : 1
+                  }}
+                >
+                  {a.disponible ? <Check size={14} /> : <X size={14} />}
+                  {a.disponible ? 'Dispo' : 'Indispo'}
+                </button>
+                <button onClick={() => handleDelete('announcements', a._id)} className="btn btn-danger btn-sm">🗑</button>
+              </div>
             </div>
           ))}
         </div>

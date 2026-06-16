@@ -14,7 +14,7 @@ const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../uti
 const getProducts = async (req, res) => {
   try {
     const { ville, categorie, prixMin, prixMax, search } = req.query;
-    let filter = { statut: 'actif' };
+    let filter = { statut: 'actif', disponible: true };
 
     if (ville) filter.ville = { $regex: ville, $options: 'i' };
     if (categorie) filter.categorie = { $regex: categorie, $options: 'i' };
@@ -250,4 +250,26 @@ const unlockContact = async (req, res) => {
   }
 };
 
-module.exports = { getProducts, getProduct, createProduct, deleteProduct, unlockContact };
+// PUT /api/products/:id/disponibilite - Basculer la disponibilité d'un produit
+const toggleDisponibilite = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Produit introuvable.' });
+    }
+
+    // Vérifier que l'utilisateur est le propriétaire
+    if (product.vendeur.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+
+    product.disponible = !product.disponible;
+    await product.save();
+
+    res.json({ message: 'Disponibilité mise à jour.', product });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+module.exports = { getProducts, getProduct, createProduct, deleteProduct, unlockContact, toggleDisponibilite };

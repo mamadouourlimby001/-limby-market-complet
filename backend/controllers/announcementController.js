@@ -9,7 +9,7 @@ const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../uti
 const getAnnouncements = async (req, res) => {
   try {
     const { villeDeTravail, entreprise, dateLimite, search } = req.query;
-    let filter = { statut: 'actif' };
+    let filter = { statut: 'actif', disponible: true };
     if (villeDeTravail) filter.villeDeTravail = { $regex: villeDeTravail, $options: 'i' };
     if (entreprise) filter.entreprise = { $regex: entreprise, $options: 'i' };
     if (dateLimite) filter.dateLimite = { $gte: new Date(dateLimite) };
@@ -138,4 +138,26 @@ const unlockContact = async (req, res) => {
   }
 };
 
-module.exports = { getAnnouncements, getAnnouncement, createAnnouncement, deleteAnnouncement, unlockContact };
+// PUT /api/announcements/:id/disponibilite - Basculer la disponibilité d'une annonce
+const toggleDisponibilite = async (req, res) => {
+  try {
+    const announcement = await Announcement.findById(req.params.id);
+    if (!announcement) {
+      return res.status(404).json({ message: 'Annonce introuvable.' });
+    }
+
+    // Vérifier que l'utilisateur est l'auteur
+    if (announcement.auteur.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+
+    announcement.disponible = !announcement.disponible;
+    await announcement.save();
+
+    res.json({ message: 'Disponibilité mise à jour.', announcement });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+module.exports = { getAnnouncements, getAnnouncement, createAnnouncement, deleteAnnouncement, unlockContact, toggleDisponibilite };
