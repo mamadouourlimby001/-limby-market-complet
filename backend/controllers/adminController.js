@@ -915,6 +915,32 @@ const getTrafficSummary = async (req, res) => {
   }
 };
 
+// POST /api/admin/traffic-summary/delete - Supprimer les visites d'un jour (bilan)
+const deleteTrafficBilan = async (req, res) => {
+  try {
+    const { date } = req.body; // Format: "dd/mm/yyyy"
+    
+    if (!date) {
+      return res.status(400).json({ message: 'Date requise.' });
+    }
+
+    // Parser la date au format dd/mm/yyyy
+    const [day, month, year] = date.split('/');
+    const dateDebut = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+    const dateFin = new Date(dateDebut.getTime() + 24 * 60 * 60 * 1000);
+
+    // Supprimer toutes les visites de ce jour
+    const result = await Visit.deleteMany({
+      dateDebut: { $gte: dateDebut, $lt: dateFin }
+    });
+
+    console.log(`Bilan du ${date} supprimé: ${result.deletedCount} visites supprimées`);
+    res.json({ message: 'Bilan supprimé avec succès', deletedCount: result.deletedCount });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 module.exports = {
   getCreditRequests, approveCreditRequest, rejectCreditRequest,
   getSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest,
@@ -923,5 +949,5 @@ module.exports = {
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
-  getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary
+  getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary, deleteTrafficBilan
 };
