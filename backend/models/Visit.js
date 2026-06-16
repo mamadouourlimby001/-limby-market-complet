@@ -12,6 +12,9 @@ const visitSchema = new mongoose.Schema({
   },
   nom: String,
   telephone: String,
+  pays: { type: String, default: null },
+  region: { type: String, default: null },
+  ville: { type: String, default: null },
   pagesVisitees: [
     {
       page: String,

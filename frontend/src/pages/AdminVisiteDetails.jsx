@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, Globe } from 'lucide-react';
+import { ArrowLeft, Clock, Globe, Trash2, MapPin } from 'lucide-react';
 import api from '../utils/api';
 
 const AdminVisiteDetails = () => {
@@ -9,6 +9,7 @@ const AdminVisiteDetails = () => {
   const [visite, setVisite] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -23,6 +24,21 @@ const AdminVisiteDetails = () => {
     };
     fetch();
   }, [id]);
+
+  const handleDelete = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette visite ?')) return;
+    
+    setDeleting(true);
+    try {
+      await api.delete(`/admin/visites/${id}`);
+      alert('Visite supprimée avec succès');
+      navigate('/admin/visites');
+    } catch (err) {
+      alert(err.response?.data?.message || 'Erreur lors de la suppression');
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   if (loading) return <div className="loader"><div className="spinner"></div></div>;
 
@@ -74,21 +90,45 @@ const AdminVisiteDetails = () => {
             <p style={{ fontSize: 14, fontWeight: 500 }}>{visite.pagesVisitees.length}</p>
           </div>
           <div>
+            <p style={{ color: '#6b7280', fontSize: 12, marginBottom: 4 }}>LOCALISATION</p>
+            <p style={{ fontSize: 13 }}>
+              <MapPin size={14} style={{ display: 'inline', marginRight: 4 }} />
+              {visite.ville || '-'}, {visite.region || '-'}, {visite.pays || '-'}
+            </p>
+          </div>
+          <div>
             <p style={{ color: '#6b7280', fontSize: 12, marginBottom: 4 }}>DATE DÉBUT</p>
             <p style={{ fontSize: 13 }}>{new Date(visite.dateDebut).toLocaleDateString('fr-GN')} à {new Date(visite.dateDebut).toLocaleTimeString('fr-GN', { hour: '2-digit', minute: '2-digit' })}</p>
           </div>
-          <div>
-            <p style={{ color: '#6b7280', fontSize: 12, marginBottom: 4 }}>DATE FIN</p>
-            <p style={{ fontSize: 13 }}>{visite.dateFin ? new Date(visite.dateFin).toLocaleDateString('fr-GN') + ' à ' + new Date(visite.dateFin).toLocaleTimeString('fr-GN', { hour: '2-digit', minute: '2-digit' }) : 'En cours'}</p>
-          </div>
         </div>
 
-        <div>
+        <div style={{ marginBottom: 16 }}>
           <p style={{ color: '#6b7280', fontSize: 12, marginBottom: 8 }}>DURÉE TOTALE</p>
           <p style={{ fontSize: 18, fontWeight: 700, color: '#10b981' }}>
             {Math.floor(visite.dureeTotale / 3600)}h {Math.floor((visite.dureeTotale % 3600) / 60)}m {visite.dureeTotale % 60}s
           </p>
         </div>
+
+        <button 
+          onClick={handleDelete}
+          disabled={deleting}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            padding: 10,
+            background: '#ef4444',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: deleting ? 'not-allowed' : 'pointer',
+            opacity: deleting ? 0.6 : 1
+          }}
+        >
+          <Trash2 size={16} /> {deleting ? 'Suppression...' : 'Supprimer cette visite'}
+        </button>
       </div>
 
       <h2 style={{ fontSize: 16, fontWeight: 600, marginBottom: 12, color: '#1B2A6B' }}>Pages visitées</h2>

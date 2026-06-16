@@ -594,8 +594,16 @@ const getVisites = async (req, res) => {
   try {
     const vingtQuatreHeures = new Date(Date.now() - 24 * 60 * 60 * 1000);
     
+    // Récupérer tous les IDs des admins
+    const admins = await User.find({ role: { $in: ['admin', 'superAdmin'] } }).select('_id');
+    const adminIds = admins.map(a => a._id.toString());
+    
     const visites = await Visit.find({
-      createdAt: { $gte: vingtQuatreHeures }
+      createdAt: { $gte: vingtQuatreHeures },
+      $or: [
+        { utilisateur: { $nin: admins.map(a => a._id) } },
+        { utilisateur: null }
+      ]
     }).sort({ createdAt: -1 });
 
     const visitesFormatees = visites.map(visite => ({
@@ -604,15 +612,38 @@ const getVisites = async (req, res) => {
       visitorId: visite.visitorId,
       nom: visite.nom || 'Visiteur anonyme',
       telephone: visite.telephone || visite.visitorId || 'Non enregistré',
+      pays: visite.pays || 'Non disponible',
+      region: visite.region || 'Non disponible',
+      ville: visite.ville || 'Non disponible',
       nombrePages: visite.pagesVisitees.length,
       dureeTotale: visite.dureeTotale || 0,
       dateDebut: visite.dateDebut,
       dateFin: visite.dateFin
     }));
 
-    res.json(visitesFormatees);
+    res.json({
+      total: visitesFormatees.length,
+      visites: visitesFormatees
+    });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// Fonction pour obtenir les infos géographiques (pays, région, ville)
+const getGeoInfo = async (ip) => {
+  try {
+    // Utiliser une API gratuite pour la géolocalisation
+    const response = await fetch(`https://ipapi.co/${ip}/json/`);
+    const data = await response.json();
+    return {
+      pays: data.country_name || null,
+      region: data.region || null,
+      ville: data.city || null
+    };
+  } catch (error) {
+    console.error('Erreur géolocalisation:', error);
+    return { pays: null, region: null, ville: null };
   }
 };
 
@@ -628,6 +659,10 @@ const trackPageVisit = async (req, res) => {
 
     const now = new Date();
     let visit = null;
+    
+    // Récupérer l'IP du client
+    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    const geoInfo = await getGeoInfo(clientIp.split(',')[0]);
 
     if (req.user && req.user._id) {
       // Utilisateur authentifié
@@ -654,6 +689,9 @@ const trackPageVisit = async (req, res) => {
           utilisateur: userId,
           nom: req.user.nom,
           telephone: req.user.telephone,
+          pays: geoInfo.pays,
+          region: geoInfo.region,
+          ville: geoInfo.ville,
           pagesVisitees: [{
             page: page,
             tempsDebut: now
@@ -684,6 +722,9 @@ const trackPageVisit = async (req, res) => {
         visit = await Visit.create({
           visitorId: visitorId,
           nom: 'Visiteur anonyme',
+          pays: geoInfo.pays,
+          region: geoInfo.region,
+          ville: geoInfo.ville,
           pagesVisitees: [{
             page: page,
             tempsDebut: now
@@ -714,6 +755,9 @@ const getVisiteDetails = async (req, res) => {
       _id: visite._id,
       nom: visite.nom || 'Visiteur anonyme',
       telephone: visite.telephone || visite.visitorId || 'Non enregistré',
+      pays: visite.pays || 'Non disponible',
+      region: visite.region || 'Non disponible',
+      ville: visite.ville || 'Non disponible',
       dateDebut: visite.dateDebut,
       dateFin: visite.dateFin,
       dureeTotale: visite.dureeTotale,
@@ -729,6 +773,18 @@ const getVisiteDetails = async (req, res) => {
   }
 };
 
+// DELETE /api/admin/visites/:id - Supprimer une visite
+const deleteVisite = async (req, res) => {
+  try {
+    const visite = await Visit.findByIdAndDelete(req.params.id);
+    if (!visite) return res.status(404).json({ message: 'Visite introuvable.' });
+    
+    res.json({ message: 'Visite supprimée avec succès' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 module.exports = {
   getCreditRequests, approveCreditRequest, rejectCreditRequest,
   getSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest,
@@ -737,5 +793,5 @@ module.exports = {
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
-  getVisites, getVisiteDetails, trackPageVisit
+  getVisites, getVisiteDetails, trackPageVisit, deleteVisite
 };
