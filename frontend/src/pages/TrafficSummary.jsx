@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Trash2, FileText, Download } from 'lucide-react';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 import api from '../utils/api';
 
 const TrafficSummaryModal = ({ onClose }) => {
