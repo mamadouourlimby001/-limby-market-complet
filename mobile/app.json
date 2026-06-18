@@ -1,0 +1,56 @@
+{
+  "expo": {
+    "name": "Limby Market",
+    "slug": "limby-market",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "backgroundColor": "#F5F5F5",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.limbymarket.app",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Limby Market utilise votre position pour vous proposer des annonces locales et mesurer les visites de boutiques.",
+        "NSCameraUsageDescription": "Limby Market a besoin de l'appareil photo pour ajouter des photos à vos annonces.",
+        "NSPhotoLibraryUsageDescription": "Limby Market a besoin d'accéder à vos photos pour illustrer vos annonces."
+      }
+    },
+    "android": {
+      "package": "com.limbymarket.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-font",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Limby Market a besoin d'accéder à vos photos pour illustrer vos annonces.",
+          "cameraPermission": "Limby Market a besoin de l'appareil photo pour ajouter des photos à vos annonces."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Limby Market utilise votre position pour vous proposer des annonces locales et mesurer les visites de boutiques."
+        }
+      ],
+      "@react-native-community/datetimepicker"
+    ]
+  }
+}
