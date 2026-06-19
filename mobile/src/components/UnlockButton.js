@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, Pressable, Linking, StyleSheet } from 'react-native';
 import { Unlock, Phone } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import Button from './ui/Button';
 import CenterModal from './ui/CenterModal';
+import WhatsAppIcon from './WhatsAppIcon';
 import { colors } from '../theme/theme';
 
 // Portage exact de frontend/src/components/UnlockButton.jsx
@@ -45,10 +46,20 @@ export default function UnlockButton({ type, id, contact, quartier }) {
   };
 
   if (unlockedContact) {
+    const phone = (unlockedContact || '').replace(/\D/g, '');
     return (
-      <View style={styles.unlockedBadge}>
-        <Phone size={14} color={colors.success} />
-        <Text style={styles.unlockedText}>{unlockedContact}</Text>
+      <View>
+        <View style={styles.unlockedBadge}>
+          <Phone size={14} color={colors.success} />
+          <Text style={styles.unlockedText}>{unlockedContact}</Text>
+        </View>
+        <Pressable
+          style={styles.whatsappBtn}
+          onPress={() => Linking.openURL(`https://wa.me/${phone}`)}
+        >
+          <WhatsAppIcon size={16} />
+          <Text style={styles.whatsappText}>Contacter sur WhatsApp</Text>
+        </Pressable>
       </View>
     );
   }
@@ -95,6 +106,8 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   unlockedText: { fontSize: 13, fontWeight: '600', color: colors.success },
+  whatsappBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: '#25D366', paddingVertical: 8, paddingHorizontal: 14, borderRadius: 8, marginTop: 6, alignSelf: 'flex-start' },
+  whatsappText: { color: '#fff', fontSize: 13, fontWeight: '700' },
   title: { fontSize: 16, fontWeight: '700', color: colors.primary, marginBottom: 12 },
   body: { fontSize: 13, color: colors.textLight, marginBottom: 16, lineHeight: 19 },
   bold: { fontWeight: '700', color: colors.text },
