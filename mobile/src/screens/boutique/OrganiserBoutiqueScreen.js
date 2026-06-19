@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { View, Text, TextInput, Image, Pressable, Alert, ScrollView, StyleSheet } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { ChevronUp, ChevronDown, Trash2, Plus } from 'lucide-react-native';
+
 import api from '../../services/api';
 import Screen from '../../components/Screen';
 import { Button, Loader } from '../../components/ui';
@@ -207,14 +208,6 @@ export default function OrganiserBoutiqueScreen() {
       {sections.map((section, sIdx) => (
         <View key={sIdx} style={styles.sectionBlock}>
           <View style={styles.sectionHeader}>
-            <View style={styles.sectionArrows}>
-              <Pressable onPress={() => moveSection(sIdx, -1)} disabled={sIdx === 0}>
-                <ChevronUp size={18} color={sIdx === 0 ? '#ccc' : colors.primary} />
-              </Pressable>
-              <Pressable onPress={() => moveSection(sIdx, 1)} disabled={sIdx === sections.length - 1}>
-                <ChevronDown size={18} color={sIdx === sections.length - 1 ? '#ccc' : colors.primary} />
-              </Pressable>
-            </View>
             <TextInput
               style={styles.sectionNameInput}
               value={section.nom}
@@ -222,6 +215,24 @@ export default function OrganiserBoutiqueScreen() {
             />
             <Pressable onPress={() => deleteSection(sIdx)} style={styles.deleteSectionBtn}>
               <Trash2 size={16} color="#ef4444" />
+            </Pressable>
+          </View>
+          <View style={styles.sectionMoveRow}>
+            <Pressable
+              style={[styles.sectionMoveBtn, sIdx === 0 && styles.sectionMoveBtnDisabled]}
+              onPress={() => moveSection(sIdx, -1)}
+              disabled={sIdx === 0}
+            >
+              <ChevronUp size={14} color={sIdx === 0 ? '#ccc' : colors.primary} />
+              <Text style={[styles.sectionMoveTxt, sIdx === 0 && { color: '#ccc' }]}>Monter section</Text>
+            </Pressable>
+            <Pressable
+              style={[styles.sectionMoveBtn, sIdx === sections.length - 1 && styles.sectionMoveBtnDisabled]}
+              onPress={() => moveSection(sIdx, 1)}
+              disabled={sIdx === sections.length - 1}
+            >
+              <ChevronDown size={14} color={sIdx === sections.length - 1 ? '#ccc' : colors.primary} />
+              <Text style={[styles.sectionMoveTxt, sIdx === sections.length - 1 && { color: '#ccc' }]}>Descendre section</Text>
             </Pressable>
           </View>
 
@@ -299,10 +310,13 @@ const styles = StyleSheet.create({
   addSectionBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: 10, borderWidth: 1.5, borderColor: colors.primary, borderStyle: 'dashed', borderRadius: 8, marginBottom: 14 },
   addSectionBtnText: { color: colors.primary, fontWeight: '600' },
   sectionBlock: { backgroundColor: '#fff', borderRadius: 10, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: colors.border || '#e5e7eb' },
-  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
-  sectionArrows: { flexDirection: 'column' },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 6, paddingBottom: 6, borderBottomWidth: 1, borderBottomColor: '#f0f0f0' },
   sectionNameInput: { flex: 1, fontSize: 14, fontWeight: '700', color: colors.primary, borderBottomWidth: 1, borderBottomColor: colors.primary, paddingBottom: 2 },
   deleteSectionBtn: { padding: 4 },
+  sectionMoveRow: { flexDirection: 'row', gap: 8, marginBottom: 8 },
+  sectionMoveBtn: { flexDirection: 'row', alignItems: 'center', gap: 3, borderWidth: 1, borderColor: colors.primary, borderRadius: 6, paddingVertical: 4, paddingHorizontal: 8 },
+  sectionMoveBtnDisabled: { borderColor: '#e5e7eb' },
+  sectionMoveTxt: { fontSize: 11, fontWeight: '600', color: colors.primary },
   emptySection: { fontSize: 12, color: '#9ca3af', textAlign: 'center', paddingVertical: 8 },
   produitRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 6, borderTopWidth: 1, borderTopColor: '#f5f5f5' },
   produitThumb: { width: 40, height: 40, borderRadius: 4 },

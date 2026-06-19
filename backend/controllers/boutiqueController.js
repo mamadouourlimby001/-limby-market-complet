@@ -66,13 +66,13 @@ const addBoutiqueProduct = async (req, res) => {
     if (!boutique.isActive) {
       return res.status(400).json({ message: 'Boutique inactive. Renouvelez votre abonnement.' });
     }
-    const { titre, description, prix, photos, categorie } = req.body;
-    
+    const { titre, description, prix, photos, categorie, section } = req.body;
+
     // Valider que la description ne contient pas de chiffres
     if (description && /\d/.test(description)) {
       return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
     }
-    
+
     // Uploader les images vers Cloudinary si elles sont en base64
     let photoUrls = [];
     if (photos && Array.isArray(photos) && photos.length > 0) {
@@ -84,9 +84,10 @@ const addBoutiqueProduct = async (req, res) => {
       const existingUrls = photos.filter(p => p && !p.startsWith('data:'));
       photoUrls = [...photoUrls, ...existingUrls];
     }
-    
+
     const product = await BoutiqueProduct.create({
-      boutique: boutique._id, titre, description, prix, photos: photoUrls, categorie
+      boutique: boutique._id, titre, description, prix, photos: photoUrls, categorie,
+      section: section || null
     });
     res.status(201).json(product);
   } catch (error) {

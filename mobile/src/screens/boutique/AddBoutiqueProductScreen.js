@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../services/api';
@@ -8,20 +8,44 @@ import { colors } from '../../theme/theme';
 
 const CATEGORIE_OPTIONS = ['Électronique', 'Mode', 'Beauté', 'Maison', 'Autres'].map((c) => ({ label: c, value: c }));
 
-// Portage exact de frontend/src/pages/AddBoutiqueProduct.jsx
 export default function AddBoutiqueProductScreen({ route }) {
   const { id } = route.params;
   const navigation = useNavigation();
-  const [form, setForm] = useState({ titre: '', description: '', prix: '', categorie: '' });
+  const [form, setForm] = useState({ titre: '', description: '', prix: '', categorie: '', section: '' });
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [sectionOptions, setSectionOptions] = useState([]);
+
+  useEffect(() => {
+    const loadSections = async () => {
+      try {
+        const res = await api.get(`/boutiques/${id}`);
+        const secs = (res.data.boutique?.sections || [])
+          .sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+        if (secs.length > 0) {
+          const opts = [
+            { label: 'Sans section', value: '' },
+            ...secs.map(s => ({ label: s.nom, value: s.nom })),
+          ];
+          setSectionOptions(opts);
+          setForm(f => ({ ...f, section: secs[0].nom }));
+        }
+      } catch (e) {}
+    };
+    loadSections();
+  }, [id]);
 
   const handleSubmit = async () => {
     setError('');
     setLoading(true);
     try {
-      await api.post(`/boutiques/${id}/products`, { ...form, prix: Number(form.prix), photos });
+      await api.post(`/boutiques/${id}/products`, {
+        ...form,
+        prix: Number(form.prix),
+        photos,
+        section: form.section || null,
+      });
       navigation.goBack();
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur');
@@ -39,6 +63,16 @@ export default function AddBoutiqueProductScreen({ route }) {
       <FormInput label="Description" value={form.description} onChangeText={(v) => setForm({ ...form, description: v })} multiline numberOfLines={4} />
       <FormInput label="Prix (GNF)" keyboardType="numeric" value={form.prix} onChangeText={(v) => setForm({ ...form, prix: v })} />
       <Select label="Catégorie" value={form.categorie} onChange={(v) => setForm({ ...form, categorie: v })} options={CATEGORIE_OPTIONS} />
+
+      {sectionOptions.length > 0 && (
+        <Select
+          label="Section"
+          value={form.section}
+          onChange={(v) => setForm({ ...form, section: v })}
+          options={sectionOptions}
+          placeholder="Sans section"
+        />
+      )}
 
       <Text style={styles.label}>Photos (max 10)</Text>
       <PhotoUpload photos={photos} setPhotos={setPhotos} max={10} />
