@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { ShoppingBag, Check, X } from 'lucide-react-native';
+import { ShoppingBag } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -38,7 +38,6 @@ export default function UserDashboardScreen() {
   const [tab, setTab] = useState('profil');
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const [unreadBoutiqueMessagesCount, setUnreadBoutiqueMessagesCount] = useState(0);
-  const [updatingItemId, setUpdatingItemId] = useState(null);
 
   const fetchAll = async () => {
     try {
@@ -80,44 +79,20 @@ export default function UserDashboardScreen() {
     ]);
   };
 
-  const toggleItemDisponibilite = async (type, id) => {
-    try {
-      setUpdatingItemId(id);
-      await api.put(`/${type}/${id}/disponibilite`);
-      if (type === 'products') setProducts((prev) => prev.map((p) => p._id === id ? { ...p, disponible: !p.disponible } : p));
-      else if (type === 'locations') setLocations((prev) => prev.map((l) => l._id === id ? { ...l, disponible: !l.disponible } : l));
-      else if (type === 'announcements') setAnnouncements((prev) => prev.map((a) => a._id === id ? { ...a, disponible: !a.disponible } : a));
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setUpdatingItemId(null);
-    }
-  };
-
   const handleLogout = async () => {
     await logout();
     navigation.navigate('Accueil', { screen: 'Home' });
   };
 
   const renderItem = (item, type) => (
-    <View key={item._id} style={[styles.itemRow, { opacity: item.disponible ? 1 : 0.6 }]}>
-      <View>
+    <View key={item._id} style={styles.itemRow}>
+      <View style={{ flex: 1 }}>
         <Text style={styles.itemTitle}>{item.titre}</Text>
         <Text style={styles.itemPrice}>
           {Number(item.prix ?? item.salaireMensuel ?? 0).toLocaleString('fr-FR')} GNF
         </Text>
       </View>
-      <View style={styles.itemActions}>
-        <Pressable
-          disabled={updatingItemId === item._id}
-          onPress={() => toggleItemDisponibilite(type, item._id)}
-          style={[styles.dispoBtn, { backgroundColor: item.disponible ? '#059669' : '#ef4444', opacity: updatingItemId === item._id ? 0.6 : 1 }]}
-        >
-          {item.disponible ? <Check size={14} color="#fff" /> : <X size={14} color="#fff" />}
-          <Text style={styles.dispoText}>{item.disponible ? 'Dispo' : 'Indispo'}</Text>
-        </Pressable>
-        <Button title="🗑" size="sm" variant="danger" onPress={() => handleDelete(type, item._id)} />
-      </View>
+      <Button title="🗑 Supprimer" size="sm" variant="danger" onPress={() => handleDelete(type, item._id)} />
     </View>
   );
 
@@ -261,9 +236,6 @@ const styles = StyleSheet.create({
   itemRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fff', borderRadius: 10, padding: 10, marginBottom: 8 },
   itemTitle: { fontSize: 13, fontWeight: '600' },
   itemPrice: { fontSize: 11, color: colors.textLight },
-  itemActions: { flexDirection: 'row', gap: 6, alignItems: 'center' },
-  dispoBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, borderRadius: 4, paddingVertical: 6, paddingHorizontal: 8 },
-  dispoText: { color: '#fff', fontSize: 11, fontWeight: '600' },
   creditsBig: { fontSize: 28, fontWeight: '700', color: colors.primary },
   creditsLabel: { fontSize: 12, color: colors.textLight },
   historyCard: { padding: 10, marginBottom: 6 },
