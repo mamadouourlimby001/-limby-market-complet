@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, Image, Pressable, Modal, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, Modal, Dimensions, StyleSheet } from 'react-native';
 import { MapPin, X, ChevronLeft, ChevronRight } from 'lucide-react-native';
 import api from '../../services/api';
 import PhotoSlider from '../../components/PhotoSlider';
@@ -9,8 +9,8 @@ import { Badge, Loader, EmptyState } from '../../components/ui';
 import { colors } from '../../theme/theme';
 
 const catLabels = { Location: 'Location', Colocation: 'Colocation', Vente_immobilière: 'Vente immobilière' };
+const { height } = Dimensions.get('window');
 
-// Portage exact de frontend/src/pages/LocationDetail.jsx (avec lightbox plein écran)
 export default function LocationDetailScreen({ route }) {
   const { id } = route.params;
   const [location, setLocation] = useState(null);
@@ -36,8 +36,8 @@ export default function LocationDetailScreen({ route }) {
   const photos = location.photos || [];
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <PhotoSlider photos={photos} height={250} onPhotoClick={setExpandedIndex} />
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <PhotoSlider photos={photos} height={Math.round(height * 0.50)} onPhotoClick={setExpandedIndex} />
 
       <Modal visible={expandedIndex !== null} transparent animationType="fade" onRequestClose={() => setExpandedIndex(null)}>
         <View style={styles.lightbox}>
@@ -72,30 +72,32 @@ export default function LocationDetailScreen({ route }) {
       </Modal>
 
       <View style={styles.body}>
-        <Text style={styles.title}>{location.titre}</Text>
+        <Text style={styles.title} numberOfLines={2}>{location.titre}</Text>
         <Text style={styles.price}>{Number(location.prix || 0).toLocaleString('fr-FR')} GNF</Text>
         <View style={styles.badgeRow}>
           <Badge variant="primary">{catLabels[location.categorie] || location.categorie}</Badge>
-          <Badge variant="primary" icon={<MapPin size={14} color={colors.primary} />}>
+          <Badge variant="primary" icon={<MapPin size={12} color={colors.primary} />}>
             {location.ville}, {location.quartier === 'hidden' ? 'Quartier masqué' : location.quartier}
           </Badge>
         </View>
-        {location.description ? <Text style={styles.description}>{location.description}</Text> : null}
+        {location.description ? (
+          <Text style={styles.description} numberOfLines={3}>{location.description}</Text>
+        ) : null}
         <UnlockButton type="location" id={location._id} contact={location.contact} quartier={location.quartier} />
-        <View style={{ marginTop: 8 }}>
+        <View style={{ marginTop: 6 }}>
           <ReportButton typeContenu="location" contenuId={location._id} />
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: 14 },
-  title: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  price: { fontSize: 20, fontWeight: '700', color: colors.primary, marginBottom: 10 },
-  badgeRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 12 },
-  description: { fontSize: 14, color: '#4b5563', marginBottom: 12, lineHeight: 21 },
+  body: { flex: 1, padding: 12 },
+  title: { fontSize: 16, fontWeight: '700', marginBottom: 4, color: colors.text },
+  price: { fontSize: 18, fontWeight: '700', color: colors.primary, marginBottom: 6 },
+  badgeRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap', marginBottom: 6 },
+  description: { fontSize: 12, color: '#4b5563', lineHeight: 18, marginBottom: 8 },
   lightbox: { flex: 1, backgroundColor: 'rgba(0,0,0,0.95)' },
   lightboxHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 12, backgroundColor: 'rgba(0,0,0,0.8)' },
   lightboxCounter: { color: '#fff', fontSize: 14, fontWeight: '600' },

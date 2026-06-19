@@ -40,8 +40,8 @@ export default function AddBoutiqueProductScreen({ route }) {
       <FormInput label="Prix (GNF)" keyboardType="numeric" value={form.prix} onChangeText={(v) => setForm({ ...form, prix: v })} />
       <Select label="Catégorie" value={form.categorie} onChange={(v) => setForm({ ...form, categorie: v })} options={CATEGORIE_OPTIONS} />
 
-      <Text style={styles.label}>Photos (max 3)</Text>
-      <PhotoUpload photos={photos} setPhotos={setPhotos} max={3} />
+      <Text style={styles.label}>Photos (max 10)</Text>
+      <PhotoUpload photos={photos} setPhotos={setPhotos} max={10} />
 
       <Button title={loading ? 'Ajout...' : 'Ajouter'} block loading={loading} onPress={handleSubmit} style={{ marginTop: 16 }} />
     </Screen>

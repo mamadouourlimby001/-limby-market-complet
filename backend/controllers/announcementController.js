@@ -8,8 +8,11 @@ const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../uti
 // GET /api/announcements
 const getAnnouncements = async (req, res) => {
   try {
-    const { villeDeTravail, entreprise, dateLimite, search } = req.query;
-    let filter = { statut: 'actif', $or: [{ disponible: true }, { disponible: { $exists: false } }] };
+    const { villeDeTravail, entreprise, dateLimite, search, mine } = req.query;
+    const isOwnerRequest = mine === 'true' && req.user;
+    let filter = { statut: 'actif' };
+    if (!isOwnerRequest) filter.$or = [{ disponible: true }, { disponible: { $exists: false } }];
+    if (isOwnerRequest) filter.auteur = req.user._id;
     if (villeDeTravail) filter.villeDeTravail = { $regex: villeDeTravail, $options: 'i' };
     if (entreprise) filter.entreprise = { $regex: entreprise, $options: 'i' };
     if (dateLimite) filter.dateLimite = { $gte: new Date(dateLimite) };

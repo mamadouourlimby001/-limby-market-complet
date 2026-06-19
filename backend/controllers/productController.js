@@ -13,8 +13,11 @@ const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../uti
 // GET /api/products - Récupérer tous les produits actifs avec filtres
 const getProducts = async (req, res) => {
   try {
-    const { ville, categorie, prixMin, prixMax, search } = req.query;
-    let filter = { statut: 'actif', $or: [{ disponible: true }, { disponible: { $exists: false } }] };
+    const { ville, categorie, prixMin, prixMax, search, mine } = req.query;
+    const isOwnerRequest = mine === 'true' && req.user;
+    let filter = { statut: 'actif' };
+    if (!isOwnerRequest) filter.$or = [{ disponible: true }, { disponible: { $exists: false } }];
+    if (isOwnerRequest) filter.vendeur = req.user._id;
 
     if (ville) filter.ville = { $regex: ville, $options: 'i' };
     if (categorie) filter.categorie = { $regex: categorie, $options: 'i' };

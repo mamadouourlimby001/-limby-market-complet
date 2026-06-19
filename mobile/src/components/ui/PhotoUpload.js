@@ -19,27 +19,40 @@ export default function PhotoUpload({ photos, setPhotos, max = 3, single = false
       return;
     }
 
-    const options = { mediaTypes: ['images'], quality: 0.7, base64: true };
-    const result =
-      source === 'camera'
-        ? await ImagePicker.launchCameraAsync(options)
-        : await ImagePicker.launchImageLibraryAsync(options);
-
-    if (result.canceled || !result.assets?.[0]) return;
-
-    const asset = result.assets[0];
-    const mime = asset.mimeType || 'image/jpeg';
-    const dataUrl = `data:${mime};base64,${asset.base64}`;
-
-    if (single) {
-      setPhotos([dataUrl]);
-      return;
-    }
-    if (photos.length >= max) {
+    const remaining = single ? 1 : max - photos.length;
+    if (!single && remaining <= 0) {
       Alert.alert('Erreur', `Maximum ${max} photo${max > 1 ? 's' : ''}`);
       return;
     }
-    setPhotos([...photos, dataUrl]);
+
+    const cameraOptions = { mediaTypes: ['images'], quality: 0.7, base64: true };
+    const galleryOptions = {
+      mediaTypes: ['images'],
+      quality: 0.7,
+      base64: true,
+      allowsMultipleSelection: !single,
+      selectionLimit: remaining,
+    };
+
+    const result =
+      source === 'camera'
+        ? await ImagePicker.launchCameraAsync(cameraOptions)
+        : await ImagePicker.launchImageLibraryAsync(galleryOptions);
+
+    if (result.canceled || !result.assets?.length) return;
+
+    if (single) {
+      const asset = result.assets[0];
+      const mime = asset.mimeType || 'image/jpeg';
+      setPhotos([`data:${mime};base64,${asset.base64}`]);
+      return;
+    }
+
+    const newPhotos = result.assets.map((asset) => {
+      const mime = asset.mimeType || 'image/jpeg';
+      return `data:${mime};base64,${asset.base64}`;
+    });
+    setPhotos([...photos, ...newPhotos].slice(0, max));
   };
 
   const addPhoto = () => {

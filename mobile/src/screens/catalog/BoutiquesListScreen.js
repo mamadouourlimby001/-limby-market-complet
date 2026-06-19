@@ -55,6 +55,8 @@ export default function BoutiquesListScreen() {
     <FlatList
       data={filteredBoutiques}
       keyExtractor={(item) => item._id}
+      numColumns={2}
+      columnWrapperStyle={{ gap: 10 }}
       contentContainerStyle={styles.list}
       style={{ backgroundColor: colors.bg }}
       ListHeaderComponent={
@@ -107,7 +109,7 @@ export default function BoutiquesListScreen() {
         </View>
       }
       renderItem={({ item }) => (
-        <View style={{ marginBottom: 10 }}>
+        <View style={{ flex: 1 }}>
           <BoutiqueCard boutique={item} />
         </View>
       )}

@@ -103,7 +103,10 @@ export default function MyBoutiqueScreen() {
         <View key={p._id} style={styles.gridItem}>
           <Pressable onPress={() => navigation.navigate('ProductBoutiqueDetail', { boutiqueId: boutique._id, productId: p._id })}>
             <Card style={{ opacity: p.disponible ? 1 : 0.6, overflow: 'hidden' }}>
-              <PhotoSlider photos={p.photos} height={110} />
+              {p.photos?.length > 0
+                ? <Image source={{ uri: p.photos[0] }} style={{ width: '100%', height: 110 }} resizeMode="cover" />
+                : <View style={{ width: '100%', height: 110, backgroundColor: '#f0f0f0' }} />
+              }
               <View style={{ padding: 8 }}>
                 <Text style={styles.productTitle} numberOfLines={1}>{p.titre}</Text>
                 <Text style={styles.productCategorie}>{p.categorie}</Text>

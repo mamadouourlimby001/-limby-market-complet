@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Dimensions, StyleSheet } from 'react-native';
 import { MapPin, Building2, Clock } from 'lucide-react-native';
 import api from '../../services/api';
 import PhotoSlider from '../../components/PhotoSlider';
@@ -8,7 +8,8 @@ import ReportButton from '../../components/ReportButton';
 import { Badge, Loader, EmptyState } from '../../components/ui';
 import { colors } from '../../theme/theme';
 
-// Portage exact de frontend/src/pages/AnnouncementDetail.jsx
+const { height } = Dimensions.get('window');
+
 export default function AnnouncementDetailScreen({ route }) {
   const { id } = route.params;
   const [ann, setAnn] = useState(null);
@@ -31,36 +32,36 @@ export default function AnnouncementDetailScreen({ route }) {
   if (!ann) return <EmptyState text="Annonce introuvable" />;
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: colors.bg }}>
-      <PhotoSlider photos={ann.photos} height={250} />
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <PhotoSlider photos={ann.photos} height={Math.round(height * 0.50)} />
       <View style={styles.body}>
-        <Text style={styles.title}>{ann.titre}</Text>
+        <Text style={styles.title} numberOfLines={2}>{ann.titre}</Text>
         <Text style={styles.price}>{Number(ann.salaireMensuel || 0).toLocaleString('fr-FR')} GNF/mois</Text>
         <View style={styles.badgeRow}>
-          <Badge variant="primary" icon={<MapPin size={14} color={colors.primary} />}>
+          <Badge variant="primary" icon={<MapPin size={12} color={colors.primary} />}>
             {ann.villeDeTravail}, {ann.quartier}
           </Badge>
-          <Badge variant="primary" icon={<Building2 size={14} color={colors.primary} />}>{ann.entreprise}</Badge>
+          <Badge variant="primary" icon={<Building2 size={12} color={colors.primary} />}>{ann.entreprise}</Badge>
         </View>
-        <Badge variant="warning" icon={<Clock size={14} color={colors.warning} />} style={{ marginBottom: 12 }}>
+        <Badge variant="warning" icon={<Clock size={12} color={colors.warning} />} style={{ marginBottom: 6 }}>
           Limite: {new Date(ann.dateLimite).toLocaleDateString('fr-FR')}
         </Badge>
-        <Text style={styles.sectionTitle}>Description</Text>
-        <Text style={styles.description}>{ann.description}</Text>
+        {ann.description ? (
+          <Text style={styles.description} numberOfLines={3}>{ann.description}</Text>
+        ) : null}
         <UnlockButton type="announcement" id={ann._id} contact={ann.contact} />
-        <View style={{ marginTop: 8 }}>
+        <View style={{ marginTop: 6 }}>
           <ReportButton typeContenu="announcement" contenuId={ann._id} />
         </View>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  body: { padding: 14 },
-  title: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  price: { fontSize: 20, fontWeight: '700', color: colors.primary, marginBottom: 6 },
-  badgeRow: { flexDirection: 'row', gap: 6, flexWrap: 'wrap', marginBottom: 8 },
-  sectionTitle: { fontSize: 14, fontWeight: '600', marginBottom: 6 },
-  description: { fontSize: 13, color: '#4b5563', lineHeight: 20, marginBottom: 14 },
+  body: { flex: 1, padding: 12 },
+  title: { fontSize: 16, fontWeight: '700', marginBottom: 4, color: colors.text },
+  price: { fontSize: 18, fontWeight: '700', color: colors.primary, marginBottom: 6 },
+  badgeRow: { flexDirection: 'row', gap: 4, flexWrap: 'wrap', marginBottom: 6 },
+  description: { fontSize: 12, color: '#4b5563', lineHeight: 18, marginBottom: 8 },
 });

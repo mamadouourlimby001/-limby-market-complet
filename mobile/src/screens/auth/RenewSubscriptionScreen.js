@@ -7,7 +7,7 @@ import { colors } from '../../theme/theme';
 
 // Portage exact de frontend/src/pages/RenewSubscription.jsx
 export default function RenewSubscriptionScreen() {
-  const [form, setForm] = useState({ nomBoutique: '', telephoneDepot: '', montant: '28000', boutiqueId: '' });
+  const [form, setForm] = useState({ nomBoutique: '', telephoneDepot: '', montant: '38000', boutiqueId: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -56,7 +56,7 @@ export default function RenewSubscriptionScreen() {
       <Text style={styles.title}>Renouveler abonnement</Text>
 
       <AlertBanner variant="info">
-        💳 Déposez 28 000 GNF sur le numéro Orange Money +224625223418 puis soumettez ce formulaire.
+        💳 Déposez 38 000 GNF sur le numéro Orange Money +224625223418 puis soumettez ce formulaire.
       </AlertBanner>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
 

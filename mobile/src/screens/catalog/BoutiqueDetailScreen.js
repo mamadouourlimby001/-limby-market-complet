@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, Image, Pressable, Linking, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Image, Pressable, Linking, ScrollView, Dimensions, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MapPin, Check, Store } from 'lucide-react-native';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import PhotoSlider from '../../components/PhotoSlider';
@@ -64,10 +66,11 @@ export default function BoutiqueDetailScreen({ route }) {
 
   return (
     <ScrollView style={styles.flex} contentContainerStyle={{ padding: 12 }}>
+      {boutique.logo
+        ? <Image source={{ uri: boutique.logo }} style={styles.banner} resizeMode="contain" />
+        : <View style={styles.bannerPlaceholder}><Store size={48} color={colors.textLight} /></View>
+      }
       <View style={styles.header}>
-        <View style={styles.logoWrap}>
-          {boutique.logo ? <Image source={{ uri: boutique.logo }} style={styles.logo} /> : null}
-        </View>
         <View style={styles.nameRow}>
           <Text style={styles.name}>{boutique.nom}</Text>
           {boutique.isVerified ? <Check size={18} color={colors.accent} /> : null}
@@ -115,7 +118,10 @@ export default function BoutiqueDetailScreen({ route }) {
               onPress={() => navigation.navigate('ProductBoutiqueDetail', { boutiqueId: id, productId: p._id })}
             >
               <Card style={[styles.productCard, { opacity: p.disponible ? 1 : 0.6 }]}>
-                <PhotoSlider photos={p.photos} height={110} />
+                {p.photos?.length > 0
+                  ? <Image source={{ uri: p.photos[0] }} style={{ width: '100%', height: 110 }} resizeMode="cover" />
+                  : <View style={{ width: '100%', height: 110, backgroundColor: '#f0f0f0' }} />
+                }
                 <View style={{ padding: 8 }}>
                   <Text style={styles.productTitle} numberOfLines={1}>{p.titre}</Text>
                   <Text style={styles.productCategorie}>{p.categorie}</Text>
@@ -141,9 +147,9 @@ export default function BoutiqueDetailScreen({ route }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
-  header: { alignItems: 'center', marginBottom: 16 },
-  logoWrap: { width: 70, height: 70, borderRadius: 35, overflow: 'hidden', backgroundColor: '#f0f0f0', marginBottom: 8 },
-  logo: { width: '100%', height: '100%' },
+  banner: { width: SCREEN_WIDTH, height: Math.round(SCREEN_WIDTH * 0.60), backgroundColor: '#f0f0f0' },
+  bannerPlaceholder: { width: SCREEN_WIDTH, height: Math.round(SCREEN_WIDTH * 0.60), backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
+  header: { alignItems: 'center', padding: 12, marginBottom: 4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   name: { fontSize: 20, fontWeight: '700' },
   certifiedBadge: { backgroundColor: '#0ea5e9', paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginTop: 4 },

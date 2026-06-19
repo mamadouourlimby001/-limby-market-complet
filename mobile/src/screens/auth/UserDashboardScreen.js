@@ -44,18 +44,18 @@ export default function UserDashboardScreen() {
     try {
       await refreshUser();
       const [prodRes, locRes, annRes, boutRes, notifRes, histRes, messagesRes, boutiqueMessagesRes] = await Promise.all([
-        api.get('/products', { params: { vendeur: user?._id } }),
-        api.get('/locations'),
-        api.get('/announcements'),
+        api.get('/products', { params: { mine: 'true' } }),
+        api.get('/locations', { params: { mine: 'true' } }),
+        api.get('/announcements', { params: { mine: 'true' } }),
         api.get('/boutiques/my-boutique').catch(() => ({ data: null })),
         api.get('/notifications'),
         api.get('/credits/my-history'),
         api.get('/messages/my-messages').catch(() => ({ data: { unreadCount: 0 } })),
         api.get('/boutique-messages/user-boutique-messages').catch(() => ({ data: { unreadCount: 0 } })),
       ]);
-      setProducts(prodRes.data.filter((p) => p.vendeur?._id === user?._id));
-      setLocations(locRes.data.filter((l) => l.proprietaire?._id === user?._id));
-      setAnnouncements(annRes.data.filter((a) => a.auteur?._id === user?._id));
+      setProducts(prodRes.data);
+      setLocations(locRes.data);
+      setAnnouncements(annRes.data);
       setBoutique(boutRes.data?.boutique || boutRes.data || null);
       setNotifications(notifRes.data);
       setHistory(histRes.data);
@@ -84,7 +84,9 @@ export default function UserDashboardScreen() {
     try {
       setUpdatingItemId(id);
       await api.put(`/${type}/${id}/disponibilite`);
-      fetchAll();
+      if (type === 'products') setProducts((prev) => prev.map((p) => p._id === id ? { ...p, disponible: !p.disponible } : p));
+      else if (type === 'locations') setLocations((prev) => prev.map((l) => l._id === id ? { ...l, disponible: !l.disponible } : l));
+      else if (type === 'announcements') setAnnouncements((prev) => prev.map((a) => a._id === id ? { ...a, disponible: !a.disponible } : a));
     } catch (err) {
       console.error(err);
     } finally {
