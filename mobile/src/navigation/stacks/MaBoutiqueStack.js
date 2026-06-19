@@ -6,6 +6,7 @@ import ProduitsCommandesScreen from '../../screens/boutique/ProduitsCommandesScr
 import BoutiqueMessagesScreen from '../../screens/boutique/BoutiqueMessagesScreen';
 import BoutiqueVisitsScreen from '../../screens/boutique/BoutiqueVisitsScreen';
 import ProductBoutiqueDetailScreen from '../../screens/catalog/ProductBoutiqueDetailScreen';
+import OrganiserBoutiqueScreen from '../../screens/boutique/OrganiserBoutiqueScreen';
 import AppHeader from '../../components/AppHeader';
 
 const Stack = createNativeStackNavigator();
@@ -20,6 +21,7 @@ export default function MaBoutiqueStack() {
       <Stack.Screen name="BoutiqueMessages" component={BoutiqueMessagesScreen} />
       <Stack.Screen name="BoutiqueVisits" component={BoutiqueVisitsScreen} />
       <Stack.Screen name="ProductBoutiqueDetail" component={ProductBoutiqueDetailScreen} />
+      <Stack.Screen name="OrganiserBoutique" component={OrganiserBoutiqueScreen} />
     </Stack.Navigator>
   );
 }

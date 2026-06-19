@@ -157,6 +157,7 @@ export default function MyBoutiqueScreen() {
         <Button title="Commandes" variant="secondary" block onPress={() => navigation.navigate('ProduitsCommandes')} />
         <Button title={`💬 Messages (${unreadMessagesCount})`} variant="secondary" block onPress={() => navigation.navigate('BoutiqueMessages')} />
         <Button title="✏️ Modifier Boutique" variant="secondary" block onPress={() => navigation.navigate('CreateBoutique')} />
+        <Button title="📂 Organiser les produits" variant="secondary" block onPress={() => navigation.navigate('OrganiserBoutique')} />
         <Button
           title="👁 Visite de la boutique"
           variant="secondary"

@@ -110,32 +110,51 @@ export default function BoutiqueDetailScreen({ route }) {
       {products.length === 0 ? (
         <EmptyState icon={<Store size={32} color={colors.textLight} />} text="Aucun produit" />
       ) : (
-        <View style={styles.grid}>
-          {products.map((p) => (
-            <Pressable
-              key={p._id}
-              style={styles.gridItem}
-              onPress={() => navigation.navigate('ProductBoutiqueDetail', { boutiqueId: id, productId: p._id })}
-            >
-              <Card style={[styles.productCard, { opacity: p.disponible ? 1 : 0.6 }]}>
-                {p.photos?.length > 0
-                  ? <Image source={{ uri: p.photos[0] }} style={{ width: '100%', height: 110 }} resizeMode="cover" />
-                  : <View style={{ width: '100%', height: 110, backgroundColor: '#f0f0f0' }} />
-                }
-                <View style={{ padding: 8 }}>
-                  <Text style={styles.productTitle} numberOfLines={1}>{p.titre}</Text>
-                  <Text style={styles.productCategorie}>{p.categorie}</Text>
-                  <Text style={styles.productPrice}>{Number(p.prix || 0).toLocaleString('fr-FR')} GNF</Text>
-                </View>
-              </Card>
-              {!p.disponible && (
-                <View style={styles.unavailableOverlay}>
-                  <Text style={styles.unavailableText}>Indisponible</Text>
-                </View>
-              )}
-            </Pressable>
-          ))}
-        </View>
+        <>
+          {(() => {
+            const orderedSecs = (boutique.sections || []).sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+            const inSection = new Set();
+            const groups = orderedSecs.map(s => {
+              const prods = products.filter(p => p.section === s.nom).sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+              prods.forEach(p => inSection.add(p._id));
+              return { nom: s.nom, prods };
+            }).filter(g => g.prods.length > 0);
+            const rest = products.filter(p => !inSection.has(p._id)).sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+            if (rest.length > 0) groups.push({ nom: null, prods: rest });
+
+            const renderProd = (p) => (
+              <Pressable
+                key={p._id}
+                style={styles.gridItem}
+                onPress={() => navigation.navigate('ProductBoutiqueDetail', { boutiqueId: id, productId: p._id })}
+              >
+                <Card style={[styles.productCard, { opacity: p.disponible ? 1 : 0.6 }]}>
+                  {p.photos?.length > 0
+                    ? <Image source={{ uri: p.photos[0] }} style={{ width: '100%', height: 110 }} resizeMode="cover" />
+                    : <View style={{ width: '100%', height: 110, backgroundColor: '#f0f0f0' }} />
+                  }
+                  <View style={{ padding: 8 }}>
+                    <Text style={styles.productTitle} numberOfLines={1}>{p.titre}</Text>
+                    <Text style={styles.productCategorie}>{p.categorie}</Text>
+                    <Text style={styles.productPrice}>{Number(p.prix || 0).toLocaleString('fr-FR')} GNF</Text>
+                  </View>
+                </Card>
+                {!p.disponible && (
+                  <View style={styles.unavailableOverlay}>
+                    <Text style={styles.unavailableText}>Indisponible</Text>
+                  </View>
+                )}
+              </Pressable>
+            );
+
+            return groups.map((group, gi) => (
+              <View key={gi}>
+                {group.nom ? <Text style={styles.sectionGroupTitle}>{group.nom}</Text> : null}
+                <View style={styles.grid}>{group.prods.map(renderProd)}</View>
+              </View>
+            ));
+          })()}
+        </>
       )}
 
       <View style={{ marginTop: 12 }}>
@@ -161,6 +180,7 @@ const styles = StyleSheet.create({
   whatsappBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, marginBottom: 14 },
   whatsappText: { fontSize: 14, fontWeight: '600', color: colors.primary },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
+  sectionGroupTitle: { fontSize: 14, fontWeight: '700', color: colors.primary, marginTop: 12, marginBottom: 8, paddingLeft: 4, borderLeftWidth: 3, borderLeftColor: colors.primary },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   gridItem: { width: '47%', position: 'relative' },
   productCard: { overflow: 'hidden' },

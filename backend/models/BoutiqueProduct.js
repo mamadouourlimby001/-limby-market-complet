@@ -46,6 +46,14 @@ const boutiqueProductSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  section: {
+    type: String,
+    default: null
+  },
+  ordre: {
+    type: Number,
+    default: 0
+  },
   createdAt: {
     type: Date,
     default: Date.now

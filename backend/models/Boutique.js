@@ -78,7 +78,11 @@ const boutiqueSchema = new mongoose.Schema({
   lastResetDate: {
     type: Date,
     default: Date.now
-  }
+  },
+  sections: [{
+    nom: { type: String },
+    ordre: { type: Number, default: 0 }
+  }]
 });
 
 module.exports = mongoose.model('Boutique', boutiqueSchema);

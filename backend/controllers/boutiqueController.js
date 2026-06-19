@@ -21,7 +21,8 @@ const getBoutique = async (req, res) => {
     const boutique = await Boutique.findById(req.params.id)
       .populate('proprietaire', 'nom telephone isVerified');
     if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
-    const products = await BoutiqueProduct.find({ boutique: boutique._id, statut: 'actif' }).sort({ createdAt: -1 });
+    const products = await BoutiqueProduct.find({ boutique: boutique._id, statut: 'actif' })
+      .sort({ ordre: 1, createdAt: -1 });
     res.json({ boutique, products });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
@@ -124,8 +125,33 @@ const getMyBoutique = async (req, res) => {
     const myBoutique = await Boutique.findOne({ proprietaire: req.user._id })
       .populate('proprietaire', 'nom telephone isVerified');
     if (!myBoutique) return res.status(404).json({ message: 'Aucune boutique trouvée.' });
-    const products = await BoutiqueProduct.find({ boutique: myBoutique._id, statut: 'actif' }).sort({ createdAt: -1 });
+    const products = await BoutiqueProduct.find({ boutique: myBoutique._id, statut: 'actif' })
+      .sort({ ordre: 1, createdAt: -1 });
     res.json({ boutique: myBoutique, products });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// PUT /api/boutiques/:id/organisation - Sauvegarder sections et ordre des produits
+const updateOrganisation = async (req, res) => {
+  try {
+    const boutique = await Boutique.findById(req.params.id);
+    if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
+    if (boutique.proprietaire.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
+    const { sections, produits } = req.body;
+    await Boutique.findByIdAndUpdate(req.params.id, { $set: { sections: sections || [] } });
+    if (produits && Array.isArray(produits)) {
+      await Promise.all(
+        produits.map(p => BoutiqueProduct.findByIdAndUpdate(
+          p._id,
+          { $set: { section: p.section || null, ordre: p.ordre || 0 } }
+        ))
+      );
+    }
+    res.json({ message: 'Organisation sauvegardée.' });
   } catch (error) {
     res.status(500).json({ message: 'Erreur serveur.', error: error.message });
   }
@@ -333,4 +359,4 @@ const deleteBoutiqueVisit = async (req, res) => {
   }
 };
 
-module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique, recordBoutiqueVisit, getBoutiqueVisits, deleteBoutiqueVisit };
+module.exports = { getBoutiques, getBoutique, createBoutique, addBoutiqueProduct, deleteBoutiqueProduct, getMyBoutique, toggleProductDisponibilite, updateBoutique, recordBoutiqueVisit, getBoutiqueVisits, deleteBoutiqueVisit, updateOrganisation };
