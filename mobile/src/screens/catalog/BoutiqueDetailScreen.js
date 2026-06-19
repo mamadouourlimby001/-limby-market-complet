@@ -148,9 +148,16 @@ export default function BoutiqueDetailScreen({ route }) {
             );
 
             return groups.map((group, gi) => (
-              <View key={gi}>
-                {group.nom ? <Text style={styles.sectionGroupTitle}>{group.nom}</Text> : null}
-                <View style={styles.grid}>{group.prods.map(renderProd)}</View>
+              <View key={gi} style={group.nom ? styles.sectionContainer : styles.sectionContainerPlain}>
+                {group.nom ? (
+                  <View style={styles.sectionBand}>
+                    <Text style={styles.sectionBandTitle}>{group.nom}</Text>
+                    <Text style={styles.sectionBandCount}>{group.prods.length} produit{group.prods.length !== 1 ? 's' : ''}</Text>
+                  </View>
+                ) : null}
+                <View style={[styles.grid, group.nom ? styles.gridPadded : null]}>
+                  {group.prods.map(renderProd)}
+                </View>
               </View>
             ));
           })()}
@@ -180,8 +187,13 @@ const styles = StyleSheet.create({
   whatsappBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border, borderRadius: 10, marginBottom: 14 },
   whatsappText: { fontSize: 14, fontWeight: '600', color: colors.primary },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
-  sectionGroupTitle: { fontSize: 14, fontWeight: '700', color: colors.primary, marginTop: 12, marginBottom: 8, paddingLeft: 4, borderLeftWidth: 3, borderLeftColor: colors.primary },
+  sectionContainer: { backgroundColor: '#fff', borderRadius: 12, marginBottom: 16, borderWidth: 1.5, borderColor: colors.primary, overflow: 'hidden' },
+  sectionContainerPlain: { marginBottom: 8 },
+  sectionBand: { backgroundColor: colors.primary, paddingVertical: 10, paddingHorizontal: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  sectionBandTitle: { fontSize: 14, fontWeight: '700', color: '#fff' },
+  sectionBandCount: { fontSize: 11, color: 'rgba(255,255,255,0.75)', fontWeight: '600' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  gridPadded: { padding: 10 },
   gridItem: { width: '47%', position: 'relative' },
   productCard: { overflow: 'hidden' },
   productTitle: { fontSize: 13, fontWeight: '600', marginBottom: 4 },
