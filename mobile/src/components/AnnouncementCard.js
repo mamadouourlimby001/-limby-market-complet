@@ -13,6 +13,7 @@ export default memo(function AnnouncementCard({ announcement, onRefresh }) {
   const navigation = useNavigation();
   const { user } = useAuth();
   const [visible, setVisible] = useState(true);
+  const [imgRatio, setImgRatio] = useState(4 / 3);
   const goDetail = () => navigation.navigate('AnnouncementDetail', { id: announcement._id });
 
   const isOwner = user && String(announcement.auteur?._id) === String(user._id);
@@ -36,7 +37,15 @@ export default memo(function AnnouncementCard({ announcement, onRefresh }) {
     <Card style={styles.card}>
       <Pressable style={styles.imageWrap} onPress={goDetail}>
         {announcement.photos?.length > 0
-          ? <Image source={{ uri: announcement.photos[0] }} style={styles.image} resizeMode="cover" />
+          ? <Image
+              source={{ uri: announcement.photos[0] }}
+              style={[styles.image, { aspectRatio: imgRatio }]}
+              resizeMode="contain"
+              onLoad={(e) => {
+                const { width, height } = e.nativeEvent.source;
+                if (width && height) setImgRatio(width / height);
+              }}
+            />
           : <View style={styles.imagePlaceholder} />
         }
       </Pressable>
@@ -71,10 +80,10 @@ export default memo(function AnnouncementCard({ announcement, onRefresh }) {
 });
 
 const styles = StyleSheet.create({
-  card: { flex: 1, overflow: 'hidden', height: 340 },
-  imageWrap: { flex: 1 },
-  image: { width: '100%', height: '100%' },
-  imagePlaceholder: { width: '100%', flex: 1, backgroundColor: '#f0f0f0' },
+  card: { flex: 1, overflow: 'hidden' },
+  imageWrap: { width: '100%' },
+  image: { width: '100%' },
+  imagePlaceholder: { width: '100%', height: 150, backgroundColor: '#f0f0f0' },
   body: { padding: 8 },
   title: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 4 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
