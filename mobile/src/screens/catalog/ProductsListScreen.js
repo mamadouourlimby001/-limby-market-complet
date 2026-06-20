@@ -72,7 +72,7 @@ export default function ProductsListScreen() {
         const active = selectedCategorie === key;
         return (
           <Pressable key={key} onPress={() => setSelectedCategorie(key)} style={[styles.tab, active && styles.tabActive]}>
-            <Icon size={11} color={active ? '#fff' : colors.primary} />
+            <Icon size={14} color={active ? '#fff' : colors.primary} />
             <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
           </Pressable>
         );
@@ -149,9 +149,9 @@ const styles = StyleSheet.create({
   pageTitleSmall: { fontSize: 14, fontWeight: '700', color: colors.primary },
   filterCard: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginHorizontal: 12, marginBottom: 8 },
   tabsRow: { paddingHorizontal: 12, paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: colors.border },
-  tab: { paddingVertical: 3, paddingHorizontal: 8, borderRadius: 5, borderWidth: 1, borderColor: colors.primary, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', gap: 2, marginBottom: 2 },
+  tab: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1.5, borderColor: colors.primary, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', gap: 3, marginBottom: 2 },
   tabActive: { backgroundColor: colors.primary },
-  tabText: { fontSize: 9, fontWeight: '700', color: colors.primary, textAlign: 'center' },
+  tabText: { fontSize: 12, fontWeight: '700', color: colors.primary, textAlign: 'center' },
   tabTextActive: { color: '#fff' },
   list: { padding: 12, paddingBottom: 80 },
 });
