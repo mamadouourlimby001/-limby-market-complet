@@ -71,7 +71,7 @@ export default function ReportButton({ typeContenu, contenuId }) {
 
 const styles = StyleSheet.create({
   trigger: { paddingVertical: 2, alignSelf: 'flex-start' },
-  triggerText: { color: '#9ca3af', fontSize: 11 },
+  triggerText: { color: '#ef4444', fontSize: 11 },
   title: { fontSize: 16, fontWeight: '700', color: colors.primary, marginBottom: 12 },
   row: { flexDirection: 'row', gap: 8 },
 });

@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import LocationCard from '../../components/LocationCard';
-import { Button, Select, FormInput, EmptyState, FAB, SkeletonList } from '../../components/ui';
+import { Button, Select, FormInput, EmptyState, SkeletonList } from '../../components/ui';
 import { VILLES_OPTIONS } from '../../constants/villes';
 import { colors } from '../../theme/theme';
 
@@ -73,7 +73,10 @@ export default function LocationsListScreen() {
           <View>
             <View style={styles.headerRow}>
               <Text style={styles.pageTitle}>Locations</Text>
-              <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
+              <View style={{ gap: 6 }}>
+                <Button title="+ Nouvelle publication" size="sm" onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
+                <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
+              </View>
             </View>
 
             {/* Onglets catégorie */}
@@ -109,7 +112,6 @@ export default function LocationsListScreen() {
         }
         renderItem={renderItem}
       />
-      <FAB onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
     </View>
   );
 }

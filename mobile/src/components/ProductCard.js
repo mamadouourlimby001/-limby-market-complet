@@ -37,9 +37,9 @@ export default memo(function ProductCard({ product, onRefresh }) {
 
   return (
     <Card style={styles.card}>
-      <Pressable onPress={goDetail}>
+      <Pressable style={styles.imageWrap} onPress={goDetail}>
         {product.photos?.length > 0
-          ? <Image source={{ uri: product.photos[0] }} style={styles.image} resizeMode="contain" />
+          ? <Image source={{ uri: product.photos[0] }} style={styles.image} resizeMode="cover" />
           : <View style={styles.imagePlaceholder} />
         }
       </Pressable>
@@ -49,8 +49,8 @@ export default memo(function ProductCard({ product, onRefresh }) {
         </Pressable>
         <View style={styles.row}>
           <View style={styles.metaRow}>
-            <MapPin size={12} color={colors.textLight} />
-            <Text style={styles.meta}>{product.ville}</Text>
+            <MapPin size={12} color={colors.success} />
+            <Text style={styles.metaVille}>{product.ville}</Text>
           </View>
           {product.etat ? <Badge variant="primary">{etatLabels[product.etat]}</Badge> : null}
         </View>
@@ -69,15 +69,17 @@ export default memo(function ProductCard({ product, onRefresh }) {
 });
 
 const styles = StyleSheet.create({
-  card: { flex: 1, overflow: 'hidden' },
-  image: { width: '100%', height: 130, backgroundColor: '#f0f0f0' },
-  imagePlaceholder: { width: '100%', height: 130, backgroundColor: '#f0f0f0' },
+  card: { flex: 1, overflow: 'hidden', height: 340 },
+  imageWrap: { flex: 1 },
+  image: { width: '100%', height: '100%' },
+  imagePlaceholder: { width: '100%', flex: 1, backgroundColor: '#f0f0f0' },
   body: { padding: 8 },
   title: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   meta: { fontSize: 11, color: colors.textLight },
-  price: { fontSize: 14, fontWeight: '700', color: colors.primary, marginBottom: 6 },
+  metaVille: { fontSize: 11, color: colors.success },
+  price: { fontSize: 17, fontWeight: '700', color: '#111', marginBottom: 6 },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#ef4444', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 8, marginTop: 6, alignSelf: 'flex-start' },
   deleteBtnText: { color: '#fff', fontSize: 10, fontWeight: '600' },
 });

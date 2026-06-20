@@ -175,6 +175,37 @@ export default function MyBoutiqueScreen() {
 
       {filteredProducts.length === 0 ? (
         <Text style={styles.emptyText}>{search ? 'Aucun produit ne correspond à votre recherche' : 'Aucun produit'}</Text>
+      ) : boutique.sections?.length > 0 ? (
+        <>
+          {[...(boutique.sections)].sort((a, b) => (a.ordre || 0) - (b.ordre || 0)).map(section => {
+            const sectionProds = filteredProducts
+              .filter(p => p.section === section.nom)
+              .sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+            if (sectionProds.length === 0) return null;
+            return (
+              <View key={section.nom} style={{ marginBottom: 16 }}>
+                <View style={styles.sectionBar}>
+                  <Text style={styles.sectionBarText}>{section.nom}</Text>
+                  <Text style={styles.sectionBarCount}>{sectionProds.length} produit(s)</Text>
+                </View>
+                {renderProductGrid(sectionProds)}
+              </View>
+            );
+          })}
+          {(() => {
+            const unassigned = filteredProducts.filter(p => !p.section);
+            if (unassigned.length === 0) return null;
+            return (
+              <View style={{ marginBottom: 16 }}>
+                <View style={[styles.sectionBar, { backgroundColor: '#6b7280' }]}>
+                  <Text style={styles.sectionBarText}>Sans section</Text>
+                  <Text style={styles.sectionBarCount}>{unassigned.length} produit(s)</Text>
+                </View>
+                {renderProductGrid(unassigned)}
+              </View>
+            );
+          })()}
+        </>
       ) : (
         <>
           {availableProducts.length > 0 && (
@@ -209,6 +240,9 @@ const styles = StyleSheet.create({
   certifiedText: { color: '#1e40af', fontSize: 11, fontWeight: '600' },
   sectionTitle: { fontSize: 14, fontWeight: '700', marginBottom: 10 },
   subTitle: { fontSize: 12, fontWeight: '600', marginBottom: 8 },
+  sectionBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', backgroundColor: colors.primary, borderRadius: 8, paddingVertical: 8, paddingHorizontal: 12, marginBottom: 10 },
+  sectionBarText: { fontSize: 13, fontWeight: '700', color: '#fff' },
+  sectionBarCount: { fontSize: 12, color: 'rgba(255,255,255,0.75)' },
   emptyText: { textAlign: 'center', color: colors.textLight, paddingVertical: 30 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 8 },
   gridItem: { width: '47%', position: 'relative' },

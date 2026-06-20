@@ -5,7 +5,7 @@ import { Search } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import ProductCard from '../../components/ProductCard';
-import { Button, Select, FormInput, EmptyState, FAB, SkeletonList } from '../../components/ui';
+import { Button, Select, FormInput, EmptyState, SkeletonList } from '../../components/ui';
 import { VILLES_OPTIONS } from '../../constants/villes';
 import { colors } from '../../theme/theme';
 
@@ -74,12 +74,10 @@ export default function ProductsListScreen() {
           <View>
             <View style={styles.headerRow}>
               <Text style={styles.pageTitle}>Occasion</Text>
-              <Button
-                title="Filtres"
-                variant="secondary"
-                size="sm"
-                onPress={() => setShowFilters(!showFilters)}
-              />
+              <View style={{ gap: 6 }}>
+                <Button title="+ Nouvelle publication" size="sm" onPress={() => (user ? navigation.navigate('AddProduct') : navigation.navigate('Compte', { screen: 'Login' }))} />
+                <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
+              </View>
             </View>
 
             {showFilters && (
@@ -100,7 +98,6 @@ export default function ProductsListScreen() {
         }
         renderItem={renderItem}
       />
-      <FAB onPress={() => (user ? navigation.navigate('AddProduct') : navigation.navigate('Compte', { screen: 'Login' }))} />
     </View>
   );
 }
