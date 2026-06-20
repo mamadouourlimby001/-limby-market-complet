@@ -5,7 +5,7 @@ import { colors, radius } from '../../theme/theme';
 
 // Équivalent mobile de <select class="form-control"> : ouvre une feuille modale
 // avec la liste des options (les pages web utilisent des <select> natifs).
-export default function Select({ label, value, onChange, options, placeholder = 'Sélectionner' }) {
+export default function Select({ label, value, onChange, options, placeholder = 'Sélectionner', small = false }) {
   const [open, setOpen] = useState(false);
   const selected = options.find((o) => o.value === value);
 
@@ -29,16 +29,16 @@ export default function Select({ label, value, onChange, options, placeholder = 
               style={{ maxHeight: 360 }}
               renderItem={({ item }) => (
                 <Pressable
-                  style={styles.option}
+                  style={[styles.option, small && styles.optionSmall]}
                   onPress={() => {
                     onChange(item.value);
                     setOpen(false);
                   }}
                 >
-                  <Text style={[styles.optionText, item.value === value && styles.optionTextActive]}>
+                  <Text style={[styles.optionText, small && styles.optionTextSmall, item.value === value && styles.optionTextActive]}>
                     {item.label}
                   </Text>
-                  {item.value === value ? <Check size={16} color={colors.primary} /> : null}
+                  {item.value === value ? <Check size={14} color={colors.primary} /> : null}
                 </Pressable>
               )}
             />
@@ -77,5 +77,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   optionText: { fontSize: 14, color: colors.text },
+  optionTextSmall: { fontSize: 12 },
+  optionSmall: { paddingVertical: 8 },
   optionTextActive: { color: colors.primary, fontWeight: '700' },
 });

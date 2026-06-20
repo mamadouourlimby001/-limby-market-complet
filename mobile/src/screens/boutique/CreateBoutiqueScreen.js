@@ -8,12 +8,31 @@ import { Button, FormInput, Select, AlertBanner, PhotoUpload, Loader } from '../
 import { colors } from '../../theme/theme';
 
 const CATEGORIE_OPTIONS = [
-  { label: 'Électronique', value: 'Électronique' },
-  { label: 'Mode', value: 'Mode' },
-  { label: 'Alimentation', value: 'Alimentation' },
-  { label: 'Beauté', value: 'Beauté' },
-  { label: 'Maison', value: 'Maison' },
-  { label: 'Services', value: 'Services' },
+  { label: 'Téléphonie',        value: 'Téléphonie' },
+  { label: 'Informatique',      value: 'Informatique' },
+  { label: 'Accessoires',       value: 'Accessoires' },
+  { label: 'Consoles et Jeux',  value: 'Consoles et Jeux' },
+  { label: 'Objets Connectés',  value: 'Objets Connectés' },
+  { label: 'Multimédias',       value: 'Multimédias' },
+  { label: 'Shampooing',        value: 'Shampooing' },
+  { label: 'Savon',             value: 'Savon' },
+  { label: 'Parfum',            value: 'Parfum' },
+  { label: 'Cosmétique',        value: 'Cosmétique' },
+  { label: 'Bien-Être',         value: 'Bien-Être' },
+  { label: 'Moto',              value: 'Moto' },
+  { label: 'Voiture',           value: 'Voiture' },
+  { label: 'Vêtements',         value: 'Vêtements' },
+  { label: 'Sacs',              value: 'Sacs' },
+  { label: 'Portefeuilles',     value: 'Portefeuilles' },
+  { label: 'Montres',           value: 'Montres' },
+  { label: 'Bijoux',            value: 'Bijoux' },
+  { label: 'Chaussures',        value: 'Chaussures' },
+  { label: 'Électroménager',    value: 'Électroménager' },
+  { label: 'Ameublement',       value: 'Ameublement' },
+  { label: 'Décorations',       value: 'Décorations' },
+  { label: 'Équipements',       value: 'Équipements' },
+  { label: 'Jouets',            value: 'Jouets' },
+  { label: 'Autre',             value: 'Autre' },
   { label: 'Saisissez la catégorie', value: 'custom' },
 ];
 
@@ -121,7 +140,7 @@ export default function CreateBoutiqueScreen() {
       <FormInput label="Description" value={form.description} onChangeText={(v) => setForm({ ...form, description: v })} multiline numberOfLines={4} />
 
       {!showCustomCategorie ? (
-        <Select label="Catégorie" value={form.categorie} onChange={handleCategorieChange} options={CATEGORIE_OPTIONS} />
+        <Select label="Catégorie" value={form.categorie} onChange={handleCategorieChange} options={CATEGORIE_OPTIONS} small />
       ) : (
         <FormInput label="Catégorie" placeholder="Saisissez votre catégorie" value={form.categorie} onChangeText={(v) => setForm({ ...form, categorie: v })} />
       )}
