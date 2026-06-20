@@ -10,7 +10,8 @@ import { colors } from '../../theme/theme';
 const CATEGORIE_OPTIONS = [
   { label: 'Location', value: 'Location' },
   { label: 'Colocation', value: 'Colocation' },
-  { label: 'Vente immobilière', value: 'Vente_immobilière' },
+  { label: 'Vente de maisons', value: 'Vente de maisons' },
+  { label: 'Vente de terrains', value: 'Vente de terrains' },
 ];
 
 // Portage exact de frontend/src/pages/AddLocation.jsx (description limitée à 4 chiffres max)
