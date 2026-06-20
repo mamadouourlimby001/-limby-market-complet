@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { View, Text, Image, Pressable, Linking, ScrollView, StyleSheet } from 'react-native';
+import { useState, useEffect, useRef } from 'react';
+import { View, Text, Image, Pressable, Linking, Animated, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MapPin, Check, Store } from 'lucide-react-native';
@@ -10,23 +10,25 @@ import WhatsAppIcon from '../../components/WhatsAppIcon';
 import { Badge, Button, Card, Loader, EmptyState } from '../../components/ui';
 import { colors } from '../../theme/theme';
 
+const EXPANDED_H = 210;
+const COLLAPSED_H = 86;
+const COLLAPSE_AT  = 70;
+
 export default function BoutiqueDetailScreen({ route }) {
   const { id } = route.params;
   const { user } = useAuth();
   const navigation = useNavigation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     (async () => {
       try {
         const res = await api.get(`/boutiques/${id}`);
         setData(res.data);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     })();
   }, [id]);
 
@@ -41,74 +43,97 @@ export default function BoutiqueDetailScreen({ route }) {
           const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`);
           const addressData = await response.json();
           const address = addressData.address || {};
-          visitData = {
-            pays: address.country || null,
-            region: address.state || address.province || null,
-            ville: address.city || address.town || address.village || null,
-          };
+          visitData = { pays: address.country || null, region: address.state || address.province || null, ville: address.city || address.town || address.village || null };
         }
         await api.post(`/boutiques/${id}/visit`, visitData);
-      } catch (error) {
-        console.log('Visite non enregistrée:', error);
-      }
+      } catch (error) { console.log('Visite non enregistrée:', error); }
     })();
   }, [data, user, id]);
 
+  const headerHeight   = scrollY.interpolate({ inputRange: [0, COLLAPSE_AT], outputRange: [EXPANDED_H, COLLAPSED_H], extrapolate: 'clamp' });
+  const expandedOpacity = scrollY.interpolate({ inputRange: [0, COLLAPSE_AT * 0.5], outputRange: [1, 0], extrapolate: 'clamp' });
+  const collapsedOpacity = scrollY.interpolate({ inputRange: [COLLAPSE_AT * 0.5, COLLAPSE_AT], outputRange: [0, 1], extrapolate: 'clamp' });
+
   if (loading) return <Loader fullScreen />;
-  if (!data) return <EmptyState text="Boutique introuvable" />;
+  if (!data)   return <EmptyState text="Boutique introuvable" />;
 
   const { boutique, products } = data;
   const isOwner = user && boutique.proprietaire?._id === user._id;
+  const waUrl = `https://wa.me/${(boutique.telephone || '').replace(/\D/g, '')}`;
+
+  const ActionBtn = ({ small }) => isOwner ? (
+    <Button
+      title="+ Ajouter un produit"
+      size="sm"
+      block
+      style={small ? { marginTop: 4 } : { marginHorizontal: 12, marginTop: 8 }}
+      onPress={() => navigation.navigate('MaBoutique', { screen: 'AddBoutiqueProduct', params: { id } })}
+    />
+  ) : (
+    <Pressable style={small ? styles.whatsappSmall : styles.whatsappLarge} onPress={() => Linking.openURL(waUrl)}>
+      <WhatsAppIcon size={small ? 14 : 17} />
+      <Text style={small ? styles.whatsappTextSmall : styles.whatsappTextLarge}>
+        {small ? 'WhatsApp' : 'Contacter par WhatsApp'}
+      </Text>
+    </Pressable>
+  );
 
   return (
     <View style={styles.flex}>
-      {/* Header fixe */}
-      <View style={styles.fixedHeader}>
-        <View style={styles.headerRow}>
-          {boutique.logo
-            ? <Image source={{ uri: boutique.logo }} style={styles.avatar} resizeMode="cover" />
-            : <View style={styles.avatarPlaceholder}><Store size={24} color={colors.textLight} /></View>
-          }
-          <View style={styles.headerInfo}>
+      {/* Header animé */}
+      <Animated.View style={[styles.fixedHeader, { height: headerHeight }]}>
+
+        {/* Vue étendue : centrée, grande */}
+        <Animated.View style={[styles.fill, { opacity: expandedOpacity }]}>
+          <View style={styles.avatarCenter}>
+            {boutique.logo
+              ? <Image source={{ uri: boutique.logo }} style={styles.avatarLarge} resizeMode="cover" />
+              : <View style={[styles.avatarLarge, styles.avatarPlaceholder]}><Store size={32} color={colors.textLight} /></View>
+            }
+          </View>
+          <View style={styles.infoCenter}>
             <View style={styles.nameRow}>
-              <Text style={styles.name} numberOfLines={1}>{boutique.nom}</Text>
-              {boutique.isVerified ? <Check size={14} color={colors.accent} /> : null}
-              {boutique.isCertified ? (
-                <View style={styles.certifiedBadge}>
-                  <Text style={styles.certifiedText}>Certifiée</Text>
-                </View>
-              ) : null}
+              <Text style={styles.nameLarge} numberOfLines={1}>{boutique.nom}</Text>
+              {boutique.isVerified ? <Check size={15} color={colors.accent} /> : null}
+              {boutique.isCertified ? <View style={styles.certBadge}><Text style={styles.certText}>Certifiée</Text></View> : null}
             </View>
-            <Text style={styles.description} numberOfLines={1}>{boutique.description}</Text>
+            <Text style={styles.descLarge} numberOfLines={1}>{boutique.description}</Text>
             <View style={styles.metaRow}>
-              <MapPin size={11} color={colors.textLight} />
-              <Text style={styles.meta} numberOfLines={1}>{boutique.quartier}, {boutique.ville} · {boutique.telephone}</Text>
+              <MapPin size={12} color={colors.textLight} />
+              <Text style={styles.metaLarge} numberOfLines={1}>{boutique.quartier}, {boutique.ville} · {boutique.telephone}</Text>
             </View>
             <Badge variant="primary">{boutique.categorie}</Badge>
           </View>
-        </View>
+          <ActionBtn small={false} />
+        </Animated.View>
 
-        {isOwner ? (
-          <Button
-            title="+ Ajouter un produit"
-            size="sm"
-            block
-            style={{ marginBottom: 6, marginHorizontal: 12 }}
-            onPress={() => navigation.navigate('MaBoutique', { screen: 'AddBoutiqueProduct', params: { id } })}
-          />
-        ) : (
-          <Pressable
-            style={styles.whatsappBtn}
-            onPress={() => Linking.openURL(`https://wa.me/${(boutique.telephone || '').replace(/\D/g, '')}`)}
-          >
-            <WhatsAppIcon size={16} />
-            <Text style={styles.whatsappText}>Contacter par WhatsApp</Text>
-          </Pressable>
-        )}
-      </View>
+        {/* Vue réduite : ligne, petite */}
+        <Animated.View style={[styles.fill, { opacity: collapsedOpacity }]}>
+          <View style={styles.collapsedRow}>
+            {boutique.logo
+              ? <Image source={{ uri: boutique.logo }} style={styles.avatarSmall} resizeMode="cover" />
+              : <View style={[styles.avatarSmall, styles.avatarPlaceholder]}><Store size={16} color={colors.textLight} /></View>
+            }
+            <View style={styles.collapsedInfo}>
+              <View style={styles.nameRow}>
+                <Text style={styles.nameSmall} numberOfLines={1}>{boutique.nom}</Text>
+                {boutique.isVerified ? <Check size={12} color={colors.accent} /> : null}
+                {boutique.isCertified ? <View style={styles.certBadge}><Text style={styles.certText}>Certifiée</Text></View> : null}
+              </View>
+              <Text style={styles.metaSmall} numberOfLines={1}>{boutique.quartier}, {boutique.ville}</Text>
+            </View>
+            <ActionBtn small={true} />
+          </View>
+        </Animated.View>
+
+      </Animated.View>
 
       {/* Contenu défilable */}
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+      <Animated.ScrollView
+        contentContainerStyle={styles.scrollContent}
+        scrollEventThrottle={16}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
+      >
         <Text style={styles.sectionTitle}>Produits ({products.length})</Text>
         {products.length === 0 ? (
           <EmptyState icon={<Store size={32} color={colors.textLight} />} text="Aucun produit" />
@@ -122,7 +147,7 @@ export default function BoutiqueDetailScreen({ route }) {
                 prods.forEach(p => inSection.add(p._id));
                 return { nom: s.nom, prods };
               }).filter(g => g.prods.length > 0);
-              const rest = products.filter(p => !inSection.has(p._id)).sort((a, b) => (a.ordre || 0) - (b.ordre || 0));
+              const rest = products.filter(p => !inSection.has(p._id));
               if (rest.length > 0) groups.push({ nom: null, prods: rest });
 
               const renderProd = (p) => (
@@ -169,28 +194,42 @@ export default function BoutiqueDetailScreen({ route }) {
         <View style={{ marginTop: 12 }}>
           <ReportButton typeContenu="boutique" contenuId={boutique._id} />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
-  fixedHeader: { backgroundColor: colors.bg, paddingTop: 6, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
-  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
-  avatar: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: colors.primary },
-  avatarPlaceholder: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: colors.border, backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
-  headerInfo: { flex: 1 },
+  fixedHeader: { backgroundColor: colors.bg, borderBottomWidth: 1, borderBottomColor: colors.border, overflow: 'hidden' },
+  fill: { position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 },
+
+  /* Expanded */
+  avatarCenter: { alignItems: 'center', paddingTop: 10, marginBottom: 6 },
+  avatarLarge: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: colors.primary },
+  infoCenter: { alignItems: 'center', paddingHorizontal: 12, marginBottom: 4 },
+  nameLarge: { fontSize: 16, fontWeight: '700' },
+  descLarge: { fontSize: 11, color: colors.textLight, marginVertical: 2 },
+  metaLarge: { fontSize: 10, color: colors.textLight, flex: 1 },
+  whatsappLarge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, padding: 7, marginHorizontal: 12, marginTop: 4, borderWidth: 1.5, borderColor: colors.border, borderRadius: 8 },
+  whatsappTextLarge: { fontSize: 13, fontWeight: '600', color: colors.primary },
+
+  /* Collapsed */
+  collapsedRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingTop: 10 },
+  avatarSmall: { width: 44, height: 44, borderRadius: 22, borderWidth: 2, borderColor: colors.primary },
+  avatarPlaceholder: { backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
+  collapsedInfo: { flex: 1 },
+  nameSmall: { fontSize: 13, fontWeight: '700' },
+  metaSmall: { fontSize: 10, color: colors.textLight, marginTop: 2 },
+  whatsappSmall: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 6, borderWidth: 1.5, borderColor: colors.border, borderRadius: 8 },
+  whatsappTextSmall: { fontSize: 11, fontWeight: '600', color: colors.primary },
+
+  /* Shared */
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
-  name: { fontSize: 14, fontWeight: '700' },
-  certifiedBadge: { backgroundColor: '#059669', paddingVertical: 1, paddingHorizontal: 5, borderRadius: 4 },
-  certifiedText: { color: '#fff', fontSize: 9, fontWeight: '600' },
-  description: { fontSize: 10, color: colors.textLight, marginVertical: 1 },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 3 },
-  meta: { fontSize: 10, color: colors.textLight, flex: 1 },
-  phone: { fontSize: 10, color: colors.primary, fontWeight: '600' },
-  whatsappBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 6, marginBottom: 6, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border, borderRadius: 8 },
-  whatsappText: { fontSize: 12, fontWeight: '600', color: colors.primary },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
+  certBadge: { backgroundColor: '#059669', paddingVertical: 1, paddingHorizontal: 5, borderRadius: 4 },
+  certText: { color: '#fff', fontSize: 9, fontWeight: '600' },
+
   scrollContent: { padding: 12, paddingBottom: 80 },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
   sectionContainer: { backgroundColor: '#fff', borderRadius: 12, marginBottom: 16, borderWidth: 1.5, borderColor: colors.primary, overflow: 'hidden' },
