@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool, ShoppingBag, RotateCcw, Lock, Eye } from 'lucide-react-native';
+import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool, ShoppingBag, RotateCcw, Lock, Eye, Trash2 } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -20,6 +20,7 @@ export default function AdminDashboardScreen() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
+  const [notifications, setNotifications] = useState([]);
 
   const isSuperAdmin =
     (user?.telephone === '+224629043181' && user?.nom?.toLowerCase() === 'diallo mamadou oury') ||
@@ -28,16 +29,25 @@ export default function AdminDashboardScreen() {
   useEffect(() => {
     (async () => {
       try {
-        const [statsRes, messagesRes] = await Promise.all([
+        const [statsRes, messagesRes, notifRes] = await Promise.all([
           api.get('/admin/dashboard-stats'),
           api.get('/messages/admin/messages').catch(() => ({ data: { unreadCount: 0 } })),
+          api.get('/notifications').catch(() => ({ data: [] })),
         ]);
         setStats(statsRes.data);
         setUnreadMessagesCount(messagesRes.data.unreadCount || 0);
+        setNotifications(notifRes.data || []);
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     })();
   }, []);
+
+  const handleDeleteNotification = async (id) => {
+    try {
+      await api.delete(`/notifications/${id}`);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+    } catch (err) { console.error(err); }
+  };
 
   if (loading) return <Loader fullScreen />;
 
@@ -126,6 +136,25 @@ export default function AdminDashboardScreen() {
           ))}
         </>
       )}
+
+      {notifications.length > 0 && (
+        <>
+          <Text style={styles.sectionTitle}>Notifications</Text>
+          {notifications.map((n) => (
+            <Card key={n._id} style={[styles.notifCard, { opacity: n.lu ? 0.6 : 1, borderLeftWidth: n.lu ? 0 : 3, borderLeftColor: colors.primary }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.notifText}>{n.message}</Text>
+                  <Text style={styles.notifDate}>{new Date(n.createdAt).toLocaleDateString('fr-FR')}</Text>
+                </View>
+                <Pressable onPress={() => handleDeleteNotification(n._id)} style={styles.notifDeleteBtn}>
+                  <Trash2 size={14} color="#ef4444" />
+                </Pressable>
+              </View>
+            </Card>
+          ))}
+        </>
+      )}
     </Screen>
   );
 }
@@ -149,4 +178,8 @@ const styles = StyleSheet.create({
   transactionAmount: { fontSize: 13, fontWeight: '700', color: colors.primary },
   statusBadge: { paddingHorizontal: 6, paddingVertical: 2, borderRadius: 3, marginTop: 4 },
   statusText: { color: '#fff', fontSize: 10, fontWeight: '600' },
+  notifCard: { padding: 10, marginBottom: 6 },
+  notifText: { fontSize: 13 },
+  notifDate: { fontSize: 10, color: '#9ca3af', marginTop: 2 },
+  notifDeleteBtn: { padding: 4 },
 });
