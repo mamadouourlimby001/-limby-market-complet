@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -17,6 +17,11 @@ export default function AddAnnouncementScreen() {
 
   const handleSubmit = async () => {
     setError('');
+    if (!form.titre.trim()) { setError('Le titre est requis.'); return; }
+    if (!form.villeDeTravail) { setError('La ville de travail est requise.'); return; }
+    if (!form.salaireMensuel || isNaN(Number(form.salaireMensuel)) || Number(form.salaireMensuel) <= 0) { setError('Un salaire valide est requis.'); return; }
+    if (!form.entreprise.trim()) { setError("Le nom de l'entreprise est requis."); return; }
+    if (!form.contact.trim()) { setError('Le contact est requis.'); return; }
     setLoading(true);
     try {
       await api.post('/announcements', { ...form, salaireMensuel: Number(form.salaireMensuel), photos });
@@ -35,14 +40,8 @@ export default function AddAnnouncementScreen() {
       <AlertBanner variant="info">⚠️ Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
 
       <FormInput label="Titre" value={form.titre} onChangeText={(v) => setForm({ ...form, titre: v })} />
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <View style={{ flex: 1 }}>
-          <Select label="Ville de travail" value={form.villeDeTravail} onChange={(v) => setForm({ ...form, villeDeTravail: v })} options={VILLES_OPTIONS} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <FormInput label="Quartier" value={form.quartier} onChangeText={(v) => setForm({ ...form, quartier: v })} />
-        </View>
-      </View>
+      <Select label="Ville de travail" value={form.villeDeTravail} onChange={(v) => setForm({ ...form, villeDeTravail: v })} options={VILLES_OPTIONS} />
+      <FormInput label="Quartier" value={form.quartier} onChangeText={(v) => setForm({ ...form, quartier: v })} />
       <FormInput label="Salaire mensuel (GNF)" keyboardType="numeric" value={form.salaireMensuel} onChangeText={(v) => setForm({ ...form, salaireMensuel: v })} />
       <DateInput label="Date limite" value={form.dateLimite} onChange={(v) => setForm({ ...form, dateLimite: v })} />
       <FormInput label="Entreprise" value={form.entreprise} onChangeText={(v) => setForm({ ...form, entreprise: v })} />

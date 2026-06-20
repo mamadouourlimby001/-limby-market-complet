@@ -1,9 +1,9 @@
 import { useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
-import { Button, FormInput } from '../../components/ui';
+import { Button, FormInput, AlertBanner } from '../../components/ui';
 import { colors } from '../../theme/theme';
 
 // Portage exact de frontend/src/pages/SendMessageToAdmins.jsx
@@ -47,11 +47,7 @@ export default function SendMessageToAdminsScreen() {
       />
       <Text style={styles.counter}>{contenu.length}/500 caractères</Text>
 
-      {message ? (
-        <View style={[styles.banner, { backgroundColor: isSuccess ? '#d4edda' : '#f8d7da' }]}>
-          <Text style={{ color: isSuccess ? '#155724' : '#721c24', fontSize: 13 }}>{message}</Text>
-        </View>
-      ) : null}
+      {message ? <AlertBanner variant={isSuccess ? 'success' : 'danger'}>{message}</AlertBanner> : null}
 
       <Button
         title={loading ? 'Envoi en cours...' : 'Envoyer'}
@@ -68,6 +64,5 @@ export default function SendMessageToAdminsScreen() {
 
 const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '700', color: colors.primary, marginBottom: 14 },
-  counter: { fontSize: 12, color: '#666', marginBottom: 12 },
-  banner: { padding: 12, borderRadius: 6, marginBottom: 12 },
+  counter: { fontSize: 12, color: colors.textLight, marginBottom: 12 },
 });

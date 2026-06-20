@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
@@ -20,6 +20,10 @@ export default function RegisterScreen() {
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigation = useNavigation();
+  const telephoneRef = useRef(null);
+  const mdpRef = useRef(null);
+  const confirmRef = useRef(null);
+  const answerRef = useRef(null);
 
   const handleInfoSubmit = () => {
     setError('');
@@ -63,10 +67,44 @@ export default function RegisterScreen() {
 
       {step === 'info' && (
         <View>
-          <FormInput label="Nom complet" placeholder="Ex: Diallo Mamadou" value={nom} onChangeText={setNom} />
-          <FormInput label="Numéro de téléphone" placeholder="+224..." keyboardType="phone-pad" value={telephone} onChangeText={setTelephone} />
-          <FormInput label="Mot de passe" placeholder="Min. 6 caractères" secureTextEntry value={motDePasse} onChangeText={setMotDePasse} />
-          <FormInput label="Confirmer le mot de passe" placeholder="Confirmez..." secureTextEntry value={confirmMdp} onChangeText={setConfirmMdp} />
+          <FormInput
+            label="Nom complet"
+            placeholder="Ex: Diallo Mamadou"
+            value={nom}
+            onChangeText={setNom}
+            returnKeyType="next"
+            onSubmitEditing={() => telephoneRef.current?.focus()}
+          />
+          <FormInput
+            ref={telephoneRef}
+            label="Numéro de téléphone"
+            placeholder="+224..."
+            keyboardType="phone-pad"
+            value={telephone}
+            onChangeText={setTelephone}
+            returnKeyType="next"
+            onSubmitEditing={() => mdpRef.current?.focus()}
+          />
+          <FormInput
+            ref={mdpRef}
+            label="Mot de passe"
+            placeholder="Min. 6 caractères"
+            secureTextEntry
+            value={motDePasse}
+            onChangeText={setMotDePasse}
+            returnKeyType="next"
+            onSubmitEditing={() => confirmRef.current?.focus()}
+          />
+          <FormInput
+            ref={confirmRef}
+            label="Confirmer le mot de passe"
+            placeholder="Confirmez..."
+            secureTextEntry
+            value={confirmMdp}
+            onChangeText={setConfirmMdp}
+            returnKeyType="done"
+            onSubmitEditing={handleInfoSubmit}
+          />
           <Button title="Continuer" block onPress={handleInfoSubmit} style={{ marginTop: 8 }} />
         </View>
       )}
@@ -79,8 +117,18 @@ export default function RegisterScreen() {
             placeholder="Ex: Quel est le nom de votre animal de compagnie ?"
             value={question}
             onChangeText={setQuestion}
+            returnKeyType="next"
+            onSubmitEditing={() => answerRef.current?.focus()}
           />
-          <FormInput label="Réponse" placeholder="Votre réponse" value={answer} onChangeText={setAnswer} />
+          <FormInput
+            ref={answerRef}
+            label="Réponse"
+            placeholder="Votre réponse"
+            value={answer}
+            onChangeText={setAnswer}
+            returnKeyType="done"
+            onSubmitEditing={handleSecuritySubmit}
+          />
           <Button
             title={loading ? 'Inscription...' : "S'inscrire"}
             block

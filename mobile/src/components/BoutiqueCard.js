@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { Check, MapPin, Store } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -6,7 +7,7 @@ import Card from './ui/Card';
 import Badge from './ui/Badge';
 import { colors } from '../theme/theme';
 
-export default function BoutiqueCard({ boutique }) {
+export default memo(function BoutiqueCard({ boutique }) {
   const navigation = useNavigation();
 
   return (
@@ -36,7 +37,7 @@ export default function BoutiqueCard({ boutique }) {
       <ReportButton typeContenu="boutique" contenuId={boutique._id} />
     </Card>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: { flex: 1, overflow: 'hidden' },

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -28,6 +28,11 @@ export default function AddLocationScreen() {
 
   const handleSubmit = async () => {
     setError('');
+    if (!form.titre.trim()) { setError('Le titre est requis.'); return; }
+    if (!form.categorie) { setError('La catégorie est requise.'); return; }
+    if (!form.ville) { setError('La ville est requise.'); return; }
+    if (!form.prix || isNaN(Number(form.prix)) || Number(form.prix) <= 0) { setError('Un prix valide est requis.'); return; }
+    if (!form.contact.trim()) { setError('Le contact est requis.'); return; }
     setLoading(true);
     try {
       await api.post('/locations', { ...form, prix: Number(form.prix), photos });
@@ -43,17 +48,12 @@ export default function AddLocationScreen() {
     <Screen>
       <Text style={styles.title}>Publier une location</Text>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
+      <AlertBanner variant="info">⚠️ Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
 
       <FormInput label="Titre" value={form.titre} onChangeText={(v) => setForm({ ...form, titre: v })} />
       <Select label="Catégorie" value={form.categorie} onChange={(v) => setForm({ ...form, categorie: v })} options={CATEGORIE_OPTIONS} />
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <View style={{ flex: 1 }}>
-          <Select label="Ville" value={form.ville} onChange={(v) => setForm({ ...form, ville: v })} options={VILLES_OPTIONS} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <FormInput label="Quartier" value={form.quartier} onChangeText={(v) => setForm({ ...form, quartier: v })} />
-        </View>
-      </View>
+      <Select label="Ville" value={form.ville} onChange={(v) => setForm({ ...form, ville: v })} options={VILLES_OPTIONS} />
+      <FormInput label="Quartier" value={form.quartier} onChangeText={(v) => setForm({ ...form, quartier: v })} />
       <FormInput
         label="Description (max 4 chiffres)"
         placeholder="Décrivez la maison..."

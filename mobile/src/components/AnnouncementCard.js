@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { View, Text, Image, Pressable, Alert, StyleSheet } from 'react-native';
 import { MapPin, Building2, Clock, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -9,7 +9,7 @@ import ReportButton from './ReportButton';
 import Card from './ui/Card';
 import { colors } from '../theme/theme';
 
-export default function AnnouncementCard({ announcement, onRefresh }) {
+export default memo(function AnnouncementCard({ announcement, onRefresh }) {
   const navigation = useNavigation();
   const { user } = useAuth();
   const [visible, setVisible] = useState(true);
@@ -68,7 +68,7 @@ export default function AnnouncementCard({ announcement, onRefresh }) {
       </View>
     </Card>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: { flex: 1, overflow: 'hidden' },

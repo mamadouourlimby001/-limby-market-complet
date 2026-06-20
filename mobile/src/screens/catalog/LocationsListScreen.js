@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, FlatList, RefreshControl, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import LocationCard from '../../components/LocationCard';
-import { Button, Select, FormInput, Loader, EmptyState, FAB } from '../../components/ui';
+import { Button, Select, FormInput, EmptyState, FAB, SkeletonList } from '../../components/ui';
 import { VILLES_OPTIONS } from '../../constants/villes';
 import { colors } from '../../theme/theme';
 
@@ -21,11 +21,13 @@ export default function LocationsListScreen() {
   const navigation = useNavigation();
   const [locations, setLocations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState({ ville: '', categorie: '', prixMin: '', prixMax: '' });
   const [showFilters, setShowFilters] = useState(false);
 
-  const fetchLocations = async () => {
-    setLoading(true);
+  const fetchLocations = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
     try {
       const params = {};
       if (filters.ville) params.ville = filters.ville;
@@ -38,10 +40,17 @@ export default function LocationsListScreen() {
       console.error(err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => { fetchLocations(); }, []);
+
+  const renderItem = useCallback(({ item }) => (
+    <View style={{ flex: 1 }}>
+      <LocationCard location={item} />
+    </View>
+  ), []);
 
   return (
     <View style={styles.flex}>
@@ -51,6 +60,14 @@ export default function LocationsListScreen() {
         numColumns={2}
         columnWrapperStyle={{ gap: 10 }}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => fetchLocations(true)}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
         ListHeaderComponent={
           <View>
             <View style={styles.headerRow}>
@@ -70,15 +87,11 @@ export default function LocationsListScreen() {
               </View>
             )}
 
-            {loading && <Loader />}
+            {loading && <SkeletonList count={6} />}
             {!loading && locations.length === 0 && <EmptyState text="Aucune location trouvée" />}
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={{ flex: 1 }}>
-            <LocationCard location={item} />
-          </View>
-        )}
+        renderItem={renderItem}
       />
       <FAB onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
     </View>

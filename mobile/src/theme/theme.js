@@ -13,6 +13,9 @@ export const colors = {
   warning: '#f59e0b',
   border: '#e5e7eb',
   white: '#FFFFFF',
+  textMid: '#4b5563',
+  textMuted: '#9ca3af',
+  textDark: '#1f2937',
 };
 
 export const radius = 10;

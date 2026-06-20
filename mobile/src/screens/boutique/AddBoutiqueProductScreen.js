@@ -38,6 +38,9 @@ export default function AddBoutiqueProductScreen({ route }) {
 
   const handleSubmit = async () => {
     setError('');
+    if (!form.titre.trim()) { setError('Le titre est requis.'); return; }
+    if (!form.categorie) { setError('La catégorie est requise.'); return; }
+    if (!form.prix || isNaN(Number(form.prix)) || Number(form.prix) <= 0) { setError('Un prix valide est requis.'); return; }
     setLoading(true);
     try {
       await api.post(`/boutiques/${id}/products`, {

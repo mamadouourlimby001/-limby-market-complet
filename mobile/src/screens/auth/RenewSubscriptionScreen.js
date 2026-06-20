@@ -60,7 +60,12 @@ export default function RenewSubscriptionScreen() {
       </AlertBanner>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
 
-      <FormInput label="Nom de la boutique" value={form.nomBoutique} onChangeText={(v) => setForm({ ...form, nomBoutique: v })} />
+      <FormInput
+        label="Nom de la boutique"
+        value={form.nomBoutique}
+        editable={false}
+        style={{ opacity: 0.6 }}
+      />
       <FormInput label="Numéro avec lequel le dépôt a été fait" keyboardType="phone-pad" value={form.telephoneDepot} onChangeText={(v) => setForm({ ...form, telephoneDepot: v })} />
       <FormInput label="Montant (GNF)" keyboardType="numeric" value={form.montant} onChangeText={(v) => setForm({ ...form, montant: v })} />
       <Button title={loading ? 'Envoi...' : 'Soumettre la demande'} block loading={loading} onPress={handleSubmit} />

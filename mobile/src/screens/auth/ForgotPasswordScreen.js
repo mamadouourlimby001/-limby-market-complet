@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../services/api';
@@ -61,7 +61,15 @@ export default function ForgotPasswordScreen() {
 
       {step === 'phone' && (
         <View>
-          <FormInput label="Numéro de téléphone" placeholder="+224..." keyboardType="phone-pad" value={telephone} onChangeText={setTelephone} />
+          <FormInput
+            label="Numéro de téléphone"
+            placeholder="+224..."
+            keyboardType="phone-pad"
+            value={telephone}
+            onChangeText={setTelephone}
+            returnKeyType="done"
+            onSubmitEditing={handleGetQuestions}
+          />
           <Button title={loading ? 'Chargement...' : 'Continuer'} block loading={loading} onPress={handleGetQuestions} />
         </View>
       )}

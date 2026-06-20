@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, Text, FlatList, RefreshControl, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Store } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import BoutiqueCard from '../../components/BoutiqueCard';
-import { Button, Select, FormInput, Loader, EmptyState, Badge } from '../../components/ui';
+import { Button, Select, FormInput, EmptyState, Badge, SkeletonList } from '../../components/ui';
 import { colors } from '../../theme/theme';
 
 // Portage exact de frontend/src/pages/BoutiquesList.jsx
@@ -15,41 +15,51 @@ export default function BoutiquesListScreen() {
   const [boutiques, setBoutiques] = useState([]);
   const [userBoutique, setUserBoutique] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategorie, setFilterCategorie] = useState('');
   const [filterVille, setFilterVille] = useState('');
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.get('/boutiques');
-        setBoutiques(res.data);
-        if (user) {
-          try {
-            const userRes = await api.get('/boutiques/my-boutique');
-            if (userRes.data) setUserBoutique(userRes.data.boutique || userRes.data);
-          } catch (err) {
-            // pas de boutique
-          }
+  const fetchData = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    try {
+      const res = await api.get('/boutiques');
+      setBoutiques(res.data);
+      if (user) {
+        try {
+          const userRes = await api.get('/boutiques/my-boutique');
+          if (userRes.data) setUserBoutique(userRes.data.boutique || userRes.data);
+        } catch (err) {
+          // pas de boutique
         }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
       }
-    })();
-  }, [user]);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => { fetchData(); }, [user]);
+
+  const renderItem = useCallback(({ item }) => (
+    <View style={{ flex: 1 }}>
+      <BoutiqueCard boutique={item} />
+    </View>
+  ), []);
 
   const categories = [...new Set(boutiques.map((b) => b.categorie))].filter(Boolean);
   const villes = [...new Set(boutiques.map((b) => b.ville))].filter(Boolean);
 
-  const filteredBoutiques = boutiques.filter((b) => {
+  const filteredBoutiques = useMemo(() => boutiques.filter((b) => {
     const matchSearch = b.nom.toLowerCase().includes(searchTerm.toLowerCase());
     const matchCategorie = !filterCategorie || b.categorie === filterCategorie;
     const matchVille = !filterVille || b.ville === filterVille;
     const notUserBoutique = !userBoutique || b._id !== userBoutique._id;
     return matchSearch && matchCategorie && matchVille && notUserBoutique;
-  });
+  }), [boutiques, searchTerm, filterCategorie, filterVille, userBoutique]);
 
   return (
     <FlatList
@@ -59,6 +69,14 @@ export default function BoutiquesListScreen() {
       columnWrapperStyle={{ gap: 10 }}
       contentContainerStyle={styles.list}
       style={{ backgroundColor: colors.bg }}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={() => fetchData(true)}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
+      }
       ListHeaderComponent={
         <View>
           <Text style={styles.pageTitle}>Boutiques</Text>
@@ -82,7 +100,7 @@ export default function BoutiquesListScreen() {
             </View>
           </View>
 
-          {loading && <Loader />}
+          {loading && <SkeletonList count={6} />}
 
           {!loading && userBoutique && (
             <View style={{ marginBottom: 24 }}>
@@ -108,11 +126,7 @@ export default function BoutiquesListScreen() {
           )}
         </View>
       }
-      renderItem={({ item }) => (
-        <View style={{ flex: 1 }}>
-          <BoutiqueCard boutique={item} />
-        </View>
-      )}
+      renderItem={renderItem}
     />
   );
 }

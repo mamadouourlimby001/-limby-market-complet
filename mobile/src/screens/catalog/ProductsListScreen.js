@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import { View, Text, FlatList, RefreshControl, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Search } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import ProductCard from '../../components/ProductCard';
-import { Button, Select, FormInput, Loader, EmptyState, FAB } from '../../components/ui';
+import { Button, Select, FormInput, EmptyState, FAB, SkeletonList } from '../../components/ui';
 import { VILLES_OPTIONS } from '../../constants/villes';
 import { colors } from '../../theme/theme';
 
@@ -18,11 +18,13 @@ export default function ProductsListScreen() {
   const navigation = useNavigation();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState({ ville: '', categorie: '', prixMin: '', prixMax: '' });
   const [showFilters, setShowFilters] = useState(false);
 
-  const fetchProducts = async () => {
-    setLoading(true);
+  const fetchProducts = async (isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
     try {
       const params = {};
       if (filters.ville) params.ville = filters.ville;
@@ -35,6 +37,7 @@ export default function ProductsListScreen() {
       console.error(err);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -45,6 +48,12 @@ export default function ProductsListScreen() {
     setShowFilters(false);
   };
 
+  const renderItem = useCallback(({ item }) => (
+    <View style={{ flex: 1 }}>
+      <ProductCard product={item} />
+    </View>
+  ), []);
+
   return (
     <View style={styles.flex}>
       <FlatList
@@ -53,6 +62,14 @@ export default function ProductsListScreen() {
         numColumns={2}
         columnWrapperStyle={{ gap: 10 }}
         contentContainerStyle={styles.list}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={() => fetchProducts(true)}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
         ListHeaderComponent={
           <View>
             <View style={styles.headerRow}>
@@ -77,15 +94,11 @@ export default function ProductsListScreen() {
               </View>
             )}
 
-            {loading && <Loader />}
+            {loading && <SkeletonList count={6} />}
             {!loading && products.length === 0 && <EmptyState text="Aucun produit trouvé" />}
           </View>
         }
-        renderItem={({ item }) => (
-          <View style={{ flex: 1 }}>
-            <ProductCard product={item} />
-          </View>
-        )}
+        renderItem={renderItem}
       />
       <FAB onPress={() => (user ? navigation.navigate('AddProduct') : navigation.navigate('Compte', { screen: 'Login' }))} />
     </View>

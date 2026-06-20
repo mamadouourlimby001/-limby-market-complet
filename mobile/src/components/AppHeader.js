@@ -27,13 +27,18 @@ export default function AppHeader() {
           <>
             <Pressable
               style={styles.creditBadge}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
               onPress={() => navigation.navigate('Tabs', { screen: 'Compte', params: { screen: 'UserDashboard' } })}
             >
               <CreditCard size={14} color={colors.primary} />
               <Text style={styles.creditText}>{user.credits}</Text>
             </Pressable>
             {isAdmin && (
-              <Pressable style={styles.adminBtn} onPress={() => navigation.navigate('Admin')}>
+              <Pressable
+                style={styles.adminBtn}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                onPress={() => navigation.navigate('Admin')}
+              >
                 <Text style={styles.adminText}>Admin</Text>
               </Pressable>
             )}

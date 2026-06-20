@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { View, Text, Image, Pressable, Alert, StyleSheet } from 'react-native';
 import { MapPin, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +12,7 @@ import { colors } from '../theme/theme';
 
 const etatLabels = { neuf: 'Neuf', occasion: 'Occasion', bon_etat: 'Bon état', use: 'Usagé' };
 
-export default function ProductCard({ product, onRefresh }) {
+export default memo(function ProductCard({ product, onRefresh }) {
   const navigation = useNavigation();
   const { user } = useAuth();
   const [visible, setVisible] = useState(true);
@@ -66,7 +66,7 @@ export default function ProductCard({ product, onRefresh }) {
       </View>
     </Card>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: { flex: 1, overflow: 'hidden' },

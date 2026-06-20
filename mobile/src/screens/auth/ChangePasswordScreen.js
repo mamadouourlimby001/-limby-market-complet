@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { View, Text, Alert, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import api from '../../services/api';
@@ -14,6 +14,8 @@ export default function ChangePasswordScreen() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const newRef = useRef(null);
+  const confirmRef = useRef(null);
 
   const handleSubmit = async () => {
     setError('');
@@ -69,9 +71,35 @@ export default function ChangePasswordScreen() {
         </View>
       ) : null}
 
-      <FormInput label="Ancien mot de passe" placeholder="Votre mot de passe actuel" secureTextEntry value={oldPassword} onChangeText={setOldPassword} />
-      <FormInput label="Nouveau mot de passe" placeholder="Min. 6 caractères" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
-      <FormInput label="Confirmer le nouveau mot de passe" placeholder="Confirmez..." secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+      <FormInput
+        label="Ancien mot de passe"
+        placeholder="Votre mot de passe actuel"
+        secureTextEntry
+        value={oldPassword}
+        onChangeText={setOldPassword}
+        returnKeyType="next"
+        onSubmitEditing={() => newRef.current?.focus()}
+      />
+      <FormInput
+        ref={newRef}
+        label="Nouveau mot de passe"
+        placeholder="Min. 6 caractères"
+        secureTextEntry
+        value={newPassword}
+        onChangeText={setNewPassword}
+        returnKeyType="next"
+        onSubmitEditing={() => confirmRef.current?.focus()}
+      />
+      <FormInput
+        ref={confirmRef}
+        label="Confirmer le nouveau mot de passe"
+        placeholder="Confirmez..."
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+        returnKeyType="done"
+        onSubmitEditing={handleSubmit}
+      />
       <Button title={loading ? 'Modification...' : 'Modifier le mot de passe'} block loading={loading} onPress={handleSubmit} />
     </Screen>
   );

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { View, Text, Image, Pressable, Alert, StyleSheet } from 'react-native';
 import { MapPin, Trash2 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -12,7 +12,7 @@ import { colors } from '../theme/theme';
 
 const catLabels = { Location: 'Location', Colocation: 'Colocation', Vente_immobilière: 'Vente' };
 
-export default function LocationCard({ location, onRefresh }) {
+export default memo(function LocationCard({ location, onRefresh }) {
   const navigation = useNavigation();
   const { user } = useAuth();
   const [visible, setVisible] = useState(true);
@@ -66,7 +66,7 @@ export default function LocationCard({ location, onRefresh }) {
       </View>
     </Card>
   );
-}
+});
 
 const styles = StyleSheet.create({
   card: { flex: 1, overflow: 'hidden' },

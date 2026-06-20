@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
@@ -15,6 +15,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigation = useNavigation();
+  const mdpRef = useRef(null);
 
   const handleSubmit = async () => {
     setError('');
@@ -45,13 +46,18 @@ export default function LoginScreen() {
         keyboardType="phone-pad"
         value={telephone}
         onChangeText={setTelephone}
+        returnKeyType="next"
+        onSubmitEditing={() => mdpRef.current?.focus()}
       />
       <FormInput
+        ref={mdpRef}
         label="Mot de passe"
         placeholder="Votre mot de passe"
         secureTextEntry
         value={motDePasse}
         onChangeText={setMotDePasse}
+        returnKeyType="done"
+        onSubmitEditing={handleSubmit}
       />
       <Button
         title={loading ? 'Connexion...' : 'Se connecter'}

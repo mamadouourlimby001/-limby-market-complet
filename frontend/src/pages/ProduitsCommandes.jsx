@@ -9,7 +9,6 @@ const ProduitsCommandes = () => {
   const [expandedId, setExpandedId] = useState(null);
   const [statusUpdating, setStatusUpdating] = useState({});
   const [noteText, setNoteText] = useState({});
-  const [isDeletingId, setIsDeletingId] = useState(null);
 
   useEffect(() => {
     fetchOrders();
@@ -42,7 +41,7 @@ const ProduitsCommandes = () => {
         noteVendeur
       });
       setNoteText(prev => ({ ...prev, [orderId]: '' }));
-      await fetchOrders();
+      fetchOrders();
       alert('Statut mis à jour');
     } catch (err) {
       alert(err.response?.data?.message || 'Erreur');
@@ -54,16 +53,15 @@ const ProduitsCommandes = () => {
   const handleDelete = async (orderId) => {
     if (!window.confirm('Supprimer définitivement cette commande ?')) return;
 
-    setIsDeletingId(orderId);
     try {
-      await api.delete(`/orders/${orderId}/delete-permanently`);
-      await fetchOrders();
+      const response = await api.delete(`/orders/${orderId}/delete-permanently`);
+      console.log('Order deleted:', response.data);
       setExpandedId(null);
+      fetchOrders();
       alert('Commande supprimée avec succès');
     } catch (err) {
-      alert(err.response?.data?.message || 'Erreur lors de la suppression');
-    } finally {
-      setIsDeletingId(null);
+      console.error('Delete error:', err.response?.data || err.message);
+      alert(err.response?.data?.message || `Erreur: ${err.message}`);
     }
   };
 
@@ -279,7 +277,6 @@ const ProduitsCommandes = () => {
                   {/* Bouton Supprimer */}
                   <button
                     onClick={() => handleDelete(order._id)}
-                    disabled={isDeletingId === order._id}
                     style={{
                       width: '100%',
                       padding: 8,
@@ -289,12 +286,11 @@ const ProduitsCommandes = () => {
                       borderRadius: 4,
                       fontWeight: 600,
                       fontSize: 12,
-                      cursor: isDeletingId === order._id ? 'not-allowed' : 'pointer',
-                      opacity: isDeletingId === order._id ? 0.6 : 1,
+                      cursor: 'pointer',
                       marginTop: 8
                     }}
                   >
-                    {isDeletingId === order._id ? 'Suppression en cours...' : 'Supprimer cette commande'}
+                    Supprimer cette commande
                   </button>
                 </div>
               )}
