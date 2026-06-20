@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { View, Text, FlatList, ScrollView, Pressable, RefreshControl, StyleSheet } from 'react-native';
+import { View, Text, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
@@ -77,7 +77,7 @@ export default function LocationsListScreen() {
             </View>
 
             {/* Onglets catégorie */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.tabsRow}>
+            <View style={styles.tabsRow}>
               {TABS.map(({ key, label }) => {
                 const active = selectedCategorie === key;
                 return (
@@ -86,11 +86,11 @@ export default function LocationsListScreen() {
                     onPress={() => setSelectedCategorie(key)}
                     style={[styles.tab, active && styles.tabActive]}
                   >
-                    <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
+                    <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={2}>{label}</Text>
                   </Pressable>
                 );
               })}
-            </ScrollView>
+            </View>
 
             {showFilters && (
               <View style={styles.filterCard}>
@@ -120,18 +120,21 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   pageTitle: { fontSize: 18, fontWeight: '700', color: colors.primary },
   filterCard: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 12 },
-  tabsRow: { flexDirection: 'row', gap: 8, paddingBottom: 12 },
+  tabsRow: { flexDirection: 'row', gap: 6, paddingBottom: 12 },
   tab: {
+    flex: 1,
     paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    paddingHorizontal: 4,
+    borderRadius: 10,
     borderWidth: 2,
     borderColor: colors.primary,
     backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabActive: {
     backgroundColor: colors.primary,
   },
-  tabText: { fontSize: 13, fontWeight: '700', color: colors.primary },
+  tabText: { fontSize: 11, fontWeight: '700', color: colors.primary, textAlign: 'center' },
   tabTextActive: { color: '#fff' },
 });
