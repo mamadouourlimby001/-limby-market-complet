@@ -74,11 +74,9 @@ export default function ProductsListScreen() {
           <View>
             <View style={styles.headerRow}>
               <Text style={styles.pageTitle}>Occasion</Text>
-              <View style={{ gap: 6 }}>
-                <Button title="+ Nouvelle publication" size="sm" onPress={() => (user ? navigation.navigate('AddProduct') : navigation.navigate('Compte', { screen: 'Login' }))} />
-                <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
-              </View>
+              <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
             </View>
+            <Button title="+ Nouvelle publication" block style={{ marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddProduct') : navigation.navigate('Compte', { screen: 'Login' }))} />
 
             {showFilters && (
               <View style={styles.filterCard}>

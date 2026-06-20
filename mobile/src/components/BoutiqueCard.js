@@ -46,8 +46,8 @@ const styles = StyleSheet.create({
   body: { padding: 8 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
   name: { fontSize: 13, fontWeight: '600', color: colors.text, flexShrink: 1 },
-  certified: { alignSelf: 'flex-start', backgroundColor: '#dbeafe', paddingVertical: 2, paddingHorizontal: 6, borderRadius: 4, marginBottom: 4 },
-  certifiedText: { fontSize: 10, fontWeight: '600', color: '#1e40af' },
+  certified: { alignSelf: 'flex-start', backgroundColor: '#d1fae5', paddingVertical: 2, paddingHorizontal: 6, borderRadius: 4, marginBottom: 4 },
+  certifiedText: { fontSize: 10, fontWeight: '600', color: '#059669' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 4 },
   meta: { fontSize: 11, color: colors.textLight, flexShrink: 1 },
 });

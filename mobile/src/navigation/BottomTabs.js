@@ -62,9 +62,9 @@ export default function BottomTabs() {
         options={{ tabBarIcon: ({ color, size }) => <FileText color={color} size={size} /> }}
       />
       <Tab.Screen
-        name="Compte"
-        component={CompteStack}
-        options={{ tabBarLabel: twoLineLabel('Mon', 'Compte'), tabBarIcon: ({ color, size }) => <User color={color} size={size} /> }}
+        name="Boutiques"
+        component={BoutiquesStack}
+        options={{ tabBarIcon: ({ color, size }) => <Warehouse color={color} size={size} /> }}
       />
       <Tab.Screen
         name="MaBoutique"
@@ -72,9 +72,9 @@ export default function BottomTabs() {
         options={{ tabBarLabel: twoLineLabel('Ma', 'Boutique'), tabBarIcon: ({ color, size }) => <Store color={color} size={size} /> }}
       />
       <Tab.Screen
-        name="Boutiques"
-        component={BoutiquesStack}
-        options={{ tabBarIcon: ({ color, size }) => <Warehouse color={color} size={size} /> }}
+        name="Compte"
+        component={CompteStack}
+        options={{ tabBarLabel: twoLineLabel('Mon', 'Compte'), tabBarIcon: ({ color, size }) => <User color={color} size={size} /> }}
       />
     </Tab.Navigator>
   );
