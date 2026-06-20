@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Location from 'expo-location';
 import api from '../services/api';
@@ -20,6 +21,20 @@ async function getCachedCoords() {
   return raw ? JSON.parse(raw) : null;
 }
 
+function askLocationConsent() {
+  return new Promise((resolve) => {
+    Alert.alert(
+      'Activer la localisation',
+      'Pour mieux enregistrer les statistiques de visite, souhaitez-vous activer votre localisation ?',
+      [
+        { text: 'Non', style: 'cancel', onPress: () => resolve(false) },
+        { text: 'Oui', onPress: () => resolve(true) },
+      ],
+      { cancelable: false }
+    );
+  });
+}
+
 // Portage de frontend/src/utils/useTrackVisit.js : appelé une seule fois à la racine
 // (à l'intérieur du NavigationContainer), écoute les changements d'écran via navigationRef
 // au lieu de useLocation().
@@ -31,8 +46,22 @@ export default function useTrackVisit(navigationRef) {
     (async () => {
       if (gpsAttempted.current) return;
       gpsAttempted.current = true;
+
+      // Si coords déjà en cache, pas besoin de demander
       const cached = await getCachedCoords();
       if (cached) return;
+
+      // Si l'utilisateur a déjà refusé, ne pas redemander
+      const alreadyDeclined = await AsyncStorage.getItem('locationDeclined');
+      if (alreadyDeclined) return;
+
+      // Demander le consentement à l'utilisateur avant la permission OS
+      const consented = await askLocationConsent();
+      if (!consented) {
+        await AsyncStorage.setItem('locationDeclined', '1');
+        return;
+      }
+
       try {
         const { status } = await Location.requestForegroundPermissionsAsync();
         if (status !== 'granted') return;
@@ -42,7 +71,7 @@ export default function useTrackVisit(navigationRef) {
           JSON.stringify({ latitude: pos.coords.latitude, longitude: pos.coords.longitude })
         );
       } catch (e) {
-        // silencieux, comme côté web
+        // silencieux
       }
     })();
   }, []);
