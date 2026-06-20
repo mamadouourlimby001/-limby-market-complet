@@ -50,7 +50,7 @@ export default function AnnouncementsListScreen() {
           <Text style={styles.pageTitle}>Annonces</Text>
           <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
         </View>
-        <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddAnnouncement') : navigation.navigate('Compte', { screen: 'Login' }))} />
+        <Button title="+ Nouvelle publication" size="sm" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddAnnouncement') : navigation.navigate('Compte', { screen: 'Login' }))} />
         {showFilters && (
           <View style={styles.filterCard}>
             <Select label="Ville de travail" value={filters.villeDeTravail} onChange={(v) => setFilters({ ...filters, villeDeTravail: v })} options={[{ label: 'Toutes', value: '' }, ...VILLES_OPTIONS]} />

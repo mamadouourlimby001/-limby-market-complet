@@ -61,7 +61,7 @@ export default function LocationsListScreen() {
           <Text style={styles.pageTitle}>Locations</Text>
           <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
         </View>
-        <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
+        <Button title="+ Nouvelle publication" size="sm" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
         <View style={styles.tabsRow}>
           {TABS.map(({ key, label, Icon }) => {
             const active = selectedCategorie === key;
