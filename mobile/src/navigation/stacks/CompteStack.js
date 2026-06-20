@@ -11,12 +11,21 @@ import BuyCreditsScreen from '../../screens/auth/BuyCreditsScreen';
 import RenewSubscriptionScreen from '../../screens/auth/RenewSubscriptionScreen';
 import MesCommandesScreen from '../../screens/auth/MesCommandesScreen';
 import AppHeader from '../../components/AppHeader';
+import Loader from '../../components/ui/Loader';
+import { useAuth } from '../../context/AuthContext';
 
 const Stack = createNativeStackNavigator();
 
 export default function CompteStack() {
+  const { user, loading } = useAuth();
+
+  if (loading) return <Loader />;
+
   return (
-    <Stack.Navigator screenOptions={{ header: () => <AppHeader /> }}>
+    <Stack.Navigator
+      screenOptions={{ header: () => <AppHeader /> }}
+      initialRouteName={user ? 'UserDashboard' : 'Login'}
+    >
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
