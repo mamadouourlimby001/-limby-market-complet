@@ -73,7 +73,7 @@ export default memo(function AnnouncementCard({ announcement, onRefresh }) {
 const styles = StyleSheet.create({
   card: { flex: 1, overflow: 'hidden', height: 340 },
   imageWrap: { flex: 1 },
-  image: { width: '100%', height: '100%' },
+  image: { width: '100%', height: '100%', backgroundColor: '#fff' },
   imagePlaceholder: { width: '100%', flex: 1, backgroundColor: '#f0f0f0' },
   body: { padding: 8 },
   title: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 4 },
