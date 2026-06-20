@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   tabsRow: { flexDirection: 'row', gap: 4, paddingBottom: 4 },
   tab: {
     flex: 1,
-    paddingVertical: 5,
+    paddingVertical: 3,
     paddingHorizontal: 3,
     borderRadius: 6,
     borderWidth: 1,
