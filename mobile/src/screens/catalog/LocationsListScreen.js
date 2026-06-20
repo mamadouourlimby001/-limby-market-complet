@@ -75,7 +75,7 @@ export default function LocationsListScreen() {
               <Text style={styles.pageTitle}>Locations</Text>
               <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
             </View>
-            <Button title="+ Nouvelle publication" block style={{ marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
+            <Button title="+ Nouvelle publication" variant="success" block style={{ marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
 
             {/* Onglets catégorie */}
             <View style={styles.tabsRow}>
