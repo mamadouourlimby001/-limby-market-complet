@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { ShoppingBag } from 'lucide-react-native';
+import { ShoppingBag, Trash2 } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -77,6 +77,13 @@ export default function UserDashboardScreen() {
         } catch (err) { console.error(err); }
       } },
     ]);
+  };
+
+  const handleDeleteNotification = async (id) => {
+    try {
+      await api.delete(`/notifications/${id}`);
+      setNotifications(prev => prev.filter(n => n._id !== id));
+    } catch (err) { console.error(err); }
   };
 
   const handleLogout = async () => {
@@ -200,8 +207,15 @@ export default function UserDashboardScreen() {
           ) : (
             notifications.map((n) => (
               <Card key={n._id} style={[styles.notifCard, { opacity: n.lu ? 0.6 : 1, borderLeftWidth: n.lu ? 0 : 3, borderLeftColor: colors.primary }]}>
-                <Text style={styles.notifText}>{n.message}</Text>
-                <Text style={styles.historyDate}>{new Date(n.createdAt).toLocaleDateString('fr-FR')}</Text>
+                <View style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 8 }}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.notifText}>{n.message}</Text>
+                    <Text style={styles.historyDate}>{new Date(n.createdAt).toLocaleDateString('fr-FR')}</Text>
+                  </View>
+                  <Pressable onPress={() => handleDeleteNotification(n._id)} style={styles.notifDeleteBtn}>
+                    <Trash2 size={14} color="#ef4444" />
+                  </Pressable>
+                </View>
               </Card>
             ))
           )}
@@ -244,5 +258,6 @@ const styles = StyleSheet.create({
   historyDate: { fontSize: 10, color: '#9ca3af' },
   notifCard: { padding: 10, marginBottom: 6 },
   notifText: { fontSize: 13 },
+  notifDeleteBtn: { padding: 4 },
   messagesHeader: { flexDirection: 'row', gap: 8, marginBottom: 16 },
 });

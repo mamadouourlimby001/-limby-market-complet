@@ -29,4 +29,7 @@ const notificationSchema = new mongoose.Schema({
   }
 });
 
+// Suppression automatique après 48 heures
+notificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 172800 });
+
 module.exports = mongoose.model('Notification', notificationSchema);

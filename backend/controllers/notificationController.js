@@ -31,4 +31,15 @@ const markAllAsRead = async (req, res) => {
   }
 };
 
-module.exports = { getNotifications, markAsRead, markAllAsRead };
+// DELETE /api/notifications/:id - Supprimer une notification
+const deleteNotification = async (req, res) => {
+  try {
+    const notif = await Notification.findOneAndDelete({ _id: req.params.id, destinataire: req.user._id });
+    if (!notif) return res.status(404).json({ message: 'Notification introuvable.' });
+    res.json({ message: 'Notification supprimée.' });
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+module.exports = { getNotifications, markAsRead, markAllAsRead, deleteNotification };
