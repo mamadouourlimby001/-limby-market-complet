@@ -74,18 +74,19 @@ export default function BoutiqueDetailScreen({ route }) {
           <View style={styles.nameRow}>
             <Text style={styles.name}>{boutique.nom}</Text>
             {boutique.isVerified ? <Check size={18} color={colors.accent} /> : null}
+            {boutique.isCertified ? (
+              <View style={styles.certifiedBadge}>
+                <Text style={styles.certifiedText}>Boutique Certifiée</Text>
+              </View>
+            ) : null}
           </View>
-          {boutique.isCertified ? (
-            <View style={styles.certifiedBadge}>
-              <Text style={styles.certifiedText}>Boutique Certifiée</Text>
-            </View>
-          ) : null}
           <Text style={styles.description}>{boutique.description}</Text>
           <View style={styles.metaRow}>
-            <MapPin size={16} color={colors.textLight} />
+            <MapPin size={14} color={colors.textLight} />
             <Text style={styles.meta}>{boutique.quartier}, {boutique.ville}</Text>
+            <Text style={styles.metaSep}>·</Text>
+            <Text style={styles.phone}>{boutique.telephone}</Text>
           </View>
-          <Text style={styles.phone}>{boutique.telephone}</Text>
           <Badge variant="primary">{boutique.categorie}</Badge>
         </View>
 
@@ -181,14 +182,15 @@ const styles = StyleSheet.create({
   avatar: { width: 90, height: 90, borderRadius: 45, borderWidth: 2, borderColor: colors.primary },
   avatarPlaceholder: { width: 90, height: 90, borderRadius: 45, borderWidth: 2, borderColor: colors.border, backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
   header: { alignItems: 'center', paddingHorizontal: 12, marginBottom: 8 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flexWrap: 'wrap', justifyContent: 'center' },
   name: { fontSize: 20, fontWeight: '700' },
-  certifiedBadge: { backgroundColor: '#059669', paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginTop: 4 },
-  certifiedText: { color: '#fff', fontSize: 12, fontWeight: '600' },
+  certifiedBadge: { backgroundColor: '#059669', paddingVertical: 3, paddingHorizontal: 7, borderRadius: 4 },
+  certifiedText: { color: '#fff', fontSize: 11, fontWeight: '600' },
   description: { fontSize: 13, color: colors.textLight, marginTop: 4, marginBottom: 4, textAlign: 'center' },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 8 },
-  meta: { fontSize: 13, color: colors.textLight },
-  phone: { fontSize: 13, color: colors.primary, fontWeight: '600', marginBottom: 6 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 8, flexWrap: 'wrap', justifyContent: 'center' },
+  meta: { fontSize: 12, color: colors.textLight },
+  metaSep: { fontSize: 12, color: colors.textLight },
+  phone: { fontSize: 12, color: colors.primary, fontWeight: '600' },
   whatsappBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12, marginHorizontal: 12, marginBottom: 10, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border, borderRadius: 10 },
   whatsappText: { fontSize: 14, fontWeight: '600', color: colors.primary },
   scrollContent: { padding: 12, paddingBottom: 80 },
