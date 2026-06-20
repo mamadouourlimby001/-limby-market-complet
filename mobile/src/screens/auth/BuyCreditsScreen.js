@@ -37,7 +37,7 @@ export default function BuyCreditsScreen() {
     return (
       <Screen center>
         <View style={styles.successWrap}>
-          <Text style={styles.successIcon}>✔️</Text>
+          <Text style={styles.successIcon}>OK</Text>
           <Text style={styles.successTitle}>Demande envoyée !</Text>
           <Text style={styles.successText}>Votre demande sera traitée sous peu par un administrateur.</Text>
         </View>
@@ -57,14 +57,14 @@ export default function BuyCreditsScreen() {
         >
           <View style={styles.packLeft}>
             <Text style={styles.packLabel}>{pack.label}</Text>
-            {pack.bonus > 0 ? <Text style={styles.gift}> 🎁</Text> : null}
+            {pack.bonus > 0 ? <Text style={styles.gift}> +Bonus</Text> : null}
           </View>
           <Text style={styles.packPrice}>{pack.prix.toLocaleString('fr-FR')} GNF</Text>
         </Pressable>
       ))}
 
       <AlertBanner variant="info">
-        📋 Effectuez un dépôt Orange Money sur le numéro +224625223418 puis remplissez le formulaire ci-dessous.
+        Effectuez un dépôt Orange Money sur le numéro +224625223418 puis remplissez le formulaire ci-dessous.
       </AlertBanner>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
 

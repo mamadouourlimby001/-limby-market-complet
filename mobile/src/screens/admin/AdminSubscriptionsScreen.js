@@ -39,13 +39,13 @@ export default function AdminSubscriptionsScreen() {
         requests.map(r => (
           <Card key={r._id} style={styles.card}>
             <Text style={styles.name}>{r.nomBoutique}</Text>
-            <Text style={styles.meta}>☎️ Dépôt: {r.telephoneDepot}</Text>
+            <Text style={styles.meta}>Dépôt: {r.telephoneDepot}</Text>
             <Text style={styles.amount}>{(r.montant || 0).toLocaleString('fr-GN')} GNF</Text>
             <Text style={styles.meta}>Par: {r.demandeur?.nom}</Text>
             <Text style={styles.date}>{new Date(r.createdAt).toLocaleString('fr-FR')}</Text>
             <View style={styles.btnRow}>
-              <Button title="✔️ Approuver" variant="success" style={{ flex: 1 }} onPress={() => handle(r._id, 'approve')} />
-              <Button title="✖️ Rejeter" variant="danger" style={{ flex: 1 }} onPress={() => handle(r._id, 'reject')} />
+              <Button title="Approuver" variant="success" style={{ flex: 1 }} onPress={() => handle(r._id, 'approve')} />
+              <Button title="Rejeter" variant="danger" style={{ flex: 1 }} onPress={() => handle(r._id, 'reject')} />
             </View>
           </Card>
         ))

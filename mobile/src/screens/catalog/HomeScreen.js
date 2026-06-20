@@ -57,7 +57,7 @@ export default function HomeScreen() {
             site via <Text style={{ fontWeight: '700' }}>Messages</Text> dans{' '}
             <Text style={{ fontWeight: '700' }}>Mon compte</Text>, ou nous appeler/WhatsApp:
           </Text>
-          <Text style={styles.helpPhone}>📱 625223418 ou 620768276</Text>
+          <Text style={styles.helpPhone}>625223418 ou 620768276</Text>
         </View>
       </View>
     </LinearGradient>

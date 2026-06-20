@@ -43,7 +43,7 @@ export default function RenewSubscriptionScreen() {
     return (
       <Screen center>
         <View style={styles.successWrap}>
-          <Text style={styles.successIcon}>✔️</Text>
+          <Text style={styles.successIcon}>OK</Text>
           <Text style={styles.successTitle}>Demande envoyée !</Text>
           <Text style={styles.successText}>Votre demande de renouvellement sera traitée sous peu.</Text>
         </View>
@@ -56,7 +56,7 @@ export default function RenewSubscriptionScreen() {
       <Text style={styles.title}>Renouveler abonnement</Text>
 
       <AlertBanner variant="info">
-        💳 Déposez 38 000 GNF sur le numéro Orange Money +224625223418 puis soumettez ce formulaire.
+        Déposez 38 000 GNF sur le numéro Orange Money +224625223418 puis soumettez ce formulaire.
       </AlertBanner>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
 

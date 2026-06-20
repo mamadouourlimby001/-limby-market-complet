@@ -49,7 +49,7 @@ export default function AddLocationScreen() {
     <Screen>
       <Text style={styles.title}>Publier une location</Text>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
-      <AlertBanner variant="info">⚠️ Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
+      <AlertBanner variant="info">Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
 
       <FormInput label="Titre" value={form.titre} onChangeText={(v) => setForm({ ...form, titre: v })} />
       <Select label="Catégorie" value={form.categorie} onChange={(v) => setForm({ ...form, categorie: v })} options={CATEGORIE_OPTIONS} />

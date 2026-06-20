@@ -47,7 +47,7 @@ export default function AdminReportsScreen() {
             <Text style={styles.raison}>{r.raison || 'Aucune raison spécifiée'}</Text>
             <Text style={styles.meta}>Par: {r.signalePar?.nom}</Text>
             <View style={styles.btnRow}>
-              <Button title="🗑 Supprimer contenu" variant="danger" style={{ flex: 1 }} onPress={() => handle(r._id, 'supprimer')} />
+              <Button title="Supprimer contenu" variant="danger" style={{ flex: 1 }} onPress={() => handle(r._id, 'supprimer')} />
               <Button title="Ignorer" variant="secondary" style={{ flex: 1 }} onPress={() => handle(r._id, 'ignorer')} />
             </View>
           </Card>

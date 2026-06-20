@@ -40,12 +40,12 @@ export default function ReportButton({ typeContenu, contenuId }) {
   return (
     <>
       <Pressable onPress={() => (user ? setShowModal(true) : goLogin())} style={styles.trigger}>
-        <Text style={styles.triggerText}>⚠️ Signaler</Text>
+        <Text style={styles.triggerText}>Signaler</Text>
       </Pressable>
       <CenterModal visible={showModal} onClose={() => setShowModal(false)}>
         {sent ? (
           <View style={{ alignItems: 'center', padding: 20 }}>
-            <Text style={{ fontSize: 14, color: colors.success }}>✔️ Signalement envoyé. Merci !</Text>
+            <Text style={{ fontSize: 14, color: colors.success }}>Signalement envoyé. Merci !</Text>
           </View>
         ) : (
           <>

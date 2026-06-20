@@ -45,7 +45,7 @@ export default function AddProductScreen() {
     <Screen>
       <Text style={styles.title}>Publier un produit</Text>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
-      <AlertBanner variant="info">⚠️ Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
+      <AlertBanner variant="info">Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
 
       <FormInput label="Titre" value={form.titre} onChangeText={(v) => setForm({ ...form, titre: v })} />
       <Select label="Catégorie" value={form.categorie} onChange={(v) => setForm({ ...form, categorie: v })} options={CATEGORIES_OPTIONS} />

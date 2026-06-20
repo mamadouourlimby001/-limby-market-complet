@@ -99,7 +99,7 @@ export default function UserDashboardScreen() {
           {Number(item.prix ?? item.salaireMensuel ?? 0).toLocaleString('fr-FR')} GNF
         </Text>
       </View>
-      <Button title="🗑 Supprimer" size="sm" variant="danger" onPress={() => handleDelete(type, item._id)} />
+      <Button title="Supprimer" size="sm" variant="danger" onPress={() => handleDelete(type, item._id)} />
     </View>
   );
 
@@ -121,20 +121,20 @@ export default function UserDashboardScreen() {
         <View>
           <Card style={styles.profileCard}>
             <Text style={styles.name}>{user?.nom}</Text>
-            <Text style={styles.phone}>☎️ {user?.telephone}</Text>
+            <Text style={styles.phone}>{user?.telephone}</Text>
             <View style={styles.badgeRow}>
               <Badge variant="primary">{roleLabels[user?.role]}</Badge>
-              {user?.isVerified ? <Badge variant="success">✔️ Vérifié</Badge> : null}
+              {user?.isVerified ? <Badge variant="success">Vérifié</Badge> : null}
             </View>
-            <Text style={styles.credits}>💵 {user?.credits} crédits</Text>
+            <Text style={styles.credits}>{user?.credits} crédits</Text>
             {user?.creditExpiry ? (
               <Text style={styles.expiry}>Expire le {new Date(user.creditExpiry).toLocaleDateString('fr-FR')}</Text>
             ) : null}
           </Card>
 
           <Button title="Acheter des crédits" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('BuyCredits')} />
-          <Button title="📦 Mes commandes" variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('MesCommandes')} />
-          <Button title="🔐 Modifier le mot de passe" variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('ChangePassword')} />
+          <Button title="Mes commandes" variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('MesCommandes')} />
+          <Button title="Modifier le mot de passe" variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('ChangePassword')} />
           <Button title="Déconnexion" variant="danger" block style={{ marginBottom: 8 }} onPress={handleLogout} />
           {boutique ? (
             <>
@@ -225,8 +225,8 @@ export default function UserDashboardScreen() {
       {tab === 'messages' && (
         <View>
           <View style={styles.messagesHeader}>
-            <Button title="✎ Écrire aux administrateurs" style={{ flex: 1 }} onPress={() => navigation.navigate('SendMessageToAdmins')} />
-            <Button title="🔄" variant="secondary" onPress={fetchAll} />
+            <Button title="Écrire aux administrateurs" style={{ flex: 1 }} onPress={() => navigation.navigate('SendMessageToAdmins')} />
+            <Button title="Actualiser" variant="secondary" onPress={fetchAll} />
           </View>
           <UserMessagesList />
         </View>

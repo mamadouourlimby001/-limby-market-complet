@@ -105,7 +105,7 @@ export default function ProductBoutiqueDetailScreen({ route }) {
               <Store size={16} color={colors.text} />
               <Text style={styles.boutiqueName}>{boutique.nom}</Text>
             </View>
-            {boutique.isVerified ? <Text style={styles.verified}>✓ Vérifié</Text> : null}
+            {boutique.isVerified ? <Text style={styles.verified}>Vérifié</Text> : null}
           </View>
         </View>
         <View style={{ gap: 8 }}>
@@ -129,7 +129,7 @@ export default function ProductBoutiqueDetailScreen({ route }) {
 
       <View style={[styles.dispoBox, { backgroundColor: product.disponible ? '#dcfce7' : '#fee2e2', borderColor: product.disponible ? '#22c55e' : '#ef4444' }]}>
         <Text style={[styles.dispoText, { color: product.disponible ? '#22c55e' : '#ef4444' }]}>
-          {product.disponible ? '✓ Produit disponible' : '✗ Produit indisponible'}
+          {product.disponible ? 'Produit disponible' : 'Produit indisponible'}
         </Text>
       </View>
 

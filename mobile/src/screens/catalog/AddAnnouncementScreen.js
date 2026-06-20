@@ -37,7 +37,7 @@ export default function AddAnnouncementScreen() {
     <Screen>
       <Text style={styles.title}>Publier une annonce</Text>
       {error ? <AlertBanner variant="danger">{error}</AlertBanner> : null}
-      <AlertBanner variant="info">⚠️ Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
+      <AlertBanner variant="info">Les numéros de téléphone ne sont pas autorisés dans la description.</AlertBanner>
 
       <FormInput label="Titre" value={form.titre} onChangeText={(v) => setForm({ ...form, titre: v })} />
       <Select label="Ville de travail" value={form.villeDeTravail} onChange={(v) => setForm({ ...form, villeDeTravail: v })} options={VILLES_OPTIONS} />

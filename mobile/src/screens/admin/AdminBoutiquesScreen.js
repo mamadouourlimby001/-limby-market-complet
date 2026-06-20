@@ -99,16 +99,16 @@ export default function AdminBoutiquesScreen() {
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{boutique.nom}</Text>
                 <Text style={styles.desc} numberOfLines={2}>{boutique.description}</Text>
-                <Text style={styles.meta}>📍 {boutique.quartier}, {boutique.ville}</Text>
-                <Text style={styles.meta}>👤 {boutique.proprietaire?.nom} ({boutique.proprietaire?.telephone})</Text>
+                <Text style={styles.meta}>{boutique.quartier}, {boutique.ville}</Text>
+                <Text style={styles.meta}>{boutique.proprietaire?.nom} ({boutique.proprietaire?.telephone})</Text>
                 <View style={styles.badgeRow}>
                   <View style={[styles.activeBadge, { backgroundColor: boutique.isActive ? '#dcfce7' : '#fee2e2' }]}>
                     <Text style={[styles.activeBadgeText, { color: boutique.isActive ? '#166534' : '#991b1b' }]}>
-                      {boutique.isActive ? '✓ Active' : '✗ Inactive'}
+                      {boutique.isActive ? 'Active' : 'Inactive'}
                     </Text>
                   </View>
-                  {boutique.isVerified && <View style={styles.verifiedBadge}><Text style={styles.verifiedText}>✓ Vérifiée</Text></View>}
-                  {boutique.isCertified && <View style={styles.verifiedBadge}><Text style={styles.verifiedText}>✓ Certifiée</Text></View>}
+                  {boutique.isVerified && <View style={styles.verifiedBadge}><Text style={styles.verifiedText}>Vérifiée</Text></View>}
+                  {boutique.isCertified && <View style={styles.verifiedBadge}><Text style={styles.verifiedText}>Certifiée</Text></View>}
                 </View>
               </View>
             </View>
@@ -121,7 +121,7 @@ export default function AdminBoutiquesScreen() {
                 disabled={actionId === boutique._id}
               />
               <Button
-                title={boutique.isCertified ? '✓ Certifiée' : '⭐ Certifier'}
+                title={boutique.isCertified ? 'Certifiée' : '⭐ Certifier'}
                 style={[styles.gridBtn, { backgroundColor: boutique.isCertified ? '#cbd5e1' : '#06b6d4' }]}
                 disabled={actionId === boutique._id || boutique.isCertified}
                 onPress={() => handleCertify(boutique._id)}

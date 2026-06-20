@@ -83,7 +83,7 @@ export default function AdminSendToUsersScreen() {
             <View style={styles.selectedUser}>
               <Text style={styles.selectedUserText}>{selectedUserObj.nom} ({selectedUserObj.telephone})</Text>
               <Pressable onPress={() => { setSelectedUser(''); setSearchTerm(''); }}>
-                <Text style={styles.clearBtn}>✕</Text>
+                <Text style={styles.clearBtn}>X</Text>
               </Pressable>
             </View>
           )}

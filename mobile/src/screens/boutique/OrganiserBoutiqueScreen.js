@@ -195,7 +195,7 @@ export default function OrganiserBoutiqueScreen() {
             <Text style={styles.confirmBtnText}>OK</Text>
           </Pressable>
           <Pressable style={styles.cancelBtnSmall} onPress={() => { setAddingSection(false); setNewSectionName(''); }}>
-            <Text style={styles.cancelBtnText}>✕</Text>
+            <Text style={styles.cancelBtnText}>X</Text>
           </Pressable>
         </View>
       ) : (

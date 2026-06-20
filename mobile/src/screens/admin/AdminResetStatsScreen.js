@@ -13,7 +13,7 @@ export default function AdminResetStatsScreen() {
 
   const handleReset = () => {
     Alert.alert(
-      '⚠️ Action irréversible',
+      'Action irréversible',
       'Ceci va réinitialiser:\n- Contacts débloqués\n- Transactions\n- Revenus (GNF)\n\nÊtes-vous absolument sûr ?',
       [
         { text: 'Annuler', style: 'cancel' },
@@ -34,7 +34,7 @@ export default function AdminResetStatsScreen() {
 
   return (
     <Screen>
-      <Text style={styles.title}>⚠️ Réinitialiser les statistiques</Text>
+      <Text style={styles.title}>Réinitialiser les statistiques</Text>
 
       <View style={styles.warningBox}>
         <View style={styles.warningHeader}>
@@ -48,9 +48,9 @@ export default function AdminResetStatsScreen() {
         </View>
 
         {[
-          '❌ Contacts débloqués: Seront remis à 0',
-          '❌ Transactions: Seront remises à 0',
-          '❌ Revenus (GNF): Seront remis à 0',
+          'Contacts débloqués: Seront remis à 0',
+          'Transactions: Seront remises à 0',
+          'Revenus (GNF): Seront remis à 0',
         ].map((item, i) => (
           <View key={i} style={styles.resetItem}>
             <Text style={styles.resetItemText}>{item}</Text>
@@ -59,7 +59,7 @@ export default function AdminResetStatsScreen() {
 
         <View style={styles.infoBox}>
           <Text style={styles.infoText}>
-            ℹ️ Les sections "Utilisateurs" et "Publications actives" ne seront pas affectées
+            Les sections "Utilisateurs" et "Publications actives" ne seront pas affectées
           </Text>
         </View>
       </View>

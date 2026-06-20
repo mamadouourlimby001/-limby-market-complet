@@ -83,7 +83,7 @@ export default function BoutiquesListScreen() {
 
           {user && user.role !== 'vendeur_boutique' && (
             <Button
-              title="🏪 Créer ma boutique"
+              title="Créer ma boutique"
               block
               style={{ marginBottom: 14 }}
               onPress={() => navigation.navigate('MaBoutique', { screen: 'CreateBoutique' })}

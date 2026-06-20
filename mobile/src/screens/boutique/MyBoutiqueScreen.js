@@ -9,9 +9,9 @@ import { Button, Card, Badge, FormInput, Select, Loader } from '../../components
 import { colors } from '../../theme/theme';
 
 const SORT_OPTIONS = [
-  { label: '📅 Récent', value: 'recent' },
-  { label: '💰 Prix ↑', value: 'price-asc' },
-  { label: '💰 Prix ↓', value: 'price-desc' },
+  { label: 'Récent', value: 'recent' },
+  { label: 'Prix ↑', value: 'price-asc' },
+  { label: 'Prix ↓', value: 'price-desc' },
 ];
 
 // Portage exact de frontend/src/pages/MyBoutique.jsx
@@ -138,7 +138,7 @@ export default function MyBoutiqueScreen() {
         </View>
         <Text style={styles.name}>{boutique.nom}</Text>
         <Text style={styles.description}>{boutique.description}</Text>
-        <Text style={styles.location}>📍 {boutique.quartier}, {boutique.ville}</Text>
+        <Text style={styles.location}>{boutique.quartier}, {boutique.ville}</Text>
         <View style={styles.badgeRow}>
           <View style={[styles.statusBadge, { backgroundColor: boutique.isActive ? '#059669' : '#dc3545' }]}>
             <Text style={styles.statusBadgeText}>{boutique.isActive ? 'Active' : 'Inactive'}</Text>
@@ -146,7 +146,7 @@ export default function MyBoutiqueScreen() {
           <Badge variant="primary">{boutique.categorie}</Badge>
           {boutique.isCertified ? (
             <View style={styles.certifiedBadge}>
-              <Text style={styles.certifiedText}>⭐ Boutique Certifiée</Text>
+              <Text style={styles.certifiedText}>Boutique Certifiée</Text>
             </View>
           ) : null}
         </View>
@@ -155,11 +155,11 @@ export default function MyBoutiqueScreen() {
       <View style={{ gap: 8, marginBottom: 16 }}>
         <Button title="Renouveler mon abonnement" block onPress={() => navigation.navigate('Compte', { screen: 'RenewSubscription' })} />
         <Button title="Commandes" variant="secondary" block onPress={() => navigation.navigate('ProduitsCommandes')} />
-        <Button title={`💬 Messages (${unreadMessagesCount})`} variant="secondary" block onPress={() => navigation.navigate('BoutiqueMessages')} />
-        <Button title="✏️ Modifier Boutique" variant="secondary" block onPress={() => navigation.navigate('CreateBoutique')} />
-        <Button title="📂 Organiser les produits" variant="secondary" block onPress={() => navigation.navigate('OrganiserBoutique')} />
+        <Button title={`Messages (${unreadMessagesCount})`} variant="secondary" block onPress={() => navigation.navigate('BoutiqueMessages')} />
+        <Button title="Modifier Boutique" variant="secondary" block onPress={() => navigation.navigate('CreateBoutique')} />
+        <Button title="Organiser les produits" variant="secondary" block onPress={() => navigation.navigate('OrganiserBoutique')} />
         <Button
-          title="👁 Visite de la boutique"
+          title="Visite de la boutique"
           variant="secondary"
           block
           onPress={() => navigation.navigate('BoutiqueVisits', { boutiqueId: boutique._id })}
@@ -179,13 +179,13 @@ export default function MyBoutiqueScreen() {
         <>
           {availableProducts.length > 0 && (
             <>
-              <Text style={[styles.subTitle, { color: colors.success }]}>✓ Disponibles ({availableProducts.length})</Text>
+              <Text style={[styles.subTitle, { color: colors.success }]}>Disponibles ({availableProducts.length})</Text>
               {renderProductGrid(availableProducts)}
             </>
           )}
           {unavailableProducts.length > 0 && (
             <>
-              <Text style={[styles.subTitle, { color: colors.danger, marginTop: 16 }]}>✗ Non disponibles ({unavailableProducts.length})</Text>
+              <Text style={[styles.subTitle, { color: colors.danger, marginTop: 16 }]}>Non disponibles ({unavailableProducts.length})</Text>
               {renderProductGrid(unavailableProducts)}
             </>
           )}

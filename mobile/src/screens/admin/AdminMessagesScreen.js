@@ -93,7 +93,7 @@ export default function AdminMessagesScreen() {
       </View>
 
       <Button
-        title="✎ Écrire aux utilisateurs"
+        title="Écrire aux utilisateurs"
         block
         onPress={() => navigation.navigate('AdminSendToUsers')}
         style={{ marginBottom: 16 }}

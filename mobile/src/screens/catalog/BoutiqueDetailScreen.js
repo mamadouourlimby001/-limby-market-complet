@@ -85,7 +85,7 @@ export default function BoutiqueDetailScreen({ route }) {
           <MapPin size={16} color={colors.textLight} />
           <Text style={styles.meta}>{boutique.quartier}, {boutique.ville}</Text>
         </View>
-        <Text style={styles.phone}>☎️ {boutique.telephone}</Text>
+        <Text style={styles.phone}>{boutique.telephone}</Text>
         <Badge variant="primary">{boutique.categorie}</Badge>
       </View>
 

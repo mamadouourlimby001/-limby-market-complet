@@ -63,7 +63,7 @@ export default function AdminPasswordsScreen() {
       <Screen>
         <Card style={{ padding: 16 }}>
           <Text style={styles.resetTitle}>{selectedUser.nom}</Text>
-          <Text style={styles.meta}>☎️ {selectedUser.telephone}</Text>
+          <Text style={styles.meta}>{selectedUser.telephone}</Text>
           <Text style={[styles.meta, { marginBottom: 16 }]}>Réinitialiser le mot de passe</Text>
           <FormInput label="Nouveau mot de passe" placeholder="Min. 6 caractères" secureTextEntry value={newPassword} onChangeText={setNewPassword} />
           <View style={styles.btnRow}>
@@ -89,7 +89,7 @@ export default function AdminPasswordsScreen() {
             <View style={styles.userRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{u.nom}</Text>
-                <Text style={styles.meta}>☎️ {u.telephone}</Text>
+                <Text style={styles.meta}>{u.telephone}</Text>
                 <Text style={styles.meta}>Rôle: {u.role}</Text>
                 <Text style={styles.meta} numberOfLines={2}>Question: {u.securityQuestion}</Text>
                 <Text style={styles.dateText}>Créé le {new Date(u.createdAt).toLocaleDateString('fr-FR')}</Text>
