@@ -86,7 +86,7 @@ export default function BoutiquesListScreen() {
               title="🏪 Créer ma boutique"
               block
               style={{ marginBottom: 14 }}
-              onPress={() => navigation.navigate('CreateBoutique')}
+              onPress={() => navigation.navigate('MaBoutique', { screen: 'CreateBoutique' })}
             />
           )}
 
