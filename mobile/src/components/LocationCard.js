@@ -16,7 +16,6 @@ export default memo(function LocationCard({ location, onRefresh }) {
   const navigation = useNavigation();
   const { user } = useAuth();
   const [visible, setVisible] = useState(true);
-  const [imgRatio, setImgRatio] = useState(4 / 3);
   const goDetail = () => navigation.navigate('LocationDetail', { id: location._id });
 
   const isOwner = user && String(location.proprietaire?._id) === String(user._id);
@@ -40,15 +39,7 @@ export default memo(function LocationCard({ location, onRefresh }) {
     <Card style={styles.card}>
       <Pressable style={styles.imageWrap} onPress={goDetail}>
         {location.photos?.length > 0
-          ? <Image
-              source={{ uri: location.photos[0] }}
-              style={[styles.image, { aspectRatio: imgRatio }]}
-              resizeMode="contain"
-              onLoad={(e) => {
-                const { width, height } = e.nativeEvent.source;
-                if (width && height) setImgRatio(width / height);
-              }}
-            />
+          ? <Image source={{ uri: location.photos[0] }} style={styles.image} resizeMode="contain" />
           : <View style={styles.imagePlaceholder} />
         }
       </Pressable>
@@ -78,10 +69,10 @@ export default memo(function LocationCard({ location, onRefresh }) {
 });
 
 const styles = StyleSheet.create({
-  card: { flex: 1, overflow: 'hidden' },
-  imageWrap: { width: '100%' },
-  image: { width: '100%' },
-  imagePlaceholder: { width: '100%', height: 150, backgroundColor: '#f0f0f0' },
+  card: { flex: 1, overflow: 'hidden', height: 340 },
+  imageWrap: { flex: 1 },
+  image: { width: '100%', height: '100%' },
+  imagePlaceholder: { width: '100%', flex: 1, backgroundColor: '#f0f0f0' },
   body: { padding: 8 },
   title: { fontSize: 13, fontWeight: '600', color: colors.text, marginBottom: 4 },
   row: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4 },
