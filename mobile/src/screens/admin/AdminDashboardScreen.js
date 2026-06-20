@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool, ShoppingBag, RotateCcw, Lock, Eye, Trash2 } from 'lucide-react-native';
+import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool, ShoppingBag, RotateCcw, Lock, Eye, Trash2, ShieldCheck } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -11,8 +11,23 @@ import { colors } from '../../theme/theme';
 const ICON_MAP = {
   credits: CreditCard, abonnements: RefreshCw, signalements: AlertTriangle, utilisateurs: Users,
   boutiques: ShoppingBag, 'reset-stats': RotateCcw, 'send-to-users': PenTool, passwords: Lock,
-  visites: Eye, messages: MessageSquare,
+  visites: Eye, messages: MessageSquare, autorisation: ShieldCheck,
 };
+
+const ALL_MENU_ITEMS = [
+  { key: 'credits', screen: 'AdminCredits', label: 'Demandes crédits' },
+  { key: 'abonnements', screen: 'AdminSubscriptions', label: 'Abonnements' },
+  { key: 'signalements', screen: 'AdminReports', label: 'Signalements' },
+  { key: 'utilisateurs', screen: 'AdminUsers', label: 'Utilisateurs' },
+  { key: 'boutiques', screen: 'AdminBoutiques', label: 'Boutiques' },
+  { key: 'reset-stats', screen: 'AdminResetStats', label: 'Réinitialiser' },
+  { key: 'send-to-users', screen: 'AdminSendToUsers', label: 'Écrire aux utilisateurs' },
+  { key: 'passwords', screen: 'AdminPasswords', label: 'Mots de passe' },
+  { key: 'visites', screen: 'AdminVisites', label: 'Visites' },
+  { key: 'messages', screen: 'AdminMessages', label: 'Messages' },
+];
+
+const DEFAULT_SIMPLE_KEYS = ['credits', 'abonnements', 'signalements', 'utilisateurs', 'send-to-users', 'messages'];
 
 export default function AdminDashboardScreen() {
   const navigation = useNavigation();
@@ -51,28 +66,14 @@ export default function AdminDashboardScreen() {
 
   if (loading) return <Loader fullScreen />;
 
-  let menuItems = [
-    { key: 'credits', screen: 'AdminCredits', label: 'Demandes crédits' },
-    { key: 'abonnements', screen: 'AdminSubscriptions', label: 'Abonnements' },
-    { key: 'signalements', screen: 'AdminReports', label: 'Signalements' },
-    { key: 'utilisateurs', screen: 'AdminUsers', label: 'Utilisateurs' },
-  ];
+  let menuItems;
   if (isSuperAdmin) {
-    menuItems.push(
-      { key: 'boutiques', screen: 'AdminBoutiques', label: 'Boutiques' },
-      { key: 'reset-stats', screen: 'AdminResetStats', label: 'Réinitialiser' },
-    );
+    menuItems = [...ALL_MENU_ITEMS, { key: 'autorisation', screen: 'AdminAutorisation', label: 'Autorisation' }];
+  } else {
+    const perms = user?.adminPermissions;
+    const allowed = (perms && perms.length > 0) ? perms : DEFAULT_SIMPLE_KEYS;
+    menuItems = ALL_MENU_ITEMS.filter(item => allowed.includes(item.key));
   }
-  menuItems.push(
-    { key: 'send-to-users', screen: 'AdminSendToUsers', label: 'Écrire aux utilisateurs' },
-  );
-  if (isSuperAdmin) {
-    menuItems.push(
-      { key: 'passwords', screen: 'AdminPasswords', label: 'Mots de passe' },
-      { key: 'visites', screen: 'AdminVisites', label: 'Visites' },
-    );
-  }
-  menuItems.push({ key: 'messages', screen: 'AdminMessages', label: 'Messages' });
 
   return (
     <Screen>

@@ -941,6 +941,32 @@ const deleteTrafficBilan = async (req, res) => {
   }
 };
 
+// GET /api/admin/permissions/admins - Liste des admins simples
+const getSimpleAdmins = async (req, res) => {
+  try {
+    const admins = await User.find({ role: 'admin_simple' }).select('nom telephone adminPermissions').sort({ nom: 1 });
+    res.json(admins);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
+// PUT /api/admin/permissions/:id - Mettre à jour les permissions d'un admin simple
+const updateAdminPermissions = async (req, res) => {
+  try {
+    const { permissions } = req.body;
+    const admin = await User.findOneAndUpdate(
+      { _id: req.params.id, role: 'admin_simple' },
+      { $set: { adminPermissions: permissions || [] } },
+      { new: true }
+    ).select('nom telephone adminPermissions');
+    if (!admin) return res.status(404).json({ message: 'Administrateur introuvable.' });
+    res.json(admin);
+  } catch (error) {
+    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+  }
+};
+
 module.exports = {
   getCreditRequests, approveCreditRequest, rejectCreditRequest,
   getSubscriptionRequests, approveSubscriptionRequest, rejectSubscriptionRequest,
@@ -949,5 +975,6 @@ module.exports = {
   addAdmin, removeAdmin, getDashboardStats,
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
-  getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary, deleteTrafficBilan
+  getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary, deleteTrafficBilan,
+  getSimpleAdmins, updateAdminPermissions
 };

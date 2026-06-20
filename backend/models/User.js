@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema({
     question: String,
     answer: String
   }],
+  adminPermissions: {
+    type: [String],
+    default: []
+  },
   createdAt: {
     type: Date,
     default: Date.now

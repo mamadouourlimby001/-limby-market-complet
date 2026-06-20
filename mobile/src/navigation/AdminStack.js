@@ -12,6 +12,7 @@ import AdminMessagesScreen from '../screens/admin/AdminMessagesScreen';
 import AdminVisitesScreen from '../screens/admin/AdminVisitesScreen';
 import AdminVisiteDetailsScreen from '../screens/admin/AdminVisiteDetailsScreen';
 import AdminResetStatsScreen from '../screens/admin/AdminResetStatsScreen';
+import AdminAutorisationScreen from '../screens/admin/AdminAutorisationScreen';
 import AppHeader from '../components/AppHeader';
 
 const Stack = createNativeStackNavigator();
@@ -32,6 +33,7 @@ export default function AdminStack() {
       <Stack.Screen name="AdminVisites" component={AdminVisitesScreen} />
       <Stack.Screen name="AdminVisiteDetails" component={AdminVisiteDetailsScreen} />
       <Stack.Screen name="AdminResetStats" component={AdminResetStatsScreen} />
+      <Stack.Screen name="AdminAutorisation" component={AdminAutorisationScreen} />
     </Stack.Navigator>
   );
 }
