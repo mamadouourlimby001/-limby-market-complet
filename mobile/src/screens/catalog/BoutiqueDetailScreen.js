@@ -211,8 +211,8 @@ const styles = StyleSheet.create({
   nameLarge: { fontSize: 16, fontWeight: '700' },
   descLarge: { fontSize: 11, color: colors.textLight, marginVertical: 2 },
   metaLarge: { fontSize: 10, color: colors.textLight, flex: 1 },
-  whatsappLarge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 7, padding: 7, marginHorizontal: 12, marginTop: 4, borderWidth: 1.5, borderColor: colors.border, borderRadius: 8 },
-  whatsappTextLarge: { fontSize: 13, fontWeight: '600', color: colors.primary },
+  whatsappLarge: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, paddingVertical: 11, marginHorizontal: 12, marginTop: 6, backgroundColor: '#25D366', borderRadius: 12, elevation: 3, shadowColor: '#25D366', shadowOpacity: 0.4, shadowRadius: 6, shadowOffset: { width: 0, height: 3 } },
+  whatsappTextLarge: { fontSize: 14, fontWeight: '700', color: '#fff' },
 
   /* Collapsed */
   collapsedRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingHorizontal: 12, paddingTop: 10 },
@@ -221,8 +221,8 @@ const styles = StyleSheet.create({
   collapsedInfo: { flex: 1 },
   nameSmall: { fontSize: 13, fontWeight: '700' },
   metaSmall: { fontSize: 10, color: colors.textLight, marginTop: 2 },
-  whatsappSmall: { flexDirection: 'row', alignItems: 'center', gap: 4, padding: 6, borderWidth: 1.5, borderColor: colors.border, borderRadius: 8 },
-  whatsappTextSmall: { fontSize: 11, fontWeight: '600', color: colors.primary },
+  whatsappSmall: { flexDirection: 'row', alignItems: 'center', gap: 4, paddingVertical: 7, paddingHorizontal: 10, backgroundColor: '#25D366', borderRadius: 8 },
+  whatsappTextSmall: { fontSize: 11, fontWeight: '700', color: '#fff' },
 
   /* Shared */
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
