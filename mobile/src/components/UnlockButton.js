@@ -68,7 +68,6 @@ export default function UnlockButton({ type, id, contact, quartier }) {
     <>
       <Button
         title={`Débloquer contact (${creditCost} crédit${creditCost > 1 ? 's' : ''})`}
-        variant="success"
         size="sm"
         block
         onPress={() => (user ? setShowConfirm(true) : goLogin())}

@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 2 },
   meta: { fontSize: 11, color: colors.textLight },
   metaVille: { fontSize: 11, color: colors.success },
-  price: { fontSize: 17, fontWeight: '700', color: colors.primary, marginVertical: 2 },
+  price: { fontSize: 17, fontWeight: '700', color: '#111', marginVertical: 2 },
   limite: { fontSize: 10, color: colors.warning, marginBottom: 6 },
   deleteBtn: { flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: '#ef4444', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 8, marginTop: 6, alignSelf: 'flex-start' },
   deleteBtnText: { color: '#fff', fontSize: 10, fontWeight: '600' },
