@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
   header: { alignItems: 'center', padding: 12, marginBottom: 4 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   name: { fontSize: 20, fontWeight: '700' },
-  certifiedBadge: { backgroundColor: '#0ea5e9', paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginTop: 4 },
+  certifiedBadge: { backgroundColor: '#059669', paddingVertical: 4, paddingHorizontal: 8, borderRadius: 4, marginTop: 4 },
   certifiedText: { color: '#fff', fontSize: 12, fontWeight: '600' },
   description: { fontSize: 13, color: colors.textLight, marginTop: 4, marginBottom: 4, textAlign: 'center' },
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 8 },

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, Image, Pressable, Alert, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { Package, Trash2, Check, X, Eye } from 'lucide-react-native';
+import { Package, Trash2, Check, X, Eye, RefreshCw, ShoppingCart, MessageSquare, Settings, LayoutGrid } from 'lucide-react-native';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
 import PhotoSlider from '../../components/PhotoSlider';
@@ -153,17 +153,12 @@ export default function MyBoutiqueScreen() {
       </View>
 
       <View style={{ gap: 8, marginBottom: 16 }}>
-        <Button title="Renouveler mon abonnement" block onPress={() => navigation.navigate('Compte', { screen: 'RenewSubscription' })} />
-        <Button title="Commandes" variant="secondary" block onPress={() => navigation.navigate('ProduitsCommandes')} />
-        <Button title={`Messages (${unreadMessagesCount})`} variant="secondary" block onPress={() => navigation.navigate('BoutiqueMessages')} />
-        <Button title="Modifier Boutique" variant="secondary" block onPress={() => navigation.navigate('CreateBoutique')} />
-        <Button title="Organiser les produits" variant="secondary" block onPress={() => navigation.navigate('OrganiserBoutique')} />
-        <Button
-          title="Visite de la boutique"
-          variant="secondary"
-          block
-          onPress={() => navigation.navigate('BoutiqueVisits', { boutiqueId: boutique._id })}
-        />
+        <Button title="Renouveler mon abonnement" leftIcon={<RefreshCw size={16} color="#fff" />} block onPress={() => navigation.navigate('Compte', { screen: 'RenewSubscription' })} />
+        <Button title="Commandes" leftIcon={<ShoppingCart size={16} color={colors.primary} />} variant="secondary" block onPress={() => navigation.navigate('ProduitsCommandes')} />
+        <Button title={`Messages (${unreadMessagesCount})`} leftIcon={<MessageSquare size={16} color={colors.primary} />} variant="secondary" block onPress={() => navigation.navigate('BoutiqueMessages')} />
+        <Button title="Modifier Boutique" leftIcon={<Settings size={16} color={colors.primary} />} variant="secondary" block onPress={() => navigation.navigate('CreateBoutique')} />
+        <Button title="Organiser les produits" leftIcon={<LayoutGrid size={16} color={colors.primary} />} variant="secondary" block onPress={() => navigation.navigate('OrganiserBoutique')} />
+        <Button title="Visite de la boutique" leftIcon={<Eye size={16} color={colors.primary} />} variant="secondary" block onPress={() => navigation.navigate('BoutiqueVisits', { boutiqueId: boutique._id })} />
       </View>
 
       <FormInput placeholder="Chercher produit..." value={search} onChangeText={setSearch} />
