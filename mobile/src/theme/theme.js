@@ -1,8 +1,8 @@
 // Reprend à l'identique les tokens CSS de frontend/src/index.css (:root)
 export const colors = {
-  primary: '#1B2A6B',
-  primaryLight: '#2a3d8f',
-  primaryDark: '#111d4a',
+  primary: '#2563EB',
+  primaryLight: '#3b82f6',
+  primaryDark: '#1d4ed8',
   accent: '#4A90D9',
   bg: '#F5F5F5',
   bgWhite: '#FFFFFF',
