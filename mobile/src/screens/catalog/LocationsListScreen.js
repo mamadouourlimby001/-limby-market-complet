@@ -11,7 +11,7 @@ import { colors } from '../../theme/theme';
 
 const TABS = [
   { key: 'Location',          label: 'Location',          Icon: Building2 },
-  { key: 'Colocation',        label: 'Colocation',        Icon: Users },
+  { key: 'Collocation',       label: 'Collocation',       Icon: Users },
   { key: 'Vente de maisons',  label: 'Vente de maisons',  Icon: Home },
   { key: 'Vente de terrains', label: 'Vente de terrains', Icon: Map },
 ];
@@ -72,7 +72,7 @@ export default function LocationsListScreen() {
                 onPress={() => setSelectedCategorie(key)}
                 style={[styles.tab, active && styles.tabActive]}
               >
-                <Icon size={16} color={iconColor} />
+                <Icon size={13} color={iconColor} />
                 <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={2}>{label}</Text>
               </Pressable>
             );
@@ -122,13 +122,13 @@ const styles = StyleSheet.create({
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   pageTitle: { fontSize: 18, fontWeight: '700', color: colors.primary },
   filterCard: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginBottom: 12 },
-  tabsRow: { flexDirection: 'row', gap: 6, paddingBottom: 12 },
+  tabsRow: { flexDirection: 'row', gap: 4, paddingBottom: 6 },
   tab: {
     flex: 1,
-    paddingVertical: 8,
-    paddingHorizontal: 4,
-    borderRadius: 10,
-    borderWidth: 2,
+    paddingVertical: 4,
+    paddingHorizontal: 3,
+    borderRadius: 6,
+    borderWidth: 1,
     borderColor: colors.primary,
     backgroundColor: '#fff',
     alignItems: 'center',
@@ -137,6 +137,6 @@ const styles = StyleSheet.create({
   tabActive: {
     backgroundColor: colors.primary,
   },
-  tabText: { fontSize: 11, fontWeight: '700', color: colors.primary, textAlign: 'center' },
+  tabText: { fontSize: 10, fontWeight: '700', color: colors.primary, textAlign: 'center' },
   tabTextActive: { color: '#fff' },
 });

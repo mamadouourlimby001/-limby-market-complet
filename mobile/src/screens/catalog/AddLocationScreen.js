@@ -9,7 +9,7 @@ import { colors } from '../../theme/theme';
 
 const CATEGORIE_OPTIONS = [
   { label: 'Location', value: 'Location' },
-  { label: 'Colocation', value: 'Colocation' },
+  { label: 'Collocation', value: 'Collocation' },
   { label: 'Vente de maisons', value: 'Vente de maisons' },
   { label: 'Vente de terrains', value: 'Vente de terrains' },
 ];
