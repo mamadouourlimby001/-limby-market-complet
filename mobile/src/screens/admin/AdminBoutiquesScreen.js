@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Image, Alert, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Trash2, CheckCircle, XCircle, BarChart3 } from 'lucide-react-native';
+import { Trash2, CheckCircle, XCircle } from 'lucide-react-native';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
 import { Card, Loader, EmptyState, Button } from '../../components/ui';
@@ -115,9 +115,9 @@ export default function AdminBoutiquesScreen() {
 
             <View style={styles.btnGrid}>
               <Button
-                title="Bilan"
+                title="Visites"
                 style={[styles.gridBtn, { backgroundColor: '#3b82f6' }]}
-                onPress={() => navigation.navigate('AdminBoutiqueDetail', { id: boutique._id })}
+                onPress={() => navigation.navigate('AdminBoutiqueVisits', { boutiqueId: boutique._id })}
                 disabled={actionId === boutique._id}
               />
               <Button

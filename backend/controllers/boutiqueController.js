@@ -252,9 +252,10 @@ const getBoutiqueVisits = async (req, res) => {
     // Vérifier que la boutique existe
     const boutique = await Boutique.findById(id);
     if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
-    
-    // Vérifier que l'utilisateur est le propriétaire
-    if (boutique.proprietaire.toString() !== req.user._id.toString()) {
+
+    // Vérifier que l'utilisateur est le propriétaire ou un admin
+    const isAdmin = req.user.role === 'admin_simple' || req.user.role === 'admin_supreme';
+    if (!isAdmin && boutique.proprietaire.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Accès refusé.' });
     }
 

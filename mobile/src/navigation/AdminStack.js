@@ -1,7 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import AdminDashboardScreen from '../screens/admin/AdminDashboardScreen';
 import AdminBoutiquesScreen from '../screens/admin/AdminBoutiquesScreen';
-import AdminBoutiqueDetailScreen from '../screens/admin/AdminBoutiqueDetailScreen';
+import BoutiqueVisitsScreen from '../screens/boutique/BoutiqueVisitsScreen';
 import AdminCreditRequestsScreen from '../screens/admin/AdminCreditRequestsScreen';
 import AdminSubscriptionsScreen from '../screens/admin/AdminSubscriptionsScreen';
 import AdminReportsScreen from '../screens/admin/AdminReportsScreen';
@@ -22,7 +22,7 @@ export default function AdminStack() {
     <Stack.Navigator screenOptions={{ header: () => <AppHeader /> }}>
       <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} />
       <Stack.Screen name="AdminBoutiques" component={AdminBoutiquesScreen} />
-      <Stack.Screen name="AdminBoutiqueDetail" component={AdminBoutiqueDetailScreen} />
+      <Stack.Screen name="AdminBoutiqueVisits" component={BoutiqueVisitsScreen} />
       <Stack.Screen name="AdminCredits" component={AdminCreditRequestsScreen} />
       <Stack.Screen name="AdminSubscriptions" component={AdminSubscriptionsScreen} />
       <Stack.Screen name="AdminReports" component={AdminReportsScreen} />
