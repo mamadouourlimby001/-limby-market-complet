@@ -72,7 +72,7 @@ export default function LocationsListScreen() {
                 onPress={() => setSelectedCategorie(key)}
                 style={[styles.tab, active && styles.tabActive]}
               >
-                <Icon size={13} color={iconColor} />
+                <Icon size={11} color={iconColor} />
                 <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={2}>{label}</Text>
               </Pressable>
             );
@@ -125,7 +125,8 @@ const styles = StyleSheet.create({
   tabsRow: { flexDirection: 'row', gap: 4, paddingBottom: 4 },
   tab: {
     flex: 1,
-    paddingVertical: 2,
+    flexDirection: 'row',
+    paddingVertical: 3,
     paddingHorizontal: 2,
     borderRadius: 5,
     borderWidth: 1,
@@ -133,10 +134,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 3,
   },
   tabActive: {
     backgroundColor: colors.primary,
   },
-  tabText: { fontSize: 10, fontWeight: '700', color: colors.primary, textAlign: 'center' },
+  tabText: { fontSize: 9, fontWeight: '700', color: colors.primary, textAlign: 'center' },
   tabTextActive: { color: '#fff' },
 });
