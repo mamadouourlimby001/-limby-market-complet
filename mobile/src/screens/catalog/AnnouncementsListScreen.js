@@ -45,6 +45,20 @@ export default function AnnouncementsListScreen() {
 
   return (
     <View style={styles.flex}>
+      <View style={styles.fixedHeader}>
+        <View style={styles.headerRow}>
+          <Text style={styles.pageTitle}>Annonces</Text>
+          <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
+        </View>
+        <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddAnnouncement') : navigation.navigate('Compte', { screen: 'Login' }))} />
+        {showFilters && (
+          <View style={styles.filterCard}>
+            <Select label="Ville de travail" value={filters.villeDeTravail} onChange={(v) => setFilters({ ...filters, villeDeTravail: v })} options={[{ label: 'Toutes', value: '' }, ...VILLES_OPTIONS]} />
+            <FormInput label="Entreprise" value={filters.entreprise} onChangeText={(v) => setFilters({ ...filters, entreprise: v })} />
+            <Button title="Appliquer" block size="sm" onPress={() => { fetchAnnouncements(); setShowFilters(false); }} />
+          </View>
+        )}
+      </View>
       <FlatList
         data={announcements}
         keyExtractor={(item) => item._id}
@@ -61,20 +75,6 @@ export default function AnnouncementsListScreen() {
         }
         ListHeaderComponent={
           <View>
-            <View style={styles.headerRow}>
-              <Text style={styles.pageTitle}>Annonces</Text>
-              <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
-            </View>
-            <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddAnnouncement') : navigation.navigate('Compte', { screen: 'Login' }))} />
-
-            {showFilters && (
-              <View style={styles.filterCard}>
-                <Select label="Ville de travail" value={filters.villeDeTravail} onChange={(v) => setFilters({ ...filters, villeDeTravail: v })} options={[{ label: 'Toutes', value: '' }, ...VILLES_OPTIONS]} />
-                <FormInput label="Entreprise" value={filters.entreprise} onChangeText={(v) => setFilters({ ...filters, entreprise: v })} />
-                <Button title="Appliquer" block size="sm" onPress={() => { fetchAnnouncements(); setShowFilters(false); }} />
-              </View>
-            )}
-
             {loading && <SkeletonList count={6} />}
             {!loading && announcements.length === 0 && <EmptyState text="Aucune annonce trouvée" />}
           </View>
@@ -87,6 +87,7 @@ export default function AnnouncementsListScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
+  fixedHeader: { backgroundColor: colors.bg, paddingHorizontal: 12, paddingTop: 12 },
   list: { padding: 12, paddingBottom: 80 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   pageTitle: { fontSize: 18, fontWeight: '700', color: colors.primary },

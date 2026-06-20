@@ -56,6 +56,24 @@ export default function ProductsListScreen() {
 
   return (
     <View style={styles.flex}>
+      <View style={styles.fixedHeader}>
+        <View style={styles.headerRow}>
+          <Text style={styles.pageTitle}>Occasion</Text>
+          <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
+        </View>
+        <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddProduct') : navigation.navigate('Compte', { screen: 'Login' }))} />
+        {showFilters && (
+          <View style={styles.filterCard}>
+            <Select label="Ville" value={filters.ville} onChange={(v) => setFilters({ ...filters, ville: v })} options={[{ label: 'Toutes', value: '' }, ...VILLES_OPTIONS]} />
+            <Select label="Catégorie" value={filters.categorie} onChange={(v) => setFilters({ ...filters, categorie: v })} options={[{ label: 'Toutes', value: '' }, ...CATEGORIES_OPTIONS]} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <FormInput containerStyle={{ flex: 1 }} label="Prix min" placeholder="GNF" keyboardType="numeric" value={filters.prixMin} onChangeText={(v) => setFilters({ ...filters, prixMin: v })} />
+              <FormInput containerStyle={{ flex: 1 }} label="Prix max" placeholder="GNF" keyboardType="numeric" value={filters.prixMax} onChangeText={(v) => setFilters({ ...filters, prixMax: v })} />
+            </View>
+            <Button title="Appliquer" block size="sm" onPress={applyFilters} />
+          </View>
+        )}
+      </View>
       <FlatList
         data={products}
         keyExtractor={(item) => item._id}
@@ -72,24 +90,6 @@ export default function ProductsListScreen() {
         }
         ListHeaderComponent={
           <View>
-            <View style={styles.headerRow}>
-              <Text style={styles.pageTitle}>Occasion</Text>
-              <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
-            </View>
-            <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddProduct') : navigation.navigate('Compte', { screen: 'Login' }))} />
-
-            {showFilters && (
-              <View style={styles.filterCard}>
-                <Select label="Ville" value={filters.ville} onChange={(v) => setFilters({ ...filters, ville: v })} options={[{ label: 'Toutes', value: '' }, ...VILLES_OPTIONS]} />
-                <Select label="Catégorie" value={filters.categorie} onChange={(v) => setFilters({ ...filters, categorie: v })} options={[{ label: 'Toutes', value: '' }, ...CATEGORIES_OPTIONS]} />
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <FormInput containerStyle={{ flex: 1 }} label="Prix min" placeholder="GNF" keyboardType="numeric" value={filters.prixMin} onChangeText={(v) => setFilters({ ...filters, prixMin: v })} />
-                  <FormInput containerStyle={{ flex: 1 }} label="Prix max" placeholder="GNF" keyboardType="numeric" value={filters.prixMax} onChangeText={(v) => setFilters({ ...filters, prixMax: v })} />
-                </View>
-                <Button title="Appliquer" block size="sm" onPress={applyFilters} />
-              </View>
-            )}
-
             {loading && <SkeletonList count={6} />}
             {!loading && products.length === 0 && <EmptyState text="Aucun produit trouvé" />}
           </View>
@@ -102,6 +102,7 @@ export default function ProductsListScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
+  fixedHeader: { backgroundColor: colors.bg, paddingHorizontal: 12, paddingTop: 12 },
   list: { padding: 12, paddingBottom: 80 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   pageTitle: { fontSize: 18, fontWeight: '700', color: colors.primary },

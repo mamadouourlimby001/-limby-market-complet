@@ -56,6 +56,39 @@ export default function LocationsListScreen() {
 
   return (
     <View style={styles.flex}>
+      <View style={styles.fixedHeader}>
+        <View style={styles.headerRow}>
+          <Text style={styles.pageTitle}>Locations</Text>
+          <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
+        </View>
+        <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
+        <View style={styles.tabsRow}>
+          {TABS.map(({ key, label, Icon }) => {
+            const active = selectedCategorie === key;
+            const iconColor = active ? '#fff' : colors.primary;
+            return (
+              <Pressable
+                key={key}
+                onPress={() => setSelectedCategorie(key)}
+                style={[styles.tab, active && styles.tabActive]}
+              >
+                <Icon size={16} color={iconColor} />
+                <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={2}>{label}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+        {showFilters && (
+          <View style={styles.filterCard}>
+            <Select label="Ville" value={filters.ville} onChange={(v) => setFilters({ ...filters, ville: v })} options={[{ label: 'Toutes', value: '' }, ...VILLES_OPTIONS]} />
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <FormInput containerStyle={{ flex: 1 }} label="Prix min" keyboardType="numeric" value={filters.prixMin} onChangeText={(v) => setFilters({ ...filters, prixMin: v })} />
+              <FormInput containerStyle={{ flex: 1 }} label="Prix max" keyboardType="numeric" value={filters.prixMax} onChangeText={(v) => setFilters({ ...filters, prixMax: v })} />
+            </View>
+            <Button title="Appliquer" block size="sm" onPress={() => { fetchLocations(); setShowFilters(false); }} />
+          </View>
+        )}
+      </View>
       <FlatList
         data={displayed}
         keyExtractor={(item) => item._id}
@@ -72,41 +105,6 @@ export default function LocationsListScreen() {
         }
         ListHeaderComponent={
           <View>
-            <View style={styles.headerRow}>
-              <Text style={styles.pageTitle}>Locations</Text>
-              <Button title="Filtres" variant="secondary" size="sm" onPress={() => setShowFilters(!showFilters)} />
-            </View>
-            <Button title="+ Nouvelle publication" block style={{ backgroundColor: '#111', marginBottom: 8 }} onPress={() => (user ? navigation.navigate('AddLocation') : navigation.navigate('Compte', { screen: 'Login' }))} />
-
-            {/* Onglets catégorie */}
-            <View style={styles.tabsRow}>
-              {TABS.map(({ key, label, Icon }) => {
-                const active = selectedCategorie === key;
-                const iconColor = active ? '#fff' : colors.primary;
-                return (
-                  <Pressable
-                    key={key}
-                    onPress={() => setSelectedCategorie(key)}
-                    style={[styles.tab, active && styles.tabActive]}
-                  >
-                    <Icon size={16} color={iconColor} />
-                    <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={2}>{label}</Text>
-                  </Pressable>
-                );
-              })}
-            </View>
-
-            {showFilters && (
-              <View style={styles.filterCard}>
-                <Select label="Ville" value={filters.ville} onChange={(v) => setFilters({ ...filters, ville: v })} options={[{ label: 'Toutes', value: '' }, ...VILLES_OPTIONS]} />
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  <FormInput containerStyle={{ flex: 1 }} label="Prix min" keyboardType="numeric" value={filters.prixMin} onChangeText={(v) => setFilters({ ...filters, prixMin: v })} />
-                  <FormInput containerStyle={{ flex: 1 }} label="Prix max" keyboardType="numeric" value={filters.prixMax} onChangeText={(v) => setFilters({ ...filters, prixMax: v })} />
-                </View>
-                <Button title="Appliquer" block size="sm" onPress={() => { fetchLocations(); setShowFilters(false); }} />
-              </View>
-            )}
-
             {loading && <SkeletonList count={6} />}
             {!loading && displayed.length === 0 && <EmptyState text="Aucune location trouvée" />}
           </View>
@@ -119,6 +117,7 @@ export default function LocationsListScreen() {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
+  fixedHeader: { backgroundColor: colors.bg, paddingHorizontal: 12, paddingTop: 12 },
   list: { padding: 12, paddingBottom: 80 },
   headerRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 },
   pageTitle: { fontSize: 18, fontWeight: '700', color: colors.primary },
