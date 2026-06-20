@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { View, Text, FlatList, Pressable, RefreshControl, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { Building2, Users, Home, Map } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import LocationCard from '../../components/LocationCard';
@@ -9,10 +10,10 @@ import { VILLES_OPTIONS } from '../../constants/villes';
 import { colors } from '../../theme/theme';
 
 const TABS = [
-  { key: 'Location',          label: 'Location' },
-  { key: 'Colocation',        label: 'Colocation' },
-  { key: 'Vente de maisons',  label: 'Vente de maisons' },
-  { key: 'Vente de terrains', label: 'Vente de terrains' },
+  { key: 'Location',          label: 'Location',          Icon: Building2 },
+  { key: 'Colocation',        label: 'Colocation',        Icon: Users },
+  { key: 'Vente de maisons',  label: 'Vente de maisons',  Icon: Home },
+  { key: 'Vente de terrains', label: 'Vente de terrains', Icon: Map },
 ];
 
 export default function LocationsListScreen() {
@@ -79,14 +80,16 @@ export default function LocationsListScreen() {
 
             {/* Onglets catégorie */}
             <View style={styles.tabsRow}>
-              {TABS.map(({ key, label }) => {
+              {TABS.map(({ key, label, Icon }) => {
                 const active = selectedCategorie === key;
+                const iconColor = active ? '#fff' : colors.primary;
                 return (
                   <Pressable
                     key={key}
                     onPress={() => setSelectedCategorie(key)}
                     style={[styles.tab, active && styles.tabActive]}
                   >
+                    <Icon size={16} color={iconColor} />
                     <Text style={[styles.tabText, active && styles.tabTextActive]} numberOfLines={2}>{label}</Text>
                   </Pressable>
                 );
