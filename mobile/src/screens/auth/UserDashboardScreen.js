@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, Pressable, Alert, StyleSheet } from 'react-native';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import { ShoppingBag, Trash2 } from 'lucide-react-native';
+import { ShoppingBag, Trash2, CreditCard, Package, Lock, RefreshCw, LogOut } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -132,13 +132,12 @@ export default function UserDashboardScreen() {
             ) : null}
           </Card>
 
-          <Button title="Acheter des crédits" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('BuyCredits')} />
-          <Button title="Mes commandes" variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('MesCommandes')} />
-          <Button title="Modifier le mot de passe" variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('ChangePassword')} />
-          <Button title="Déconnexion" variant="danger" block style={{ marginBottom: 8 }} onPress={handleLogout} />
+          <Button title="Acheter des crédits" leftIcon={<CreditCard size={16} color="#fff" />} block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('BuyCredits')} />
+          <Button title="Mes commandes" leftIcon={<Package size={16} color={colors.primary} />} variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('MesCommandes')} />
+          <Button title="Modifier le mot de passe" leftIcon={<Lock size={16} color={colors.primary} />} variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('ChangePassword')} />
           {boutique ? (
             <>
-              <Button title="Renouveler mon abonnement" variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('RenewSubscription')} />
+              <Button title="Renouveler mon abonnement" leftIcon={<RefreshCw size={16} color={colors.primary} />} variant="secondary" block style={{ marginBottom: 8 }} onPress={() => navigation.navigate('RenewSubscription')} />
               <Pressable onPress={() => navigation.navigate('MaBoutique', { screen: 'MyBoutique' })}>
                 <Card style={styles.boutiqueCard}>
                   <View style={styles.boutiqueTitleRow}>
@@ -155,6 +154,7 @@ export default function UserDashboardScreen() {
               </Pressable>
             </>
           ) : null}
+          <Button title="Déconnexion" leftIcon={<LogOut size={16} color="#fff" />} variant="danger" block style={{ marginTop: 8, marginBottom: 8 }} onPress={handleLogout} />
         </View>
       )}
 

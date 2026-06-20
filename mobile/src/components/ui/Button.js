@@ -1,4 +1,4 @@
-import { Pressable, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { Pressable, Text, View, StyleSheet, ActivityIndicator } from 'react-native';
 import { colors, radius } from '../../theme/theme';
 
 // Équivalent des classes .btn / .btn-primary / .btn-secondary / .btn-danger / .btn-success
@@ -19,6 +19,7 @@ export default function Button({
   block = false,
   disabled = false,
   loading = false,
+  leftIcon,
   style,
   textStyle,
 }) {
@@ -42,7 +43,10 @@ export default function Button({
       {loading ? (
         <ActivityIndicator color={v.fg} size="small" />
       ) : (
-        <Text style={[styles.text, size === 'sm' && styles.textSm, { color: v.fg }, textStyle]}>{title}</Text>
+        <View style={styles.inner}>
+          {leftIcon ? <View style={styles.iconWrap}>{leftIcon}</View> : null}
+          <Text style={[styles.text, size === 'sm' && styles.textSm, { color: v.fg }, textStyle]}>{title}</Text>
+        </View>
       )}
     </Pressable>
   );
@@ -61,6 +65,8 @@ const styles = StyleSheet.create({
   block: { width: '100%' },
   disabled: { opacity: 0.5 },
   pressed: { opacity: 0.85 },
+  inner: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
+  iconWrap: { marginRight: 7 },
   text: { fontSize: 14, fontWeight: '600' },
   textSm: { fontSize: 12 },
 });
