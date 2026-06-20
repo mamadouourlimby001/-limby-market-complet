@@ -64,37 +64,36 @@ export default function BoutiqueDetailScreen({ route }) {
     <View style={styles.flex}>
       {/* Header fixe */}
       <View style={styles.fixedHeader}>
-        <View style={styles.avatarWrap}>
+        <View style={styles.headerRow}>
           {boutique.logo
             ? <Image source={{ uri: boutique.logo }} style={styles.avatar} resizeMode="cover" />
-            : <View style={styles.avatarPlaceholder}><Store size={36} color={colors.textLight} /></View>
+            : <View style={styles.avatarPlaceholder}><Store size={24} color={colors.textLight} /></View>
           }
-        </View>
-        <View style={styles.header}>
-          <View style={styles.nameRow}>
-            <Text style={styles.name}>{boutique.nom}</Text>
-            {boutique.isVerified ? <Check size={18} color={colors.accent} /> : null}
-            {boutique.isCertified ? (
-              <View style={styles.certifiedBadge}>
-                <Text style={styles.certifiedText}>Boutique Certifiée</Text>
-              </View>
-            ) : null}
+          <View style={styles.headerInfo}>
+            <View style={styles.nameRow}>
+              <Text style={styles.name} numberOfLines={1}>{boutique.nom}</Text>
+              {boutique.isVerified ? <Check size={14} color={colors.accent} /> : null}
+              {boutique.isCertified ? (
+                <View style={styles.certifiedBadge}>
+                  <Text style={styles.certifiedText}>Certifiée</Text>
+                </View>
+              ) : null}
+            </View>
+            <Text style={styles.description} numberOfLines={1}>{boutique.description}</Text>
+            <View style={styles.metaRow}>
+              <MapPin size={11} color={colors.textLight} />
+              <Text style={styles.meta} numberOfLines={1}>{boutique.quartier}, {boutique.ville} · {boutique.telephone}</Text>
+            </View>
+            <Badge variant="primary">{boutique.categorie}</Badge>
           </View>
-          <Text style={styles.description}>{boutique.description}</Text>
-          <View style={styles.metaRow}>
-            <MapPin size={14} color={colors.textLight} />
-            <Text style={styles.meta}>{boutique.quartier}, {boutique.ville}</Text>
-            <Text style={styles.metaSep}>·</Text>
-            <Text style={styles.phone}>{boutique.telephone}</Text>
-          </View>
-          <Badge variant="primary">{boutique.categorie}</Badge>
         </View>
 
         {isOwner ? (
           <Button
             title="+ Ajouter un produit"
+            size="sm"
             block
-            style={{ marginBottom: 10, marginHorizontal: 12 }}
+            style={{ marginBottom: 6, marginHorizontal: 12 }}
             onPress={() => navigation.navigate('MaBoutique', { screen: 'AddBoutiqueProduct', params: { id } })}
           />
         ) : (
@@ -102,7 +101,7 @@ export default function BoutiqueDetailScreen({ route }) {
             style={styles.whatsappBtn}
             onPress={() => Linking.openURL(`https://wa.me/${(boutique.telephone || '').replace(/\D/g, '')}`)}
           >
-            <WhatsAppIcon size={18} />
+            <WhatsAppIcon size={16} />
             <Text style={styles.whatsappText}>Contacter par WhatsApp</Text>
           </Pressable>
         )}
@@ -177,22 +176,21 @@ export default function BoutiqueDetailScreen({ route }) {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: colors.bg },
-  fixedHeader: { backgroundColor: colors.bg, paddingTop: 6, borderBottomWidth: 1, borderBottomColor: colors.border },
-  avatarWrap: { alignItems: 'center', marginBottom: 4 },
-  avatar: { width: 60, height: 60, borderRadius: 30, borderWidth: 2, borderColor: colors.primary },
-  avatarPlaceholder: { width: 60, height: 60, borderRadius: 30, borderWidth: 2, borderColor: colors.border, backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
-  header: { alignItems: 'center', paddingHorizontal: 12, marginBottom: 4 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 5, flexWrap: 'wrap', justifyContent: 'center' },
-  name: { fontSize: 16, fontWeight: '700' },
-  certifiedBadge: { backgroundColor: '#059669', paddingVertical: 2, paddingHorizontal: 6, borderRadius: 4 },
-  certifiedText: { color: '#fff', fontSize: 10, fontWeight: '600' },
-  description: { fontSize: 11, color: colors.textLight, marginTop: 2, marginBottom: 2, textAlign: 'center' },
-  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginBottom: 4, flexWrap: 'wrap', justifyContent: 'center' },
-  meta: { fontSize: 11, color: colors.textLight },
-  metaSep: { fontSize: 11, color: colors.textLight },
-  phone: { fontSize: 11, color: colors.primary, fontWeight: '600' },
-  whatsappBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 8, marginHorizontal: 12, marginBottom: 6, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border, borderRadius: 10 },
-  whatsappText: { fontSize: 13, fontWeight: '600', color: colors.primary },
+  fixedHeader: { backgroundColor: colors.bg, paddingTop: 6, paddingHorizontal: 12, borderBottomWidth: 1, borderBottomColor: colors.border },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 6 },
+  avatar: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: colors.primary },
+  avatarPlaceholder: { width: 50, height: 50, borderRadius: 25, borderWidth: 2, borderColor: colors.border, backgroundColor: '#f0f0f0', alignItems: 'center', justifyContent: 'center' },
+  headerInfo: { flex: 1 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4, flexWrap: 'wrap' },
+  name: { fontSize: 14, fontWeight: '700' },
+  certifiedBadge: { backgroundColor: '#059669', paddingVertical: 1, paddingHorizontal: 5, borderRadius: 4 },
+  certifiedText: { color: '#fff', fontSize: 9, fontWeight: '600' },
+  description: { fontSize: 10, color: colors.textLight, marginVertical: 1 },
+  metaRow: { flexDirection: 'row', alignItems: 'center', gap: 3, marginBottom: 3 },
+  meta: { fontSize: 10, color: colors.textLight, flex: 1 },
+  phone: { fontSize: 10, color: colors.primary, fontWeight: '600' },
+  whatsappBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, padding: 6, marginBottom: 6, backgroundColor: colors.bg, borderWidth: 1.5, borderColor: colors.border, borderRadius: 8 },
+  whatsappText: { fontSize: 12, fontWeight: '600', color: colors.primary },
   scrollContent: { padding: 12, paddingBottom: 80 },
   sectionTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
   sectionContainer: { backgroundColor: '#fff', borderRadius: 12, marginBottom: 16, borderWidth: 1.5, borderColor: colors.primary, overflow: 'hidden' },
