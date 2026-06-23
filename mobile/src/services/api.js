@@ -5,7 +5,7 @@ import { resetToLogin } from '../navigation/navigationRef';
 // Équivalent exact de frontend/src/utils/api.js : même baseURL de repli, même
 // logique d'intercepteurs (Bearer + purge sur 401), aucune route additionnelle.
 const api = axios.create({
-  baseURL: 'https://limby01-1.onrender.com/api',
+  baseURL: 'https://web-production-bac6a.up.railway.app/api',
   timeout: 60000,
 });
 
