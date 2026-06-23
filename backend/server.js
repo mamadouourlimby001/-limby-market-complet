@@ -11,13 +11,8 @@ const adminSeed = require('./seed/adminSeed');
 dotenv.config();
 
 // Diagnostic Railway
-console.log('ENV CHECK:', {
-  MONGODB_URI: process.env.MONGODB_URI ? 'SET' : 'UNDEFINED',
-  JWT_SECRET: process.env.JWT_SECRET ? 'SET' : 'UNDEFINED',
-  NODE_ENV: process.env.NODE_ENV || 'UNDEFINED',
-  PORT: process.env.PORT || 'UNDEFINED',
-  CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME ? 'SET' : 'UNDEFINED',
-});
+console.log('ALL ENV KEYS:', Object.keys(process.env).sort().join(', '));
+console.log('MONGODB_URI value:', process.env.MONGODB_URI === undefined ? 'UNDEFINED' : (process.env.MONGODB_URI === '' ? 'EMPTY STRING' : 'SET:' + process.env.MONGODB_URI.substring(0, 30)));
 
 // Connexion à MongoDB
 connectDB();
