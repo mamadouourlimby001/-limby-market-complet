@@ -20,6 +20,7 @@ export default function AnnouncementsListScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [filters, setFilters] = useState({ villeDeTravail: '', entreprise: '' });
   const [showFilters, setShowFilters] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const fetchAnnouncements = async (isRefresh = false) => {
@@ -50,8 +51,8 @@ export default function AnnouncementsListScreen() {
   return (
     <View style={styles.flex}>
       <Animated.View style={[styles.animHeader, { height: headerHeight }]}>
-        {/* Étendu */}
-        <Animated.View style={[styles.fill, { opacity: expandedOpacity }]}>
+        {/* Étendu — reçoit les touches quand non scrollé */}
+        <Animated.View pointerEvents={scrolled ? 'none' : 'auto'} style={[styles.fill, { opacity: expandedOpacity }]}>
           <View style={styles.expandedInner}>
             <View style={styles.headerRow}>
               <Text style={styles.pageTitle}>Annonces</Text>
@@ -60,8 +61,8 @@ export default function AnnouncementsListScreen() {
             <Button title="+ Nouvelle publication" size="sm" block style={{ backgroundColor: '#111', marginBottom: 6 }} onPress={goAdd} />
           </View>
         </Animated.View>
-        {/* Réduit */}
-        <Animated.View style={[styles.fill, { opacity: collapsedOpacity }]}>
+        {/* Réduit — reçoit les touches quand scrollé */}
+        <Animated.View pointerEvents={scrolled ? 'auto' : 'none'} style={[styles.fill, { opacity: collapsedOpacity }]}>
           <View style={styles.collapsedInner}>
             <Text style={styles.pageTitleSmall}>Annonces</Text>
             <View style={{ flex: 1 }} />
@@ -86,7 +87,13 @@ export default function AnnouncementsListScreen() {
         columnWrapperStyle={{ gap: 10 }}
         contentContainerStyle={styles.list}
         scrollEventThrottle={16}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          {
+            useNativeDriver: false,
+            listener: (e) => setScrolled(e.nativeEvent.contentOffset.y >= COLLAPSE_AT * 0.5),
+          }
+        )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchAnnouncements(true)} colors={[colors.primary]} tintColor={colors.primary} />}
         ListHeaderComponent={
           <View>

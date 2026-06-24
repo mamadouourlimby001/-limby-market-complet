@@ -11,6 +11,7 @@ import RootNavigator from './src/navigation/RootNavigator';
 import { navigationRef } from './src/navigation/navigationRef';
 import LocationPermissionModal from './src/components/LocationPermissionModal';
 import useTrackVisit from './src/hooks/useTrackVisit';
+import SplashScreen from './src/screens/SplashScreen';
 
 function AppCore() {
   useTrackVisit(navigationRef);
@@ -40,8 +41,22 @@ export default function App() {
     Inter_600SemiBold,
     Inter_700Bold,
   });
+  const [splashDone, setSplashDone] = useState(false);
 
-  if (!fontsLoaded && !fontError) return null;
+  useEffect(() => {
+    const t = setTimeout(() => setSplashDone(true), 2600);
+    return () => clearTimeout(t);
+  }, []);
+
+  const showSplash = !splashDone || (!fontsLoaded && !fontError);
+
+  if (showSplash) {
+    return (
+      <SafeAreaProvider>
+        <SplashScreen />
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>

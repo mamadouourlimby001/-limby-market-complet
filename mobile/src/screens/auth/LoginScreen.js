@@ -22,7 +22,7 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await login(telephone, motDePasse);
-      navigation.navigate('Accueil', { screen: 'Home' });
+      navigation.replace('UserDashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur de connexion');
     } finally {

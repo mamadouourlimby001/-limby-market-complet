@@ -1,26 +1,12 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { View, Text, FlatList, ScrollView, Pressable, RefreshControl, Animated, StyleSheet } from 'react-native';
+import { View, Text, FlatList, RefreshControl, Animated, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { LayoutGrid, Zap, Shirt, Package, Car, Smartphone, Laptop, Plug, Dumbbell, MoreHorizontal } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import ProductCard from '../../components/ProductCard';
 import { Button, Select, FormInput, EmptyState, SkeletonList } from '../../components/ui';
 import { VILLES_OPTIONS } from '../../constants/villes';
 import { colors } from '../../theme/theme';
-
-const TABS = [
-  { key: '',               label: 'Tous',           Icon: LayoutGrid },
-  { key: 'Électronique',   label: 'Électronique',   Icon: Zap },
-  { key: 'Vêtements',      label: 'Vêtements',      Icon: Shirt },
-  { key: 'Meubles',        label: 'Meubles',        Icon: Package },
-  { key: 'Véhicules',      label: 'Véhicules',      Icon: Car },
-  { key: 'Téléphones',     label: 'Téléphones',     Icon: Smartphone },
-  { key: 'Informatique',   label: 'Informatique',   Icon: Laptop },
-  { key: 'Électroménager', label: 'Électroménager', Icon: Plug },
-  { key: 'Sport',          label: 'Sport',          Icon: Dumbbell },
-  { key: 'Autres',         label: 'Autres',         Icon: MoreHorizontal },
-];
 
 const EXPANDED_H  = 100;
 const COLLAPSED_H = 50;
@@ -32,9 +18,9 @@ export default function ProductsListScreen() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedCategorie, setSelectedCategorie] = useState('');
   const [filters, setFilters] = useState({ ville: '', prixMin: '', prixMax: '' });
   const [showFilters, setShowFilters] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const fetchProducts = async (isRefresh = false) => {
@@ -54,7 +40,6 @@ export default function ProductsListScreen() {
   useEffect(() => { fetchProducts(); }, []);
 
   const applyFilters = () => { fetchProducts(); setShowFilters(false); };
-  const displayed = selectedCategorie ? products.filter(p => p.categorie === selectedCategorie) : products;
 
   const headerHeight    = scrollY.interpolate({ inputRange: [0, COLLAPSE_AT], outputRange: [EXPANDED_H, COLLAPSED_H], extrapolate: 'clamp' });
   const expandedOpacity = scrollY.interpolate({ inputRange: [0, COLLAPSE_AT * 0.5], outputRange: [1, 0], extrapolate: 'clamp' });
@@ -66,25 +51,11 @@ export default function ProductsListScreen() {
     <View style={{ flex: 1 }}><ProductCard product={item} /></View>
   ), []);
 
-  const TabsRow = () => (
-    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabsRow} contentContainerStyle={{ gap: 4 }}>
-      {TABS.map(({ key, label, Icon }) => {
-        const active = selectedCategorie === key;
-        return (
-          <Pressable key={key} onPress={() => setSelectedCategorie(key)} style={[styles.tab, active && styles.tabActive]}>
-            <Icon size={14} color={active ? '#fff' : colors.primary} />
-            <Text style={[styles.tabText, active && styles.tabTextActive]}>{label}</Text>
-          </Pressable>
-        );
-      })}
-    </ScrollView>
-  );
-
   return (
     <View style={styles.flex}>
       <Animated.View style={[styles.animHeader, { height: headerHeight }]}>
-        {/* Étendu */}
-        <Animated.View style={[styles.fill, { opacity: expandedOpacity }]}>
+        {/* Étendu — reçoit les touches quand non scrollé */}
+        <Animated.View pointerEvents={scrolled ? 'none' : 'auto'} style={[styles.fill, { opacity: expandedOpacity }]}>
           <View style={styles.expandedInner}>
             <View style={styles.headerRow}>
               <Text style={styles.pageTitle}>Occasion</Text>
@@ -93,8 +64,8 @@ export default function ProductsListScreen() {
             <Button title="+ Nouvelle publication" size="sm" block style={{ backgroundColor: '#111', marginBottom: 6 }} onPress={goAdd} />
           </View>
         </Animated.View>
-        {/* Réduit */}
-        <Animated.View style={[styles.fill, { opacity: collapsedOpacity }]}>
+        {/* Réduit — reçoit les touches quand scrollé */}
+        <Animated.View pointerEvents={scrolled ? 'auto' : 'none'} style={[styles.fill, { opacity: collapsedOpacity }]}>
           <View style={styles.collapsedInner}>
             <Text style={styles.pageTitleSmall}>Occasion</Text>
             <View style={{ flex: 1 }} />
@@ -103,8 +74,6 @@ export default function ProductsListScreen() {
           </View>
         </Animated.View>
       </Animated.View>
-
-      <TabsRow />
 
       {showFilters && (
         <View style={styles.filterCard}>
@@ -118,18 +87,24 @@ export default function ProductsListScreen() {
       )}
 
       <FlatList
-        data={displayed}
+        data={products}
         keyExtractor={(item) => item._id}
         numColumns={2}
         columnWrapperStyle={{ gap: 10 }}
         contentContainerStyle={styles.list}
         scrollEventThrottle={16}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          {
+            useNativeDriver: false,
+            listener: (e) => setScrolled(e.nativeEvent.contentOffset.y >= COLLAPSE_AT * 0.5),
+          }
+        )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchProducts(true)} colors={[colors.primary]} tintColor={colors.primary} />}
         ListHeaderComponent={
           <View>
             {loading && <SkeletonList count={6} />}
-            {!loading && displayed.length === 0 && <EmptyState text="Aucun produit trouvé" />}
+            {!loading && products.length === 0 && <EmptyState text="Aucun produit trouvé" />}
           </View>
         }
         renderItem={renderItem}
@@ -148,10 +123,5 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 18, fontWeight: '700', color: colors.primary },
   pageTitleSmall: { fontSize: 14, fontWeight: '700', color: colors.primary },
   filterCard: { backgroundColor: '#fff', borderRadius: 10, padding: 12, marginHorizontal: 12, marginBottom: 8 },
-  tabsRow: { paddingHorizontal: 12, paddingVertical: 4, borderBottomWidth: 1, borderBottomColor: colors.border },
-  tab: { paddingVertical: 6, paddingHorizontal: 10, borderRadius: 8, borderWidth: 1.5, borderColor: colors.primary, backgroundColor: '#fff', alignItems: 'center', justifyContent: 'center', gap: 3, marginBottom: 2 },
-  tabActive: { backgroundColor: colors.primary },
-  tabText: { fontSize: 12, fontWeight: '700', color: colors.primary, textAlign: 'center' },
-  tabTextActive: { color: '#fff' },
   list: { padding: 12, paddingBottom: 80 },
 });

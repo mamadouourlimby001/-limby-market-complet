@@ -23,6 +23,7 @@ export default function CompteStack() {
 
   return (
     <Stack.Navigator
+      key={user ? 'logged-in' : 'logged-out'}
       screenOptions={{ header: () => <AppHeader /> }}
       initialRouteName={user ? 'UserDashboard' : 'Login'}
     >

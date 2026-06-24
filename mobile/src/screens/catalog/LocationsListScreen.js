@@ -29,6 +29,7 @@ export default function LocationsListScreen() {
   const [selectedCategorie, setSelectedCategorie] = useState('Location');
   const [filters, setFilters] = useState({ ville: '', prixMin: '', prixMax: '' });
   const [showFilters, setShowFilters] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const fetchLocations = async (isRefresh = false) => {
@@ -62,8 +63,8 @@ export default function LocationsListScreen() {
   return (
     <View style={styles.flex}>
       <Animated.View style={[styles.animHeader, { height: headerHeight }]}>
-        {/* Étendu */}
-        <Animated.View style={[styles.fill, { opacity: expandedOpacity }]}>
+        {/* Étendu — reçoit les touches quand non scrollé */}
+        <Animated.View pointerEvents={scrolled ? 'none' : 'auto'} style={[styles.fill, { opacity: expandedOpacity }]}>
           <View style={styles.expandedInner}>
             <View style={styles.headerRow}>
               <Text style={styles.pageTitle}>Locations</Text>
@@ -72,8 +73,8 @@ export default function LocationsListScreen() {
             <Button title="+ Nouvelle publication" size="sm" block style={{ backgroundColor: '#111', marginBottom: 6 }} onPress={goAdd} />
           </View>
         </Animated.View>
-        {/* Réduit */}
-        <Animated.View style={[styles.fill, { opacity: collapsedOpacity }]}>
+        {/* Réduit — reçoit les touches quand scrollé */}
+        <Animated.View pointerEvents={scrolled ? 'auto' : 'none'} style={[styles.fill, { opacity: collapsedOpacity }]}>
           <View style={styles.collapsedInner}>
             <Text style={styles.pageTitleSmall}>Locations</Text>
             <View style={{ flex: 1 }} />
@@ -83,7 +84,7 @@ export default function LocationsListScreen() {
         </Animated.View>
       </Animated.View>
 
-      {/* Onglets catégorie — toujours visibles */}
+      {/* Onglets catégorie */}
       <View style={styles.tabsRow}>
         {TABS.map(({ key, label, Icon }) => {
           const active = selectedCategorie === key;
@@ -114,7 +115,13 @@ export default function LocationsListScreen() {
         columnWrapperStyle={{ gap: 10 }}
         contentContainerStyle={styles.list}
         scrollEventThrottle={16}
-        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], { useNativeDriver: false })}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          {
+            useNativeDriver: false,
+            listener: (e) => setScrolled(e.nativeEvent.contentOffset.y >= COLLAPSE_AT * 0.5),
+          }
+        )}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchLocations(true)} colors={[colors.primary]} tintColor={colors.primary} />}
         ListHeaderComponent={
           <View>
