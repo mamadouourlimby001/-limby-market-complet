@@ -5,6 +5,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Updates from 'expo-updates';
 
 import { AuthProvider } from './src/context/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
@@ -35,6 +36,20 @@ function AppCore() {
   );
 }
 
+// Vérifie et télécharge silencieusement les mises à jour en arrière-plan
+async function checkForUpdate() {
+  try {
+    if (__DEV__) return; // Pas de mise à jour en mode développement
+    const update = await Updates.checkForUpdateAsync();
+    if (update.isAvailable) {
+      await Updates.fetchUpdateAsync();
+      await Updates.reloadAsync(); // Redémarre l'app avec la nouvelle version
+    }
+  } catch (_) {
+    // Ignore les erreurs réseau silencieusement
+  }
+}
+
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
@@ -45,6 +60,7 @@ export default function App() {
 
   useEffect(() => {
     const t = setTimeout(() => setSplashDone(true), 2600);
+    checkForUpdate(); // Lance la vérification de mise à jour dès l'ouverture
     return () => clearTimeout(t);
   }, []);
 

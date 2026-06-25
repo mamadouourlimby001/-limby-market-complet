@@ -52,6 +52,15 @@
       ],
       "@react-native-community/datetimepicker"
     ],
+    "updates": {
+      "url": "https://u.expo.dev/e62f6d68-534f-41da-9cb9-6a0f1d90b5b9",
+      "enabled": true,
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
     "extra": {
       "eas": {
         "projectId": "e62f6d68-534f-41da-9cb9-6a0f1d90b5b9"
