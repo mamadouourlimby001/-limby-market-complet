@@ -6,7 +6,8 @@ const getNotifications = async (req, res) => {
     const notifications = await Notification.find({ destinataire: req.user._id }).sort({ createdAt: -1 });
     res.json(notifications);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('notification error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -17,7 +18,8 @@ const markAsRead = async (req, res) => {
     if (!notification) return res.status(404).json({ message: 'Notification introuvable.' });
     res.json(notification);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('notification error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -27,7 +29,8 @@ const markAllAsRead = async (req, res) => {
     await Notification.updateMany({ destinataire: req.user._id, lu: false }, { lu: true });
     res.json({ message: 'Toutes les notifications marquées comme lues.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('notification error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -38,7 +41,8 @@ const deleteNotification = async (req, res) => {
     if (!notif) return res.status(404).json({ message: 'Notification introuvable.' });
     res.json({ message: 'Notification supprimée.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('notification error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 

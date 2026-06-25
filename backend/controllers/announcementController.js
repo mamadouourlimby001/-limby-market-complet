@@ -5,6 +5,12 @@ const ActionHistory = require('../models/ActionHistory');
 const Notification = require('../models/Notification');
 const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../utils/cloudinaryUpload');
 
+const MAX_PHOTOS = 5;
+const MAX_SEARCH_LEN = 100;
+const MAX_STRING_LEN = 200;
+
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 // GET /api/announcements
 const getAnnouncements = async (req, res) => {
   try {
@@ -13,50 +19,65 @@ const getAnnouncements = async (req, res) => {
     let filter = { statut: 'actif' };
     if (!isOwnerRequest) filter.$or = [{ disponible: true }, { disponible: { $exists: false } }];
     if (isOwnerRequest) filter.auteur = req.user._id;
-    if (villeDeTravail) filter.villeDeTravail = { $regex: villeDeTravail, $options: 'i' };
-    if (entreprise) filter.entreprise = { $regex: entreprise, $options: 'i' };
-    if (dateLimite) filter.dateLimite = { $gte: new Date(dateLimite) };
-    if (search) {
+
+    if (villeDeTravail && typeof villeDeTravail === 'string' && villeDeTravail.length <= MAX_STRING_LEN) {
+      filter.villeDeTravail = { $regex: escapeRegex(villeDeTravail), $options: 'i' };
+    }
+    if (entreprise && typeof entreprise === 'string' && entreprise.length <= MAX_STRING_LEN) {
+      filter.entreprise = { $regex: escapeRegex(entreprise), $options: 'i' };
+    }
+    if (dateLimite) {
+      const d = new Date(dateLimite);
+      if (!isNaN(d.getTime())) filter.dateLimite = { $gte: d };
+    }
+    if (search && typeof search === 'string' && search.length <= MAX_SEARCH_LEN) {
+      const safeSearch = escapeRegex(search);
       filter.$or = [
-        { titre: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } },
-        { entreprise: { $regex: search, $options: 'i' } }
+        { titre: { $regex: safeSearch, $options: 'i' } },
+        { description: { $regex: safeSearch, $options: 'i' } },
+        { entreprise: { $regex: safeSearch, $options: 'i' } }
       ];
     }
-    const announcements = await Announcement.find(filter)
-      .populate('auteur', 'nom telephone isVerified').sort({ createdAt: -1 });
+
+    const announcements = await Announcement.find(filter).populate('auteur', 'nom telephone isVerified').sort({ createdAt: -1 });
+
     const userId = req.user ? req.user._id : null;
     let unlockedIds = [];
     if (userId) {
       const unlocks = await ContactUnlock.find({ utilisateur: userId, typeContenu: 'announcement' });
       unlockedIds = unlocks.map(u => u.contenuId.toString());
     }
+
     const result = announcements.map(a => {
       const obj = a.toObject();
       if (!unlockedIds.includes(obj._id.toString())) obj.contact = 'hidden';
       return obj;
     });
+
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('getAnnouncements error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
 // GET /api/announcements/:id
 const getAnnouncement = async (req, res) => {
   try {
-    const announcement = await Announcement.findById(req.params.id)
-      .populate('auteur', 'nom telephone isVerified');
+    const announcement = await Announcement.findById(req.params.id).populate('auteur', 'nom telephone isVerified');
     if (!announcement) return res.status(404).json({ message: 'Annonce introuvable.' });
     const obj = announcement.toObject();
     const userId = req.user ? req.user._id : null;
     if (userId) {
       const unlock = await ContactUnlock.findOne({ utilisateur: userId, typeContenu: 'announcement', contenuId: announcement._id });
       if (!unlock) obj.contact = 'hidden';
-    } else { obj.contact = 'hidden'; }
+    } else {
+      obj.contact = 'hidden';
+    }
     res.json(obj);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('getAnnouncement error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -64,31 +85,37 @@ const getAnnouncement = async (req, res) => {
 const createAnnouncement = async (req, res) => {
   try {
     const { titre, villeDeTravail, quartier, salaireMensuel, dateLimite, entreprise, description, photos, contact } = req.body;
-    
-    // Valider que la description ne contient pas de chiffres
+
+    if (!titre || typeof titre !== 'string' || titre.trim().length < 2 || titre.trim().length > 200) {
+      return res.status(400).json({ message: 'Le titre doit contenir entre 2 et 200 caractères.' });
+    }
+    if (description && typeof description === 'string' && description.length > 2000) {
+      return res.status(400).json({ message: 'La description ne peut pas dépasser 2000 caractères.' });
+    }
     if (description && /\d/.test(description)) {
       return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
     }
-    
-    // Uploader les images vers Cloudinary si elles sont en base64
+
     let photoUrls = [];
-    if (photos && Array.isArray(photos) && photos.length > 0) {
-      const base64Photos = photos.filter(p => p && p.startsWith('data:'));
-      if (base64Photos.length > 0) {
-        photoUrls = await uploadImagesToCloudinary(base64Photos, 'limby/announcements');
+    if (photos && Array.isArray(photos)) {
+      if (photos.length > MAX_PHOTOS) {
+        return res.status(400).json({ message: `Maximum ${MAX_PHOTOS} photos autorisées.` });
       }
-      // Les photos qui ne sont pas en base64 sont déjà des URLs
-      const existingUrls = photos.filter(p => p && !p.startsWith('data:'));
+      const base64Photos = photos.filter(p => p && typeof p === 'string' && p.startsWith('data:'));
+      if (base64Photos.length > 0) photoUrls = await uploadImagesToCloudinary(base64Photos, 'limby/announcements');
+      const existingUrls = photos.filter(p => p && typeof p === 'string' && !p.startsWith('data:'));
       photoUrls = [...photoUrls, ...existingUrls];
     }
-    
+
     const announcement = await Announcement.create({
-      titre, villeDeTravail, quartier, salaireMensuel, dateLimite, entreprise, description,
-      photos: photoUrls, auteur: req.user._id, contact
+      titre: titre.trim(), villeDeTravail, quartier, salaireMensuel, dateLimite, entreprise,
+      description, photos: photoUrls, auteur: req.user._id, contact
     });
+
     res.status(201).json(announcement);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('createAnnouncement error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -100,18 +127,12 @@ const deleteAnnouncement = async (req, res) => {
     const isOwner = announcement.auteur.toString() === req.user._id.toString();
     const isAdmin = req.user.role === 'admin_simple' || req.user.role === 'admin_supreme';
     if (!isOwner && !isAdmin) return res.status(403).json({ message: 'Accès refusé.' });
-    
-    // Supprimer les images de Cloudinary
-    if (announcement.photos && Array.isArray(announcement.photos) && announcement.photos.length > 0) {
-      await deleteImagesFromCloudinary(announcement.photos);
-    }
-    
-    // Hard delete - supprimer complètement de la base de données
+    if (announcement.photos && announcement.photos.length > 0) await deleteImagesFromCloudinary(announcement.photos);
     await Announcement.findByIdAndDelete(req.params.id);
-    
     res.json({ message: 'Annonce supprimée avec succès.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('deleteAnnouncement error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -131,35 +152,29 @@ const unlockContact = async (req, res) => {
     await user.save();
     await ContactUnlock.create({ utilisateur: user._id, typeContenu: 'announcement', contenuId: announcement._id, creditsDepenses: 1 });
     await ActionHistory.create({ utilisateur: user._id, action: 'contact_debloque', details: { typeContenu: 'announcement', contenuId: announcement._id, titre: announcement.titre } });
-    await Notification.create({ destinataire: user._id, message: `Contact débloqué pour "${announcement.titre}". ${bonusCredit ? '🎉 Bonus fidélité : +1 crédit gratuit !' : ''}`, type: 'contact_debloque' });
+    await Notification.create({ destinataire: user._id, message: `Contact débloqué pour "${announcement.titre}".${bonusCredit ? ' Bonus fidélité : +1 crédit gratuit !' : ''}`, type: 'contact_debloque' });
     if (user.credits === 0) {
       await Notification.create({ destinataire: user._id, message: 'Votre solde de crédits est épuisé.', type: 'solde_faible' });
     }
     res.json({ contact: announcement.contact, credits: user.credits, bonusCredit, message: bonusCredit ? 'Contact débloqué ! Bonus fidélité !' : 'Contact débloqué avec succès.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('unlockContact announcement error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
-// PUT /api/announcements/:id/disponibilite - Basculer la disponibilité d'une annonce
+// PUT /api/announcements/:id/disponibilite
 const toggleDisponibilite = async (req, res) => {
   try {
     const announcement = await Announcement.findById(req.params.id);
-    if (!announcement) {
-      return res.status(404).json({ message: 'Annonce introuvable.' });
-    }
-
-    // Vérifier que l'utilisateur est l'auteur
-    if (announcement.auteur.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: 'Accès refusé.' });
-    }
-
+    if (!announcement) return res.status(404).json({ message: 'Annonce introuvable.' });
+    if (announcement.auteur.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Accès refusé.' });
     announcement.disponible = !announcement.disponible;
     await announcement.save();
-
     res.json({ message: 'Disponibilité mise à jour.', announcement });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('toggleDisponibilite announcement error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 

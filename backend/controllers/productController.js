@@ -5,12 +5,20 @@ const ActionHistory = require('../models/ActionHistory');
 const Notification = require('../models/Notification');
 const { uploadImagesToCloudinary, deleteImagesFromCloudinary } = require('../utils/cloudinaryUpload');
 
-/**
- * Contrôleur des produits d'occasion
- * Gère le CRUD des produits et le déblocage de contacts
- */
+const MAX_PHOTOS = 5;
+const MAX_SEARCH_LEN = 100;
+const MAX_STRING_LEN = 200;
 
-// GET /api/products - Récupérer tous les produits actifs avec filtres
+// Échappe les caractères spéciaux regex pour éviter les injections ReDoS
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+// Valide et parse un prix numérique depuis un paramètre de requête
+const parsePrice = (val) => {
+  const n = Number(val);
+  return isFinite(n) && n >= 0 ? n : null;
+};
+
+// GET /api/products
 const getProducts = async (req, res) => {
   try {
     const { ville, categorie, prixMin, prixMax, search, mine } = req.query;
@@ -19,17 +27,26 @@ const getProducts = async (req, res) => {
     if (!isOwnerRequest) filter.$or = [{ disponible: true }, { disponible: { $exists: false } }];
     if (isOwnerRequest) filter.vendeur = req.user._id;
 
-    if (ville) filter.ville = { $regex: ville, $options: 'i' };
-    if (categorie) filter.categorie = { $regex: categorie, $options: 'i' };
-    if (prixMin || prixMax) {
-      filter.prix = {};
-      if (prixMin) filter.prix.$gte = Number(prixMin);
-      if (prixMax) filter.prix.$lte = Number(prixMax);
+    if (ville && typeof ville === 'string' && ville.length <= MAX_STRING_LEN) {
+      filter.ville = { $regex: escapeRegex(ville), $options: 'i' };
     }
-    if (search) {
+    if (categorie && typeof categorie === 'string' && categorie.length <= MAX_STRING_LEN) {
+      filter.categorie = { $regex: escapeRegex(categorie), $options: 'i' };
+    }
+
+    const minPrice = prixMin ? parsePrice(prixMin) : null;
+    const maxPrice = prixMax ? parsePrice(prixMax) : null;
+    if (minPrice !== null || maxPrice !== null) {
+      filter.prix = {};
+      if (minPrice !== null) filter.prix.$gte = minPrice;
+      if (maxPrice !== null) filter.prix.$lte = maxPrice;
+    }
+
+    if (search && typeof search === 'string' && search.length <= MAX_SEARCH_LEN) {
+      const safeSearch = escapeRegex(search);
       filter.$or = [
-        { titre: { $regex: search, $options: 'i' } },
-        { description: { $regex: search, $options: 'i' } }
+        { titre: { $regex: safeSearch, $options: 'i' } },
+        { description: { $regex: safeSearch, $options: 'i' } }
       ];
     }
 
@@ -37,241 +54,170 @@ const getProducts = async (req, res) => {
       .populate('vendeur', 'nom telephone isVerified')
       .sort({ createdAt: -1 });
 
-    // Masquer les contacts sauf si déjà débloqués par l'utilisateur connecté
     const userId = req.user ? req.user._id : null;
     let unlockedIds = [];
     if (userId) {
-      const unlocks = await ContactUnlock.find({ 
-        utilisateur: userId, 
-        typeContenu: 'product' 
-      });
+      const unlocks = await ContactUnlock.find({ utilisateur: userId, typeContenu: 'product' });
       unlockedIds = unlocks.map(u => u.contenuId.toString());
     }
 
     const productsWithContact = products.map(p => {
       const product = p.toObject();
-      if (!unlockedIds.includes(product._id.toString())) {
-        product.contact = 'hidden';
-      }
+      if (!unlockedIds.includes(product._id.toString())) product.contact = 'hidden';
       return product;
     });
 
     res.json(productsWithContact);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('getProducts error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
-// GET /api/products/:id - Récupérer le détail d'un produit
+// GET /api/products/:id
 const getProduct = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id)
-      .populate('vendeur', 'nom telephone isVerified');
-    
-    if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable.' });
-    }
+    const product = await Product.findById(req.params.id).populate('vendeur', 'nom telephone isVerified');
+    if (!product) return res.status(404).json({ message: 'Produit introuvable.' });
 
     const productObj = product.toObject();
-
-    // Masquer le contact sauf si déjà débloqué
     const userId = req.user ? req.user._id : null;
     if (userId) {
-      const unlock = await ContactUnlock.findOne({
-        utilisateur: userId,
-        typeContenu: 'product',
-        contenuId: product._id
-      });
-      if (!unlock) {
-        productObj.contact = 'hidden';
-      }
+      const unlock = await ContactUnlock.findOne({ utilisateur: userId, typeContenu: 'product', contenuId: product._id });
+      if (!unlock) productObj.contact = 'hidden';
     } else {
       productObj.contact = 'hidden';
     }
 
     res.json(productObj);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('getProduct error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
-// POST /api/products - Créer un produit
+// POST /api/products
 const createProduct = async (req, res) => {
   try {
     const { titre, categorie, sousCategorie, ville, quartier, prix, description, etat, photos, contact } = req.body;
 
-    // Valider que la description ne contient pas de chiffres
+    if (!titre || typeof titre !== 'string' || titre.trim().length < 2 || titre.trim().length > 200) {
+      return res.status(400).json({ message: 'Le titre doit contenir entre 2 et 200 caractères.' });
+    }
+    if (description && typeof description === 'string' && description.length > 2000) {
+      return res.status(400).json({ message: 'La description ne peut pas dépasser 2000 caractères.' });
+    }
     if (description && /\d/.test(description)) {
       return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
     }
+    if (prix !== undefined && (isNaN(Number(prix)) || Number(prix) < 0)) {
+      return res.status(400).json({ message: 'Prix invalide.' });
+    }
 
-    // Uploader les images vers Cloudinary si elles sont en base64
     let photoUrls = [];
-    if (photos && Array.isArray(photos) && photos.length > 0) {
-      const base64Photos = photos.filter(p => p && p.startsWith('data:'));
+    if (photos && Array.isArray(photos)) {
+      if (photos.length > MAX_PHOTOS) {
+        return res.status(400).json({ message: `Maximum ${MAX_PHOTOS} photos autorisées.` });
+      }
+      const base64Photos = photos.filter(p => p && typeof p === 'string' && p.startsWith('data:'));
       if (base64Photos.length > 0) {
         photoUrls = await uploadImagesToCloudinary(base64Photos, 'limby/products');
       }
-      // Les photos qui ne sont pas en base64 sont déjà des URLs
-      const existingUrls = photos.filter(p => p && !p.startsWith('data:'));
+      const existingUrls = photos.filter(p => p && typeof p === 'string' && !p.startsWith('data:'));
       photoUrls = [...photoUrls, ...existingUrls];
     }
 
     const product = await Product.create({
-      titre,
-      categorie,
-      sousCategorie,
-      ville,
-      quartier,
-      prix,
-      description,
-      etat,
-      photos: photoUrls,
-      vendeur: req.user._id,
-      contact
+      titre: titre.trim(), categorie, sousCategorie, ville, quartier,
+      prix: Number(prix), description, etat, photos: photoUrls,
+      vendeur: req.user._id, contact
     });
 
     res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('createProduct error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
-// DELETE /api/products/:id - Supprimer un produit (propriétaire ou admin)
+// DELETE /api/products/:id
 const deleteProduct = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable.' });
-    }
+    if (!product) return res.status(404).json({ message: 'Produit introuvable.' });
 
-    // Vérifier que l'utilisateur est le propriétaire ou un admin
     const isOwner = product.vendeur.toString() === req.user._id.toString();
     const isAdmin = req.user.role === 'admin_simple' || req.user.role === 'admin_supreme';
+    if (!isOwner && !isAdmin) return res.status(403).json({ message: 'Accès refusé.' });
 
-    if (!isOwner && !isAdmin) {
-      return res.status(403).json({ message: 'Accès refusé.' });
-    }
-
-    // Supprimer les images de Cloudinary
-    if (product.photos && Array.isArray(product.photos) && product.photos.length > 0) {
+    if (product.photos && product.photos.length > 0) {
       await deleteImagesFromCloudinary(product.photos);
     }
 
-    // Hard delete - supprimer complètement de la base de données
     await Product.findByIdAndDelete(req.params.id);
-
     res.json({ message: 'Produit supprimé avec succès.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('deleteProduct error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
-// POST /api/products/:id/unlock-contact - Débloquer le contact d'un produit
+// POST /api/products/:id/unlock-contact
 const unlockContact = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable.' });
-    }
+    if (!product) return res.status(404).json({ message: 'Produit introuvable.' });
 
     const user = await User.findById(req.user._id);
 
-    // Vérifier si déjà débloqué
-    const existingUnlock = await ContactUnlock.findOne({
-      utilisateur: user._id,
-      typeContenu: 'product',
-      contenuId: product._id
-    });
+    const existingUnlock = await ContactUnlock.findOne({ utilisateur: user._id, typeContenu: 'product', contenuId: product._id });
+    if (existingUnlock) return res.json({ contact: product.contact, message: 'Contact déjà débloqué.' });
 
-    if (existingUnlock) {
-      return res.json({ contact: product.contact, message: 'Contact déjà débloqué.' });
-    }
-
-    // Vérifier le solde de crédits
     if (user.credits < 1) {
       return res.status(400).json({ message: 'Solde de crédits insuffisant. Achetez des crédits pour débloquer ce contact.' });
     }
 
-    // Décrémenter le crédit
     user.credits -= 1;
     user.loyaltyCount += 1;
-
-    // Système de fidélité : 1 crédit gratuit après 5 déblocages
     let bonusCredit = false;
     if (user.loyaltyCount >= 5) {
       user.credits += 1;
       user.loyaltyCount = 0;
       bonusCredit = true;
     }
-
     await user.save();
 
-    // Créer le document ContactUnlock
-    await ContactUnlock.create({
-      utilisateur: user._id,
-      typeContenu: 'product',
-      contenuId: product._id,
-      creditsDepenses: 1
-    });
+    await ContactUnlock.create({ utilisateur: user._id, typeContenu: 'product', contenuId: product._id, creditsDepenses: 1 });
+    await ActionHistory.create({ utilisateur: user._id, action: 'contact_debloque', details: { typeContenu: 'product', contenuId: product._id, titre: product.titre } });
+    await Notification.create({ destinataire: user._id, message: `Contact débloqué pour "${product.titre}".${bonusCredit ? ' Bonus fidélité : +1 crédit gratuit !' : ''}`, type: 'contact_debloque' });
 
-    // Enregistrer dans l'historique
-    await ActionHistory.create({
-      utilisateur: user._id,
-      action: 'contact_debloque',
-      details: {
-        typeContenu: 'product',
-        contenuId: product._id,
-        titre: product.titre
-      }
-    });
-
-    // Notification contact débloqué
-    await Notification.create({
-      destinataire: user._id,
-      message: `Contact débloqué pour "${product.titre}". ${bonusCredit ? '🎉 Bonus fidélité : +1 crédit gratuit !' : ''}`,
-      type: 'contact_debloque'
-    });
-
-    // Si solde atteint 0, notification solde faible
     if (user.credits === 0) {
-      await Notification.create({
-        destinataire: user._id,
-        message: 'Votre solde de crédits est épuisé. Rechargez pour continuer à débloquer des contacts.',
-        type: 'solde_faible'
-      });
+      await Notification.create({ destinataire: user._id, message: 'Votre solde de crédits est épuisé. Rechargez pour continuer à débloquer des contacts.', type: 'solde_faible' });
     }
 
-    res.json({ 
-      contact: product.contact, 
-      credits: user.credits,
-      bonusCredit,
-      message: bonusCredit ? 'Contact débloqué ! Bonus fidélité : +1 crédit gratuit !' : 'Contact débloqué avec succès.'
-    });
+    res.json({ contact: product.contact, credits: user.credits, bonusCredit, message: bonusCredit ? 'Contact débloqué ! Bonus fidélité : +1 crédit gratuit !' : 'Contact débloqué avec succès.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('unlockContact error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
-// PUT /api/products/:id/disponibilite - Basculer la disponibilité d'un produit
+// PUT /api/products/:id/disponibilite
 const toggleDisponibilite = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) {
-      return res.status(404).json({ message: 'Produit introuvable.' });
-    }
+    if (!product) return res.status(404).json({ message: 'Produit introuvable.' });
 
-    // Vérifier que l'utilisateur est le propriétaire
     if (product.vendeur.toString() !== req.user._id.toString()) {
       return res.status(403).json({ message: 'Accès refusé.' });
     }
 
     product.disponible = !product.disponible;
     await product.save();
-
     res.json({ message: 'Disponibilité mise à jour.', product });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('toggleDisponibilite error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 

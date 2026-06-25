@@ -8,7 +8,15 @@ const User = require('../models/User');
 const requestCredits = async (req, res) => {
   try {
     const { nomCompte, telephoneDepot, montant, telephoneCompte } = req.body;
-    const creditRequest = await CreditRequest.create({ nomCompte, telephoneDepot, montant, telephoneCompte });
+
+    if (!nomCompte || typeof nomCompte !== 'string' || nomCompte.trim().length > 100) {
+      return res.status(400).json({ message: 'Nom de compte invalide.' });
+    }
+    if (!montant || isNaN(Number(montant)) || Number(montant) <= 0 || Number(montant) > 10000000) {
+      return res.status(400).json({ message: 'Montant invalide.' });
+    }
+
+    const creditRequest = await CreditRequest.create({ nomCompte: nomCompte.trim(), telephoneDepot, montant: Number(montant), telephoneCompte });
     // Notifier tous les admins
     const admins = await User.find({ role: { $in: ['admin_simple', 'admin_supreme'] } });
     for (const admin of admins) {
@@ -20,7 +28,8 @@ const requestCredits = async (req, res) => {
     }
     res.status(201).json({ message: 'Votre demande a été envoyée. Elle sera traitée sous peu.', creditRequest });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('credit error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -31,7 +40,8 @@ const getMyHistory = async (req, res) => {
     const requests = await CreditRequest.find({ telephoneCompte: req.user.telephone }).sort({ createdAt: -1 });
     res.json({ unlocks, requests });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('credit error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -52,7 +62,8 @@ const subscriptionRequest = async (req, res) => {
     }
     res.status(201).json({ message: 'Votre demande de renouvellement a été envoyée.', subRequest });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('credit error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 

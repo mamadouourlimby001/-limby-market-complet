@@ -63,7 +63,8 @@ const createOrder = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('order error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -80,7 +81,8 @@ const getMyOrders = async (req, res) => {
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('order error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -103,7 +105,8 @@ const getBoutiqueOrders = async (req, res) => {
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('order error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -197,7 +200,8 @@ const updateOrderStatus = async (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('order error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -240,7 +244,8 @@ const cancelOrder = async (req, res) => {
     res.json({ message: 'Commande annulée' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('order error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -280,7 +285,8 @@ const deleteOrder = async (req, res) => {
     res.json({ message: 'Commande supprimée' });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erreur serveur', error: error.message });
+    console.error('order error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 

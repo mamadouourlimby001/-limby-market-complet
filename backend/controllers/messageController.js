@@ -12,8 +12,11 @@ const sendMessageToAdmins = async (req, res) => {
     const { contenu } = req.body;
     const userId = req.user._id;
 
-    if (!contenu || contenu.trim().length === 0) {
+    if (!contenu || typeof contenu !== 'string' || contenu.trim().length === 0) {
       return res.status(400).json({ message: 'Le contenu du message est requis' });
+    }
+    if (contenu.length > 2000) {
+      return res.status(400).json({ message: 'Le message ne peut pas dépasser 2000 caractères.' });
     }
 
     // Trouver tous les administrateurs
@@ -166,18 +169,24 @@ const deleteMessage = async (req, res) => {
   try {
     const { messageId } = req.params;
     const userId = req.user._id;
+    const user = req.user;
 
     const message = await Message.findById(messageId);
     if (!message) {
       return res.status(404).json({ message: 'Message non trouvé' });
     }
 
-    // Hard delete - supprimer complètement de la base de données
-    await Message.findByIdAndDelete(messageId);
+    // Vérifier que l'utilisateur est l'expéditeur ou un admin
+    const isAdmin = user.role === 'admin_simple' || user.role === 'admin_supreme';
+    const isSender = message.sender.toString() === userId.toString();
+    if (!isAdmin && !isSender) {
+      return res.status(403).json({ message: 'Accès refusé.' });
+    }
 
+    await Message.findByIdAndDelete(messageId);
     res.json({ message: 'Message supprimé' });
   } catch (err) {
-    console.error(err);
+    console.error('deleteMessage error:', err.message);
     res.status(500).json({ message: 'Erreur lors de la suppression' });
   }
 };

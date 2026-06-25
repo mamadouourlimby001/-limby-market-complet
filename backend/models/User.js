@@ -1,19 +1,18 @@
 const mongoose = require('mongoose');
 
-/**
- * Modèle User
- * Représente un utilisateur de la plateforme Limby Market
- * Rôles : acheteur (défaut), vendeur, vendeur_boutique, admin_simple, admin_supreme
- */
 const userSchema = new mongoose.Schema({
   nom: {
     type: String,
-    required: [true, 'Le nom est requis']
+    required: [true, 'Le nom est requis'],
+    trim: true,
+    maxlength: [100, 'Le nom ne peut pas dépasser 100 caractères']
   },
   telephone: {
     type: String,
     required: [true, 'Le numéro de téléphone est requis'],
-    unique: true
+    unique: true,
+    trim: true,
+    maxlength: [20, 'Le numéro de téléphone ne peut pas dépasser 20 caractères']
   },
   motDePasse: {
     type: String,
@@ -40,12 +39,16 @@ const userSchema = new mongoose.Schema({
     default: 0
   },
   securityQuestions: [{
-    question: String,
-    answer: String
+    question: { type: String, maxlength: 200 },
+    answer: { type: String }
   }],
   adminPermissions: {
     type: [String],
     default: []
+  },
+  // Utilisé pour invalider les tokens JWT émis avant un changement de mot de passe
+  passwordChangedAt: {
+    type: Date
   },
   createdAt: {
     type: Date,

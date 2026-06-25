@@ -11,7 +11,8 @@ const getBoutiques = async (req, res) => {
       .populate('proprietaire', 'nom telephone isVerified').sort({ dateCreation: -1 });
     res.json(boutiques);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -25,7 +26,8 @@ const getBoutique = async (req, res) => {
       .sort({ ordre: 1, createdAt: -1 });
     res.json({ boutique, products });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -33,8 +35,13 @@ const getBoutique = async (req, res) => {
 const createBoutique = async (req, res) => {
   try {
     const { nom, description, logo, telephone, categorie, ville, quartier } = req.body;
-    
-    // Valider que la description ne contient pas de chiffres
+
+    if (!nom || typeof nom !== 'string' || nom.trim().length < 2 || nom.trim().length > 100) {
+      return res.status(400).json({ message: 'Le nom de la boutique doit contenir entre 2 et 100 caractères.' });
+    }
+    if (description && typeof description === 'string' && description.length > 2000) {
+      return res.status(400).json({ message: 'La description ne peut pas dépasser 2000 caractères.' });
+    }
     if (description && /\d/.test(description)) {
       return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
     }
@@ -51,7 +58,8 @@ const createBoutique = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Une boutique avec ce nom existe déjà.' });
     }
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -73,15 +81,16 @@ const addBoutiqueProduct = async (req, res) => {
       return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
     }
 
-    // Uploader les images vers Cloudinary si elles sont en base64
     let photoUrls = [];
-    if (photos && Array.isArray(photos) && photos.length > 0) {
-      const base64Photos = photos.filter(p => p && p.startsWith('data:'));
+    if (photos && Array.isArray(photos)) {
+      if (photos.length > 5) {
+        return res.status(400).json({ message: 'Maximum 5 photos autorisées.' });
+      }
+      const base64Photos = photos.filter(p => p && typeof p === 'string' && p.startsWith('data:'));
       if (base64Photos.length > 0) {
         photoUrls = await uploadImagesToCloudinary(base64Photos, 'limby/boutiques');
       }
-      // Les photos qui ne sont pas en base64 sont déjà des URLs
-      const existingUrls = photos.filter(p => p && !p.startsWith('data:'));
+      const existingUrls = photos.filter(p => p && typeof p === 'string' && !p.startsWith('data:'));
       photoUrls = [...photoUrls, ...existingUrls];
     }
 
@@ -91,7 +100,8 @@ const addBoutiqueProduct = async (req, res) => {
     });
     res.status(201).json(product);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -116,7 +126,8 @@ const deleteBoutiqueProduct = async (req, res) => {
     
     res.json({ message: 'Produit supprimé avec succès.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -130,7 +141,8 @@ const getMyBoutique = async (req, res) => {
       .sort({ ordre: 1, createdAt: -1 });
     res.json({ boutique: myBoutique, products });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -154,7 +166,8 @@ const updateOrganisation = async (req, res) => {
     }
     res.json({ message: 'Organisation sauvegardée.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -176,7 +189,8 @@ const toggleProductDisponibilite = async (req, res) => {
     
     res.json({ message: 'Disponibilité mise à jour.', product });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -214,7 +228,8 @@ const updateBoutique = async (req, res) => {
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Une boutique avec ce nom existe déjà.' });
     }
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('boutique error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -240,7 +255,8 @@ const recordBoutiqueVisit = async (req, res) => {
 
     res.status(201).json({ message: 'Visite enregistrée' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de l\'enregistrement de la visite', error: error.message });
+    console.error('recordBoutiqueVisit error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -325,7 +341,8 @@ const getBoutiqueVisits = async (req, res) => {
 
     res.json({ bilans: bilans.sort((a, b) => new Date(b.date) - new Date(a.date)) });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors du chargement des visites', error: error.message });
+    console.error('getBoutiqueVisits error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -357,7 +374,8 @@ const deleteBoutiqueVisit = async (req, res) => {
 
     res.json({ message: 'Bilan supprimé', deletedCount: result.deletedCount });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur lors de la suppression', error: error.message });
+    console.error('deleteBoutiqueVisit error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 

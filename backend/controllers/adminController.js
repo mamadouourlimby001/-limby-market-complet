@@ -19,7 +19,8 @@ const getCreditRequests = async (req, res) => {
     const requests = await CreditRequest.find({ statut: 'en_attente' }).sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('getCreditRequests error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -54,7 +55,8 @@ const approveCreditRequest = async (req, res) => {
 
     res.json({ message: `${credits} crédits attribués à ${user.nom}.`, credits });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -68,7 +70,8 @@ const rejectCreditRequest = async (req, res) => {
     await request.save();
     res.json({ message: 'Demande rejetée.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -78,7 +81,8 @@ const getSubscriptionRequests = async (req, res) => {
     const requests = await SubscriptionRequest.find({ statut: 'en_attente' }).populate('boutique').populate('demandeur', 'nom telephone').sort({ createdAt: -1 });
     res.json(requests);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -118,7 +122,8 @@ const approveSubscriptionRequest = async (req, res) => {
       // Ignorer les erreurs de notification
     }
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -132,7 +137,8 @@ const rejectSubscriptionRequest = async (req, res) => {
     await request.save();
     res.json({ message: 'Demande de renouvellement rejetée.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -142,7 +148,8 @@ const getReports = async (req, res) => {
     const reports = await Report.find({ statut: 'en_attente' }).populate('signalePar', 'nom telephone').sort({ createdAt: -1 });
     res.json(reports);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -168,7 +175,8 @@ const handleReport = async (req, res) => {
     await report.save();
     res.json({ message: `Signalement traité (${action}).` });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -178,7 +186,8 @@ const getUsers = async (req, res) => {
     const users = await User.find().select('-motDePasse').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -194,7 +203,8 @@ const deleteUser = async (req, res) => {
     await User.findByIdAndDelete(req.params.id);
     res.json({ message: 'Utilisateur et ses publications supprimés.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -202,16 +212,21 @@ const deleteUser = async (req, res) => {
 const addCredits = async (req, res) => {
   try {
     const { credits } = req.body;
+    const creditsNum = Number(credits);
+    if (!credits || isNaN(creditsNum) || creditsNum <= 0 || !Number.isInteger(creditsNum)) {
+      return res.status(400).json({ message: 'Nombre de crédits invalide.' });
+    }
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: 'Utilisateur introuvable.' });
-    user.credits += Number(credits);
+    user.credits += creditsNum;
     user.creditExpiry = new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000);
     await user.save();
     await ActionHistory.create({ utilisateur: req.user._id, action: 'credits_ajoutes_manuellement', details: { userId: user._id, credits } });
     await Notification.create({ destinataire: user._id, message: `${credits} crédits ajoutés à votre compte par un administrateur.`, type: 'credit_achat' });
     res.json({ message: `${credits} crédits ajoutés à ${user.nom}.` });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -235,7 +250,8 @@ const removeCredits = async (req, res) => {
     await Notification.create({ destinataire: user._id, message: `${creditsToRemove} crédits ont été retirés de votre compte par un administrateur.`, type: 'credit_retiré' });
     res.json({ message: `${creditsToRemove} crédits retirés de ${user.nom}.` });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -247,7 +263,8 @@ const setVerified = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json({ message: `Badge vérifié ${isVerified ? 'attribué' : 'retiré'}.`, user });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -259,7 +276,8 @@ const setBoutiqueActive = async (req, res) => {
     if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
     res.json({ message: `Boutique ${isActive ? 'activée' : 'désactivée'}.`, boutique });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -271,7 +289,8 @@ const setBoutiqueVerified = async (req, res) => {
     if (!boutique) return res.status(404).json({ message: 'Boutique introuvable.' });
     res.json({ message: `Badge boutique ${isVerified ? 'attribué' : 'retiré'}.`, boutique });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -286,7 +305,8 @@ const renewBoutique = async (req, res) => {
     await Notification.create({ destinataire: boutique.proprietaire, message: `Votre boutique "${boutique.nom}" a été renouvelée pour 30 jours.`, type: 'abonnement_renouveler' });
     res.json({ message: 'Boutique renouvelée pour 30 jours.' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -298,7 +318,8 @@ const addAdmin = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json({ message: `${user.nom} est maintenant administrateur.`, user });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -309,7 +330,8 @@ const removeAdmin = async (req, res) => {
     if (!user) return res.status(404).json({ message: 'Utilisateur introuvable.' });
     res.json({ message: `${user.nom} n'est plus administrateur.`, user });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -338,7 +360,8 @@ const getDashboardStats = async (req, res) => {
       totalCreditsVendus, totalUnlocks, totalRevenue, recentTransactions
     });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -350,7 +373,8 @@ const getAllBoutiques = async (req, res) => {
       .sort({ createdAt: -1 });
     res.json(boutiques);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -376,7 +400,8 @@ const deleteBoutique = async (req, res) => {
     
     res.json({ message: 'Boutique supprimée' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -409,7 +434,8 @@ const activateBoutique = async (req, res) => {
     
     res.json({ message: 'Boutique activée pour 30 jours', boutique });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -436,7 +462,8 @@ const deactivateBoutique = async (req, res) => {
     
     res.json({ message: 'Boutique désactivée', boutique });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -463,7 +490,8 @@ const certifyBoutique = async (req, res) => {
     
     res.json({ message: 'Boutique certifiée', boutique });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -515,7 +543,8 @@ const resetDashboardStats = async (req, res) => {
     
     res.json({ message: 'Statistiques réinitialisées' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -536,7 +565,8 @@ const getUsersWithSecurityQuestions = async (req, res) => {
     res.json(usersData);
   } catch (error) {
     console.error('Erreur getUsersWithSecurityQuestions:', error);
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -558,6 +588,7 @@ const resetUserPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     user.motDePasse = hashedPassword;
+    user.passwordChangedAt = new Date();
     await user.save();
 
     // Enregistrer l'action dans l'historique (non-bloquant)
@@ -585,7 +616,8 @@ const resetUserPassword = async (req, res) => {
     res.json({ message: `Mot de passe de ${user.nom} réinitialisé avec succès.` });
   } catch (error) {
     console.error('Erreur resetUserPassword:', error);
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -626,7 +658,8 @@ const getVisites = async (req, res) => {
       visites: visitesFormatees
     });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -673,33 +706,24 @@ const getGeoInfo = async (ip) => {
 const trackPageVisit = async (req, res) => {
   try {
     const { page, visitorId, latitude, longitude } = req.body;
-    console.log('trackPageVisit reçu:', { page, visitorId, hasUser: !!req.user, userId: req.user?._id, hasGPS: !!(latitude && longitude) });
-    
-    if (!page) {
+
+    if (!page || typeof page !== 'string' || page.length > 200) {
       return res.status(400).json({ message: 'Page requise.' });
     }
 
     const now = new Date();
     let visit = null;
-    
-    // Déterminer la géolocalisation: priorité aux coordonnées GPS
     let geoInfo = { pays: null, region: null, ville: null };
-    
+
     if (latitude && longitude) {
-      // Utiliser les coordonnées GPS si disponibles
-      console.log('Utilisation reverse geocoding GPS:', { latitude, longitude });
       geoInfo = await getReverseGeoInfo(latitude, longitude);
     } else {
-      // Sinon, utiliser la géolocalisation par IP
       const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-      console.log('Utilisation géolocalisation IP:', clientIp);
-      geoInfo = await getGeoInfo(clientIp.split(',')[0]);
+      geoInfo = await getGeoInfo(clientIp.split(',')[0].trim());
     }
 
     if (req.user && req.user._id) {
-      // Utilisateur authentifié
       const userId = req.user._id;
-      console.log('Enregistrement visite authentifiée pour:', userId);
 
       // Chercher une visite ouverte pour cet utilisateur
       visit = await Visit.findOne({
@@ -708,80 +732,48 @@ const trackPageVisit = async (req, res) => {
       });
 
       if (visit) {
-        // Ajouter la page à la visite existante
-        visit.pagesVisitees.push({
-          page: page,
-          tempsDebut: now
-        });
+        visit.pagesVisitees.push({ page: page, tempsDebut: now });
         visit.nombrePages = visit.pagesVisitees.length;
-        // Mettre à jour la géolocalisation si elle n'était pas disponible
         if (!visit.pays) visit.pays = geoInfo.pays;
         if (!visit.region) visit.region = geoInfo.region;
         if (!visit.ville) visit.ville = geoInfo.ville;
         await visit.save();
       } else {
-        // Créer une nouvelle visite
         visit = await Visit.create({
-          utilisateur: userId,
-          nom: req.user.nom,
-          telephone: req.user.telephone,
-          pays: geoInfo.pays,
-          region: geoInfo.region,
-          ville: geoInfo.ville,
-          pagesVisitees: [{
-            page: page,
-            tempsDebut: now
-          }],
-          dateDebut: now,
-          nombrePages: 1
+          utilisateur: userId, nom: req.user.nom, telephone: req.user.telephone,
+          pays: geoInfo.pays, region: geoInfo.region, ville: geoInfo.ville,
+          pagesVisitees: [{ page: page, tempsDebut: now }],
+          dateDebut: now, nombrePages: 1
         });
       }
-    } else if (visitorId) {
-      // Visiteur anonyme
-      console.log('Enregistrement visite anonyme pour:', visitorId);
-      
+    } else if (visitorId && typeof visitorId === 'string' && visitorId.length <= 100) {
       visit = await Visit.findOne({
         visitorId: visitorId,
         dateFin: null
       });
 
       if (visit) {
-        // Ajouter la page à la visite existante
-        visit.pagesVisitees.push({
-          page: page,
-          tempsDebut: now
-        });
+        visit.pagesVisitees.push({ page: page, tempsDebut: now });
         visit.nombrePages = visit.pagesVisitees.length;
-        // Mettre à jour la géolocalisation si elle n'était pas disponible
         if (!visit.pays) visit.pays = geoInfo.pays;
         if (!visit.region) visit.region = geoInfo.region;
         if (!visit.ville) visit.ville = geoInfo.ville;
         await visit.save();
       } else {
-        // Créer une nouvelle visite anonyme
         visit = await Visit.create({
-          visitorId: visitorId,
-          nom: 'Visiteur anonyme',
-          pays: geoInfo.pays,
-          region: geoInfo.region,
-          ville: geoInfo.ville,
-          pagesVisitees: [{
-            page: page,
-            tempsDebut: now
-          }],
-          dateDebut: now,
-          nombrePages: 1
+          visitorId: visitorId, nom: 'Visiteur anonyme',
+          pays: geoInfo.pays, region: geoInfo.region, ville: geoInfo.ville,
+          pagesVisitees: [{ page: page, tempsDebut: now }],
+          dateDebut: now, nombrePages: 1
         });
       }
-    } else {
-      console.log('Ni utilisateur ni visitorId fourni');
     }
 
-    console.log('Visite créée/mise à jour:', visit?._id, 'Géolocalisation:', geoInfo);
     res.json({ message: 'Visite enregistrée', visitId: visit?._id });
   } catch (error) {
     console.error('Erreur trackPageVisit:', error);
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -809,7 +801,8 @@ const getVisiteDetails = async (req, res) => {
       }))
     });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -821,7 +814,8 @@ const deleteVisite = async (req, res) => {
     
     res.json({ message: 'Visite supprimée avec succès' });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -911,7 +905,8 @@ const getTrafficSummary = async (req, res) => {
 
     res.json({ bilans });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -937,7 +932,8 @@ const deleteTrafficBilan = async (req, res) => {
     console.log(`Bilan du ${date} supprimé: ${result.deletedCount} visites supprimées`);
     res.json({ message: 'Bilan supprimé avec succès', deletedCount: result.deletedCount });
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -947,7 +943,8 @@ const getSimpleAdmins = async (req, res) => {
     const admins = await User.find({ role: 'admin_simple' }).select('nom telephone adminPermissions').sort({ nom: 1 });
     res.json(admins);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
@@ -963,7 +960,8 @@ const updateAdminPermissions = async (req, res) => {
     if (!admin) return res.status(404).json({ message: 'Administrateur introuvable.' });
     res.json(admin);
   } catch (error) {
-    res.status(500).json({ message: 'Erreur serveur.', error: error.message });
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
   }
 };
 
