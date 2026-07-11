@@ -4,6 +4,8 @@ import AdminBoutiquesScreen from '../screens/admin/AdminBoutiquesScreen';
 import BoutiqueVisitsScreen from '../screens/boutique/BoutiqueVisitsScreen';
 import AdminCreditRequestsScreen from '../screens/admin/AdminCreditRequestsScreen';
 import AdminSubscriptionsScreen from '../screens/admin/AdminSubscriptionsScreen';
+import AdminServicesScreen from '../screens/admin/AdminServicesScreen';
+import AdminServiceSubscriptionsScreen from '../screens/admin/AdminServiceSubscriptionsScreen';
 import AdminReportsScreen from '../screens/admin/AdminReportsScreen';
 import AdminUsersScreen from '../screens/admin/AdminUsersScreen';
 import AdminSendToUsersScreen from '../screens/admin/AdminSendToUsersScreen';
@@ -25,6 +27,8 @@ export default function AdminStack() {
       <Stack.Screen name="AdminBoutiqueVisits" component={BoutiqueVisitsScreen} />
       <Stack.Screen name="AdminCredits" component={AdminCreditRequestsScreen} />
       <Stack.Screen name="AdminSubscriptions" component={AdminSubscriptionsScreen} />
+      <Stack.Screen name="AdminServices" component={AdminServicesScreen} />
+      <Stack.Screen name="AdminServiceSubscriptions" component={AdminServiceSubscriptionsScreen} />
       <Stack.Screen name="AdminReports" component={AdminReportsScreen} />
       <Stack.Screen name="AdminUsers" component={AdminUsersScreen} />
       <Stack.Screen name="AdminSendToUsers" component={AdminSendToUsersScreen} />

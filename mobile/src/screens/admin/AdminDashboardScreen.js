@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool, ShoppingBag, RotateCcw, Lock, Eye, Trash2, ShieldCheck } from 'lucide-react-native';
+import { MessageSquare, CreditCard, RefreshCw, AlertTriangle, Users, PenTool, ShoppingBag, RotateCcw, Lock, Eye, Trash2, ShieldCheck, Wrench } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import Screen from '../../components/Screen';
@@ -12,6 +12,7 @@ const ICON_MAP = {
   credits: CreditCard, abonnements: RefreshCw, signalements: AlertTriangle, utilisateurs: Users,
   boutiques: ShoppingBag, 'reset-stats': RotateCcw, 'send-to-users': PenTool, passwords: Lock,
   visites: Eye, messages: MessageSquare, autorisation: ShieldCheck,
+  services: Wrench, 'abonnements-services': RefreshCw,
 };
 
 const ALL_MENU_ITEMS = [
@@ -20,6 +21,8 @@ const ALL_MENU_ITEMS = [
   { key: 'signalements', screen: 'AdminReports', label: 'Signalements' },
   { key: 'utilisateurs', screen: 'AdminUsers', label: 'Utilisateurs' },
   { key: 'boutiques', screen: 'AdminBoutiques', label: 'Boutiques' },
+  { key: 'services', screen: 'AdminServices', label: 'Services' },
+  { key: 'abonnements-services', screen: 'AdminServiceSubscriptions', label: 'Abonnements Services' },
   { key: 'reset-stats', screen: 'AdminResetStats', label: 'Réinitialiser' },
   { key: 'send-to-users', screen: 'AdminSendToUsers', label: 'Écrire aux utilisateurs' },
   { key: 'passwords', screen: 'AdminPasswords', label: 'Mots de passe' },
@@ -27,7 +30,7 @@ const ALL_MENU_ITEMS = [
   { key: 'messages', screen: 'AdminMessages', label: 'Messages' },
 ];
 
-const DEFAULT_SIMPLE_KEYS = ['credits', 'abonnements', 'signalements', 'utilisateurs', 'send-to-users', 'messages'];
+const DEFAULT_SIMPLE_KEYS = ['credits', 'abonnements', 'signalements', 'utilisateurs', 'send-to-users', 'messages', 'services', 'abonnements-services'];
 
 export default function AdminDashboardScreen() {
   const navigation = useNavigation();

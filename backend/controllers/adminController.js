@@ -6,6 +6,8 @@ const Boutique = require('../models/Boutique');
 const BoutiqueProduct = require('../models/BoutiqueProduct');
 const CreditRequest = require('../models/CreditRequest');
 const SubscriptionRequest = require('../models/SubscriptionRequest');
+const Service = require('../models/Service');
+const ServiceSubscriptionRequest = require('../models/ServiceSubscriptionRequest');
 const ContactUnlock = require('../models/ContactUnlock');
 const Report = require('../models/Report');
 const ActionHistory = require('../models/ActionHistory');
@@ -495,6 +497,196 @@ const certifyBoutique = async (req, res) => {
   }
 };
 
+// GET /api/admin/service-subscription-requests
+const getServiceSubscriptionRequests = async (req, res) => {
+  try {
+    const requests = await ServiceSubscriptionRequest.find({ statut: 'en_attente' }).populate('service').populate('demandeur', 'nom telephone').sort({ createdAt: -1 });
+    res.json(requests);
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+// POST /api/admin/service-subscription-requests/:id/approve
+const approveServiceSubscriptionRequest = async (req, res) => {
+  try {
+    const request = await ServiceSubscriptionRequest.findById(req.params.id);
+    if (!request) return res.status(404).json({ message: 'Demande introuvable.' });
+
+    if (!request.service) return res.status(400).json({ message: 'Service non associé.' });
+
+    await Service.findByIdAndUpdate(request.service, {
+      isActive: true,
+      dateExpiration: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    });
+
+    await ServiceSubscriptionRequest.findByIdAndUpdate(req.params.id, {
+      statut: 'approuvé',
+      traitePar: req.user._id
+    });
+
+    res.json({ message: 'Abonnement renouvelé.' });
+
+    try {
+      if (request.demandeur) {
+        const service = await Service.findById(request.service).select('nom');
+        await Notification.create({
+          destinataire: request.demandeur,
+          message: `Votre profil de service "${service.nom}" a été renouvelé pour 30 jours !`,
+          type: 'abonnement_renouveler'
+        });
+      }
+    } catch (notifErr) {
+      // Ignorer les erreurs de notification
+    }
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+// POST /api/admin/service-subscription-requests/:id/reject
+const rejectServiceSubscriptionRequest = async (req, res) => {
+  try {
+    const request = await ServiceSubscriptionRequest.findById(req.params.id);
+    if (!request) return res.status(404).json({ message: 'Demande introuvable.' });
+    request.statut = 'rejeté';
+    request.traitePar = req.user._id;
+    await request.save();
+    res.json({ message: 'Demande de renouvellement rejetée.' });
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+// GET /api/admin/services - Récupérer tous les services
+const getAllServices = async (req, res) => {
+  try {
+    const services = await Service.find()
+      .populate('proprietaire', 'nom telephone')
+      .sort({ dateCreation: -1 });
+    res.json(services);
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+// DELETE /api/admin/services/:id - Supprimer un service
+const deleteService = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const service = await Service.findByIdAndDelete(id);
+    if (!service) {
+      return res.status(404).json({ message: 'Service non trouvé' });
+    }
+
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'service_supprime',
+      details: { serviceId: id, nom: service.nom }
+    });
+
+    res.json({ message: 'Service supprimé' });
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+// PUT /api/admin/services/:id/activate - Activer un service pour 30 jours
+const activateService = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30);
+
+    const service = await Service.findByIdAndUpdate(
+      id,
+      {
+        isActive: true,
+        dateExpiration: expirationDate
+      },
+      { new: true }
+    ).populate('proprietaire', 'nom telephone');
+
+    if (!service) {
+      return res.status(404).json({ message: 'Service non trouvé' });
+    }
+
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'service_active',
+      details: { serviceId: id, nom: service.nom }
+    });
+
+    res.json({ message: 'Service activé pour 30 jours', service });
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+// PUT /api/admin/services/:id/deactivate - Désactiver un service
+const deactivateService = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const service = await Service.findByIdAndUpdate(
+      id,
+      { isActive: false },
+      { new: true }
+    ).populate('proprietaire', 'nom telephone');
+
+    if (!service) {
+      return res.status(404).json({ message: 'Service non trouvé' });
+    }
+
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'service_desactive',
+      details: { serviceId: id, nom: service.nom }
+    });
+
+    res.json({ message: 'Service désactivé', service });
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
+// PUT /api/admin/services/:id/certify - Certifier un service
+const certifyService = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const service = await Service.findByIdAndUpdate(
+      id,
+      { isCertified: true },
+      { new: true }
+    ).populate('proprietaire', 'nom telephone');
+
+    if (!service) {
+      return res.status(404).json({ message: 'Service non trouvé' });
+    }
+
+    await ActionHistory.create({
+      utilisateur: req.user._id,
+      action: 'service_certifie',
+      details: { serviceId: id, nom: service.nom }
+    });
+
+    res.json({ message: 'Service certifié', service });
+  } catch (error) {
+    console.error('admin error:', error.message);
+    res.status(500).json({ message: 'Erreur serveur.' });
+  }
+};
+
 // GET /api/admin/boutiques/:id/stats - Récupérer les stats d'une boutique
 const getBoutiqueDetailStats = async (req, res) => {
   try {
@@ -974,5 +1166,7 @@ module.exports = {
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
   getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary, deleteTrafficBilan,
-  getSimpleAdmins, updateAdminPermissions
+  getSimpleAdmins, updateAdminPermissions,
+  getServiceSubscriptionRequests, approveServiceSubscriptionRequest, rejectServiceSubscriptionRequest,
+  getAllServices, deleteService, activateService, deactivateService, certifyService
 };

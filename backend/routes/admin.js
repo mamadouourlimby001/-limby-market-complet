@@ -13,7 +13,9 @@ const {
   getAllBoutiques, deleteBoutique, activateBoutique, deactivateBoutique, certifyBoutique, resetDashboardStats,
   getBoutiqueDetailStats, getUsersWithSecurityQuestions, resetUserPassword,
   getVisites, getVisiteDetails, trackPageVisit, deleteVisite, getTrafficSummary, deleteTrafficBilan,
-  getSimpleAdmins, updateAdminPermissions
+  getSimpleAdmins, updateAdminPermissions,
+  getServiceSubscriptionRequests, approveServiceSubscriptionRequest, rejectServiceSubscriptionRequest,
+  getAllServices, deleteService, activateService, deactivateService, certifyService
 } = require('../controllers/adminController');
 
 // Route de tracking accessible à tous (public - avec authentification optionnelle)
@@ -53,6 +55,14 @@ router.get('/visites/:id', getVisiteDetails);
 router.delete('/visites/:id', deleteVisite);
 router.get('/traffic-summary', getTrafficSummary);
 router.post('/traffic-summary/delete', deleteTrafficBilan);
+router.get('/service-subscription-requests', getServiceSubscriptionRequests);
+router.post('/service-subscription-requests/:id/approve', approveServiceSubscriptionRequest);
+router.post('/service-subscription-requests/:id/reject', rejectServiceSubscriptionRequest);
+router.get('/services', getAllServices);
+router.delete('/services/:id', deleteService);
+router.put('/services/:id/activate', activateService);
+router.put('/services/:id/deactivate', deactivateService);
+router.put('/services/:id/certify', certifyService);
 
 // Routes admin suprême uniquement
 router.post('/admins/add', isSupremeAdmin, addAdmin);
