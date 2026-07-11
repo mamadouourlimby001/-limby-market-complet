@@ -86,6 +86,7 @@ export default function ServiceDetailScreen({ route }) {
                   <View style={{ padding: 8 }}>
                     <Text style={styles.postTitle} numberOfLines={1}>{p.titre}</Text>
                     <Text style={styles.postDescription} numberOfLines={2}>{p.description}</Text>
+                    <Text style={styles.postPrice}>{Number(p.prix || 0).toLocaleString('fr-FR')} GNF</Text>
                   </View>
                 </Card>
               </Pressable>
@@ -115,4 +116,5 @@ const styles = StyleSheet.create({
   gridItem: { width: '47%', position: 'relative' },
   postTitle: { fontSize: 13, fontWeight: '600', marginBottom: 4 },
   postDescription: { fontSize: 12, color: colors.textLight },
+  postPrice: { fontSize: 14, fontWeight: '700', color: colors.primary, marginTop: 4 },
 });

@@ -66,6 +66,7 @@ export default function ServicePostDetailScreen({ route }) {
 
       <View style={{ marginTop: 16, marginBottom: 16 }}>
         <Text style={styles.title}>{post.titre}</Text>
+        <Text style={styles.price}>{Number(post.prix || 0).toLocaleString('fr-FR')} GNF</Text>
         <Text style={styles.created}>Publié le {new Date(post.createdAt).toLocaleDateString('fr-FR')}</Text>
       </View>
 
@@ -115,6 +116,7 @@ const styles = StyleSheet.create({
   backBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 12, alignSelf: 'flex-start' },
   backText: { color: colors.primary, fontWeight: '600' },
   title: { fontSize: 20, fontWeight: '700', color: colors.primary, marginBottom: 4 },
+  price: { fontSize: 22, fontWeight: '700', color: colors.success, marginBottom: 8 },
   created: { fontSize: 12, color: '#9ca3af' },
   sectionTitle: { fontSize: 14, fontWeight: '700', marginBottom: 8 },
   description: { fontSize: 14, color: '#4b5563', lineHeight: 21 },

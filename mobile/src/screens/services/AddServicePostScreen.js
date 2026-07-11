@@ -9,7 +9,7 @@ import { colors } from '../../theme/theme';
 export default function AddServicePostScreen({ route }) {
   const { id } = route.params;
   const navigation = useNavigation();
-  const [form, setForm] = useState({ titre: '', description: '' });
+  const [form, setForm] = useState({ titre: '', description: '', prix: '' });
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -18,9 +18,10 @@ export default function AddServicePostScreen({ route }) {
     setError('');
     if (!form.titre.trim()) { setError('Le titre est requis.'); return; }
     if (!form.description.trim()) { setError('La description est requise.'); return; }
+    if (!form.prix || isNaN(Number(form.prix)) || Number(form.prix) <= 0) { setError('Un prix de la main d\'œuvre valide est requis.'); return; }
     setLoading(true);
     try {
-      await api.post(`/services/${id}/posts`, { ...form, photos });
+      await api.post(`/services/${id}/posts`, { ...form, prix: Number(form.prix), photos });
       navigation.goBack();
     } catch (err) {
       setError(err.response?.data?.message || 'Erreur');
@@ -36,6 +37,7 @@ export default function AddServicePostScreen({ route }) {
 
       <FormInput label="Titre" placeholder="Ex: Robe traditionnelle sur mesure" value={form.titre} onChangeText={(v) => setForm({ ...form, titre: v })} />
       <FormInput label="Description" placeholder="Décrivez votre réalisation..." value={form.description} onChangeText={(v) => setForm({ ...form, description: v })} multiline numberOfLines={4} />
+      <FormInput label="Prix de la main d'œuvre (GNF)" placeholder="Ex: 50000" keyboardType="numeric" value={form.prix} onChangeText={(v) => setForm({ ...form, prix: v })} />
 
       <Text style={styles.label}>Photos (max 5)</Text>
       <PhotoUpload photos={photos} setPhotos={setPhotos} max={5} />

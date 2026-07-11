@@ -130,10 +130,13 @@ const addServicePost = async (req, res) => {
     if (!service.isActive) {
       return res.status(400).json({ message: 'Profil inactif. Renouvelez votre abonnement.' });
     }
-    const { titre, description, photos } = req.body;
+    const { titre, description, prix, photos } = req.body;
 
     if (description && /\d/.test(description)) {
       return res.status(400).json({ message: 'Les chiffres sont interdits dans la description.' });
+    }
+    if (!prix || isNaN(Number(prix)) || Number(prix) <= 0) {
+      return res.status(400).json({ message: 'Un prix de la main d\'œuvre valide est requis.' });
     }
 
     let photoUrls = [];
@@ -150,7 +153,7 @@ const addServicePost = async (req, res) => {
     }
 
     const post = await ServicePost.create({
-      service: service._id, titre, description, photos: photoUrls
+      service: service._id, titre, description, prix: Number(prix), photos: photoUrls
     });
     res.status(201).json(post);
   } catch (error) {

@@ -19,6 +19,10 @@ const servicePostSchema = new mongoose.Schema({
     type: String,
     required: [true, 'La description est requise']
   },
+  prix: {
+    type: Number,
+    required: [true, 'Le prix de la main d\'œuvre est requis']
+  },
   photos: {
     type: [String],
     validate: {
