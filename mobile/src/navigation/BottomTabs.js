@@ -84,9 +84,9 @@ export default function BottomTabs() {
         options={{ tabBarLabel: twoLineLabel('Ma', 'Boutique'), tabBarIcon: tabIcon(Store) }}
       />
       <Tab.Screen
-        name="Compte"
-        component={CompteStack}
-        options={{ tabBarLabel: twoLineLabel('Mon', 'Compte'), tabBarIcon: tabIcon(User) }}
+        name="MonProfilService"
+        component={MyServiceStack}
+        options={{ tabBarLabel: twoLineLabel('Mon Profil', 'Service'), tabBarIcon: tabIcon(Briefcase) }}
       />
       <Tab.Screen
         name="Services"
@@ -94,9 +94,9 @@ export default function BottomTabs() {
         options={{ tabBarIcon: tabIcon(Wrench) }}
       />
       <Tab.Screen
-        name="MonProfilService"
-        component={MyServiceStack}
-        options={{ tabBarLabel: twoLineLabel('Mon Profil', 'Service'), tabBarIcon: tabIcon(Briefcase) }}
+        name="Compte"
+        component={CompteStack}
+        options={{ tabBarLabel: twoLineLabel('Mon', 'Compte'), tabBarIcon: tabIcon(User) }}
       />
     </Tab.Navigator>
   );
