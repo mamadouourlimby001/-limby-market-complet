@@ -62,12 +62,12 @@ export default function ServiceDetailScreen({ route }) {
             style={{ marginTop: 12 }}
             onPress={() => navigation.navigate('MonProfilService', { screen: 'AddServicePost', params: { id } })}
           />
-        ) : (
-          <Pressable style={styles.whatsapp} onPress={() => Linking.openURL(waUrl)}>
-            <WhatsAppIcon size={17} />
-            <Text style={styles.whatsappText}>Contacter par WhatsApp</Text>
-          </Pressable>
-        )}
+        ) : null}
+
+        <Pressable style={styles.whatsapp} onPress={() => Linking.openURL(waUrl)}>
+          <WhatsAppIcon size={17} />
+          <Text style={styles.whatsappText}>Contacter par WhatsApp</Text>
+        </Pressable>
       </View>
 
       <Text style={styles.sectionTitle}>Publications ({posts.length})</Text>
