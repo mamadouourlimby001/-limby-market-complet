@@ -9,11 +9,11 @@ const menuItems = [
   { tab: 'Occasion', screen: 'ProductsList', label: 'Occasion', Icon: ShoppingBag, desc: "Produits d'occasion" },
   { tab: 'Locations', screen: 'LocationsList', label: 'Locations', Icon: Building2, desc: 'Immobilier' },
   { tab: 'Annonces', screen: 'AnnouncementsList', label: 'Annonces', Icon: FileText, desc: "Offres d'emploi" },
+  { tab: 'Compte', screen: 'UserDashboard', label: 'Mon Compte', Icon: User, desc: 'Tableau de bord' },
   { tab: 'Boutiques', screen: 'BoutiquesList', label: 'Boutiques', Icon: Warehouse, desc: 'Boutiques en ligne' },
-  { tab: 'MonProfilService', screen: 'MyService', label: 'Profil Service', Icon: Briefcase, desc: 'Mon profil service' },
   { tab: 'MaBoutique', screen: 'MyBoutique', label: 'Ma Boutique', Icon: Store, desc: 'Ma boutique' },
   { tab: 'Services', screen: 'ServicesList', label: 'Services', Icon: Wrench, desc: 'Prestataires de services' },
-  { tab: 'Compte', screen: 'UserDashboard', label: 'Mon Compte', Icon: User, desc: 'Tableau de bord' },
+  { tab: 'MonProfilService', screen: 'MyService', label: 'Profil Service', Icon: Briefcase, desc: 'Mon profil service' },
 ];
 
 export default function HomeScreen() {
