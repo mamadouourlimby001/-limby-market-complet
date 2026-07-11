@@ -1,7 +1,7 @@
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { ShoppingBag, Building2, FileText, Store, User, Warehouse } from 'lucide-react-native';
+import { ShoppingBag, Building2, FileText, Store, User, Warehouse, Wrench, Briefcase } from 'lucide-react-native';
 import { useAuth } from '../../context/AuthContext';
 import Logo from '../../components/Logo';
 
@@ -12,6 +12,8 @@ const menuItems = [
   { tab: 'Boutiques', screen: 'BoutiquesList', label: 'Boutiques', Icon: Warehouse, desc: 'Boutiques en ligne' },
   { tab: 'Compte', screen: 'UserDashboard', label: 'Mon Compte', Icon: User, desc: 'Tableau de bord' },
   { tab: 'MaBoutique', screen: 'MyBoutique', label: 'Ma Boutique', Icon: Store, desc: 'Ma boutique' },
+  { tab: 'Services', screen: 'ServicesList', label: 'Services', Icon: Wrench, desc: 'Prestataires de services' },
+  { tab: 'MonProfilService', screen: 'MyService', label: 'Profil Service', Icon: Briefcase, desc: 'Mon profil service' },
 ];
 
 export default function HomeScreen() {
@@ -43,7 +45,7 @@ export default function HomeScreen() {
             ))}
           </View>
           <View style={[styles.grid, { marginTop: 10 }]}>
-            {menuItems.slice(4, 6).map((item) => (
+            {menuItems.slice(4, 8).map((item) => (
               <Pressable key={item.label} style={styles.card} onPress={() => goTo(item)}>
                 <item.Icon size={28} color="#1B2A6B" />
                 <Text style={styles.cardLabel}>{item.label}</Text>

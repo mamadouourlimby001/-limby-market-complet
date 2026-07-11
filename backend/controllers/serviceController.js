@@ -56,7 +56,9 @@ const createService = async (req, res) => {
       nom, metier, description, photo, proprietaire: req.user._id, telephone, ville, quartier,
       isActive: false, dateExpiration: null
     });
-    await User.findByIdAndUpdate(req.user._id, { role: 'vendeur_service' });
+    if (!['admin_simple', 'admin_supreme'].includes(req.user.role)) {
+      await User.findByIdAndUpdate(req.user._id, { role: 'vendeur_service' });
+    }
     res.status(201).json(service);
   } catch (error) {
     if (error.code === 11000) {
