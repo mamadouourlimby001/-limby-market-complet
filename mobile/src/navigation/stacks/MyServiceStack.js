@@ -3,6 +3,7 @@ import MyServiceScreen from '../../screens/services/MyServiceScreen';
 import CreateServiceScreen from '../../screens/services/CreateServiceScreen';
 import AddServicePostScreen from '../../screens/services/AddServicePostScreen';
 import RenewServiceSubscriptionScreen from '../../screens/services/RenewServiceSubscriptionScreen';
+import ServicePostDetailScreen from '../../screens/services/ServicePostDetailScreen';
 import AppHeader from '../../components/AppHeader';
 
 const Stack = createNativeStackNavigator();
@@ -14,6 +15,7 @@ export default function MyServiceStack() {
       <Stack.Screen name="CreateService" component={CreateServiceScreen} />
       <Stack.Screen name="AddServicePost" component={AddServicePostScreen} />
       <Stack.Screen name="RenewServiceSubscription" component={RenewServiceSubscriptionScreen} />
+      <Stack.Screen name="ServicePostDetail" component={ServicePostDetailScreen} />
     </Stack.Navigator>
   );
 }

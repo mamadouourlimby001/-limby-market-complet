@@ -100,16 +100,18 @@ export default function MyServiceScreen() {
         <View style={styles.grid}>
           {posts.map((p) => (
             <View key={p._id} style={styles.gridItem}>
-              <Card style={{ overflow: 'hidden' }}>
-                {p.photos?.length > 0
-                  ? <Image source={{ uri: p.photos[0] }} style={{ width: '100%', height: 110 }} resizeMode="cover" />
-                  : <View style={{ width: '100%', height: 110, backgroundColor: '#f0f0f0' }} />
-                }
-                <View style={{ padding: 8 }}>
-                  <Text style={styles.postTitle} numberOfLines={1}>{p.titre}</Text>
-                  <Text style={styles.postDescription} numberOfLines={2}>{p.description}</Text>
-                </View>
-              </Card>
+              <Pressable onPress={() => navigation.navigate('ServicePostDetail', { serviceId: service._id, postId: p._id })}>
+                <Card style={{ overflow: 'hidden' }}>
+                  {p.photos?.length > 0
+                    ? <Image source={{ uri: p.photos[0] }} style={{ width: '100%', height: 110 }} resizeMode="cover" />
+                    : <View style={{ width: '100%', height: 110, backgroundColor: '#f0f0f0' }} />
+                  }
+                  <View style={{ padding: 8 }}>
+                    <Text style={styles.postTitle} numberOfLines={1}>{p.titre}</Text>
+                    <Text style={styles.postDescription} numberOfLines={2}>{p.description}</Text>
+                  </View>
+                </Card>
+              </Pressable>
               <Pressable
                 disabled={deletingId === p._id}
                 style={[styles.deleteBtn, { opacity: deletingId === p._id ? 0.6 : 1 }]}
